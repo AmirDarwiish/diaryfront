@@ -39,7 +39,7 @@ const css = {
 const Tag = ({ children }) => (
   <span style={{
     display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em',
-    textTransform: 'uppercase', color: '#0d9488', marginBottom: 16,
+    textTransform: 'uppercase', color: '#C9A96E', marginBottom: 16,
   }}>{children}</span>
 );
 
@@ -48,9 +48,9 @@ const Btn = ({ href, primary, children, style = {} }) => (
     display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px',
     borderRadius: 14, fontWeight: 700, fontSize: 15, textDecoration: 'none',
     transition: 'all .2s',
-    background: primary ? '#0d9488' : '#f1f5f9',
+    background: primary ? '#C9A96E' : '#f1f5f9',
     color: primary ? '#fff' : '#334155',
-    boxShadow: primary ? '0 8px 24px rgba(13,148,136,.18)' : 'none',
+    boxShadow: primary ? '0 8px 24px rgba(201,169,110,.25)' : 'none',
     ...style,
   }}
     onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
@@ -69,7 +69,7 @@ const Section = ({ id, bg, children, style = {} }) => (
   </section>
 );
 
-/* ─── Hero illustration – geometric / abstract, zero AI iconography ─── */
+/* ─── Hero illustration ─── */
 const HeroIllustration = ({ isRtl }) => {
   const services = isRtl ? [
     { title: 'تطوير المواقع', desc: 'منصات ويب قابلة للتوسع ومبنية للأداء العالي' },
@@ -83,30 +83,30 @@ const HeroIllustration = ({ isRtl }) => {
 
   const icons = [
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-      <rect x="2" y="5" width="24" height="18" rx="3" stroke="#0d9488" strokeWidth="1.8"/>
-      <line x1="2" y1="10" x2="26" y2="10" stroke="#0d9488" strokeWidth="1.8"/>
-      <circle cx="6" cy="7.5" r="1" fill="#0d9488"/>
-      <circle cx="10" cy="7.5" r="1" fill="#0d9488"/>
-      <circle cx="14" cy="7.5" r="1" fill="#0d9488"/>
-      <line x1="7" y1="15" x2="21" y2="15" stroke="#ccfbf1" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="7" y1="19" x2="16" y2="19" stroke="#ccfbf1" strokeWidth="1.8" strokeLinecap="round"/>
+      <rect x="2" y="5" width="24" height="18" rx="3" stroke="#C9A96E" strokeWidth="1.8"/>
+      <line x1="2" y1="10" x2="26" y2="10" stroke="#C9A96E" strokeWidth="1.8"/>
+      <circle cx="6" cy="7.5" r="1" fill="#C9A96E"/>
+      <circle cx="10" cy="7.5" r="1" fill="#C9A96E"/>
+      <circle cx="14" cy="7.5" r="1" fill="#C9A96E"/>
+      <line x1="7" y1="15" x2="21" y2="15" stroke="#F5EDD9" strokeWidth="1.8" strokeLinecap="round"/>
+      <line x1="7" y1="19" x2="16" y2="19" stroke="#F5EDD9" strokeWidth="1.8" strokeLinecap="round"/>
     </svg>,
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-      <rect x="8" y="2" width="12" height="24" rx="3" stroke="#0d9488" strokeWidth="1.8"/>
-      <line x1="8" y1="7" x2="20" y2="7" stroke="#0d9488" strokeWidth="1.8"/>
-      <line x1="8" y1="21" x2="20" y2="21" stroke="#0d9488" strokeWidth="1.8"/>
-      <circle cx="14" cy="24" r="1" fill="#0d9488"/>
-      <line x1="11" y1="13" x2="17" y2="13" stroke="#ccfbf1" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="11" y1="16" x2="15" y2="16" stroke="#ccfbf1" strokeWidth="1.8" strokeLinecap="round"/>
+      <rect x="8" y="2" width="12" height="24" rx="3" stroke="#C9A96E" strokeWidth="1.8"/>
+      <line x1="8" y1="7" x2="20" y2="7" stroke="#C9A96E" strokeWidth="1.8"/>
+      <line x1="8" y1="21" x2="20" y2="21" stroke="#C9A96E" strokeWidth="1.8"/>
+      <circle cx="14" cy="24" r="1" fill="#C9A96E"/>
+      <line x1="11" y1="13" x2="17" y2="13" stroke="#F5EDD9" strokeWidth="1.8" strokeLinecap="round"/>
+      <line x1="11" y1="16" x2="15" y2="16" stroke="#F5EDD9" strokeWidth="1.8" strokeLinecap="round"/>
     </svg>,
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-      <rect x="3" y="3" width="9" height="9" rx="2" stroke="#0d9488" strokeWidth="1.8"/>
-      <rect x="16" y="3" width="9" height="9" rx="2" stroke="#0d9488" strokeWidth="1.8"/>
-      <rect x="3" y="16" width="9" height="9" rx="2" stroke="#0d9488" strokeWidth="1.8"/>
-      <rect x="16" y="16" width="9" height="9" rx="2" stroke="#ccfbf1" strokeWidth="1.8"/>
-      <line x1="12" y1="7.5" x2="16" y2="7.5" stroke="#0d9488" strokeWidth="1.5" strokeDasharray="1.5 1.5"/>
-      <line x1="7.5" y1="12" x2="7.5" y2="16" stroke="#0d9488" strokeWidth="1.5" strokeDasharray="1.5 1.5"/>
-      <line x1="20.5" y1="12" x2="20.5" y2="16" stroke="#0d9488" strokeWidth="1.5" strokeDasharray="1.5 1.5"/>
+      <rect x="3" y="3" width="9" height="9" rx="2" stroke="#C9A96E" strokeWidth="1.8"/>
+      <rect x="16" y="3" width="9" height="9" rx="2" stroke="#C9A96E" strokeWidth="1.8"/>
+      <rect x="3" y="16" width="9" height="9" rx="2" stroke="#C9A96E" strokeWidth="1.8"/>
+      <rect x="16" y="16" width="9" height="9" rx="2" stroke="#F5EDD9" strokeWidth="1.8"/>
+      <line x1="12" y1="7.5" x2="16" y2="7.5" stroke="#C9A96E" strokeWidth="1.5" strokeDasharray="1.5 1.5"/>
+      <line x1="7.5" y1="12" x2="7.5" y2="16" stroke="#C9A96E" strokeWidth="1.5" strokeDasharray="1.5 1.5"/>
+      <line x1="20.5" y1="12" x2="20.5" y2="16" stroke="#C9A96E" strokeWidth="1.5" strokeDasharray="1.5 1.5"/>
     </svg>,
   ];
 
@@ -115,7 +115,7 @@ const HeroIllustration = ({ isRtl }) => {
       <div style={{
         position: 'absolute', top: -40, right: isRtl ? 'auto' : -40, left: isRtl ? -40 : 'auto',
         width: 280, height: 280, borderRadius: '50%',
-        background: 'radial-gradient(circle, #ccfbf1 0%, transparent 70%)',
+        background: 'radial-gradient(circle, #F5EDD9 0%, transparent 70%)',
         filter: 'blur(32px)', opacity: 0.7,
       }} className="animate-blob" />
 
@@ -129,13 +129,10 @@ const HeroIllustration = ({ isRtl }) => {
       {/* header */}
 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
   <svg width="120" height="48" viewBox="0 0 120 48" fill="none">
-    {/* abstract interlocked circles */}
-    <circle cx="24" cy="24" r="18" stroke="#0d9488" strokeWidth="1.5" opacity="0.3"/>
-    <circle cx="44" cy="24" r="18" stroke="#0d9488" strokeWidth="1.5" opacity="0.3"/>
-    <circle cx="34" cy="24" r="18" stroke="#0d9488" strokeWidth="1.5" opacity="0.6"/>
-    {/* center dot */}
-    <circle cx="34" cy="24" r="3" fill="#0d9488"/>
-    {/* connecting lines */}
+    <circle cx="24" cy="24" r="18" stroke="#C9A96E" strokeWidth="1.5" opacity="0.3"/>
+    <circle cx="44" cy="24" r="18" stroke="#C9A96E" strokeWidth="1.5" opacity="0.3"/>
+    <circle cx="34" cy="24" r="18" stroke="#C9A96E" strokeWidth="1.5" opacity="0.6"/>
+    <circle cx="34" cy="24" r="3" fill="#C9A96E"/>
     <line x1="68" y1="12" x2="115" y2="12" stroke="#f1f5f9" strokeWidth="1.5" strokeLinecap="round"/>
     <line x1="68" y1="20" x2="100" y2="20" stroke="#f1f5f9" strokeWidth="1.5" strokeLinecap="round"/>
     <line x1="68" y1="28" x2="108" y2="28" stroke="#f1f5f9" strokeWidth="1.5" strokeLinecap="round"/>
@@ -143,7 +140,7 @@ const HeroIllustration = ({ isRtl }) => {
   </svg>
   <div style={{
     padding: '6px 16px', borderRadius: 50, fontSize: 11, fontWeight: 700,
-    background: '#f0fdfa', color: '#0d9488', border: '1px solid #99f6e4',
+    background: '#F5EDD9', color: '#C9A96E', border: '1px solid #E8D5B0',
   }}>{isRtl ? 'خدماتنا' : 'Our Services'}</div>
 </div>
         {/* service cards */}
@@ -151,8 +148,8 @@ const HeroIllustration = ({ isRtl }) => {
           <div key={i} style={{
             display: 'flex', alignItems: 'center', gap: 16,
             padding: '16px 18px', borderRadius: 16,
-            background: i === 0 ? '#f0fdfa' : '#f8fafc',
-            border: `1px solid ${i === 0 ? '#ccfbf1' : '#f1f5f9'}`,
+            background: i === 0 ? '#F5EDD9' : '#f8fafc',
+            border: `1px solid ${i === 0 ? '#E8D5B0' : '#f1f5f9'}`,
           }}>
             <div style={{
               width: 52, height: 52, borderRadius: 14, flexShrink: 0,
@@ -175,6 +172,7 @@ const HeroIllustration = ({ isRtl }) => {
     </div>
   );
 };
+
 /* ═══════════════════════════════════════════ */
 /*                  MAIN APP                   */
 /* ═══════════════════════════════════════════ */
@@ -182,7 +180,8 @@ const App = () => {
   const [lang, setLang] = useState('ar');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState(null);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });  const isRtl = lang === 'ar';
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const isRtl = lang === 'ar';
 
   const translations = {
     en: {
@@ -246,7 +245,7 @@ const App = () => {
       },
       footer: {
         desc: "Engineering digital foundations for the world's next great companies.",
-        rights: "© 2026 zeiia. All rights reserved."      
+        rights: "© 2026 zeiia. All rights reserved."
       }
     },
     ar: {
@@ -310,7 +309,8 @@ const App = () => {
       },
       footer: {
         desc: "هندسة الأسس الرقمية لأعظم شركات المستقبل.",
-        rights: "© 2026 زيا. جميع الحقوق محفوظة."      }
+        rights: "© 2026 زيا. جميع الحقوق محفوظة."
+      }
     }
   };
 
@@ -335,9 +335,8 @@ const App = () => {
       {/* ── NAV ── */}
       <nav style={css.navWrap}>
         <div style={css.navInner}>
-          {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/logo-dark.PNG" alt="zeiia logo" style={{ width: 64, height: 80, objectFit: 'contain' }} />            <span style={{ fontWeight: 800, fontSize: 22, letterSpacing: '-0.03em', color: '#0f172a' }}>{t.companyName}</span>
+            <img src="/logo-dark.PNG" alt="zeiia logo" style={{ width: 120, height: 120, objectFit: 'contain' }} />
           </div>
 
           {/* Desktop links */}
@@ -345,7 +344,7 @@ const App = () => {
             className="desktop-nav">
             {[['#services', t.nav.services], ['#why-us', t.nav.whyUs], ['#process', t.nav.process]].map(([href, label]) => (
               <a key={href} href={href} style={{ color: '#475569', textDecoration: 'none', transition: 'color .2s' }}
-                onMouseEnter={e => e.target.style.color = '#0d9488'}
+                onMouseEnter={e => e.target.style.color = '#C9A96E'}
                 onMouseLeave={e => e.target.style.color = '#475569'}>{label}</a>
             ))}
             <button onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} style={{
@@ -360,7 +359,7 @@ const App = () => {
               borderRadius: 50, textDecoration: 'none', fontWeight: 700, fontSize: 13,
               transition: 'background .2s',
             }}
-              onMouseEnter={e => e.currentTarget.style.background = '#0d9488'}
+              onMouseEnter={e => e.currentTarget.style.background = '#C9A96E'}
               onMouseLeave={e => e.currentTarget.style.background = '#0f172a'}
             >{t.nav.contact}</a>
           </div>
@@ -386,7 +385,7 @@ const App = () => {
           }}>
             {[['#services', t.nav.services], ['#why-us', t.nav.whyUs], ['#process', t.nav.process], ['#contact', t.nav.contact]].map(([href, label], i) => (
               <a key={href} href={href} onClick={() => setIsMenuOpen(false)} style={{
-                fontSize: 20, fontWeight: 800, color: i === 3 ? '#0d9488' : '#0f172a',
+                fontSize: 20, fontWeight: 800, color: i === 3 ? '#C9A96E' : '#0f172a',
                 textDecoration: 'none', paddingBottom: i < 3 ? 16 : 0,
                 borderBottom: i < 3 ? '1px solid #f8fafc' : 'none',
               }}>{label}</a>
@@ -407,22 +406,22 @@ const App = () => {
             {/* badge */}
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '6px 14px', borderRadius: 50, background: '#f0fdfa',
-              color: '#0d9488', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em',
+              padding: '6px 14px', borderRadius: 50, background: '#F5EDD9',
+              color: '#C9A96E', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em',
               textTransform: 'uppercase', marginBottom: 28,
             }}>
               <span style={{ position: 'relative', width: 8, height: 8 }}>
                 <span style={{
-                  position: 'absolute', inset: 0, borderRadius: '50%', background: '#34d399', opacity: 0.7,
+                  position: 'absolute', inset: 0, borderRadius: '50%', background: '#C9A96E', opacity: 0.7,
                   animation: 'ping 1.5s cubic-bezier(0,0,.2,1) infinite',
                 }} />
-                <span style={{ position: 'relative', display: 'block', width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+                <span style={{ position: 'relative', display: 'block', width: 8, height: 8, borderRadius: '50%', background: '#A8864F' }} />
               </span>
               {t.hero.badge}
             </div>
 
-            <h1 style={{ fontSize: 'clamp(36px, 5vw, 68px)', fontWeight: 900, lineHeight: 1.08, marginBottom: 28, color: '#0f172a' }}>
-              {t.hero.title}<span style={{ color: '#0d9488' }}>{t.hero.titleAccent}</span>{t.hero.titleEnd}
+            <h1 style={{ fontSize: 'clamp(36px, 5vw, 68px)', fontWeight: 900, lineHeight: 1.35, marginBottom: 28, color: '#0f172a' }}>
+              {t.hero.title}<span style={{ color: '#C9A96E' }}>{t.hero.titleAccent}</span>{t.hero.titleEnd}
             </h1>
             <p style={{ fontSize: 17, color: '#475569', lineHeight: 1.75, marginBottom: 40, maxWidth: 520 }}>
               {t.hero.sub}
@@ -443,7 +442,7 @@ const App = () => {
       <Section id="services" bg="#f8fafc">
         <div style={{ textAlign: 'center', maxWidth: 600, margin: '0 auto 64px' }}>
           <Tag>{t.services.tag}</Tag>
-          <h2 style={{ fontSize: 'clamp(24px, 3vw, 38px)', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>{t.services.title}</h2>
+          <h2 style={{ fontSize: 'clamp(24px, 3vw, 38px)', fontWeight: 800, color: '#0f172a', lineHeight: 1.35 }}>{t.services.title}</h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
           {t.services.items.map((s, i) => (
@@ -451,13 +450,13 @@ const App = () => {
               background: '#fff', padding: '36px 28px', borderRadius: 20,
               border: '1px solid #f1f5f9', transition: 'all .25s', cursor: 'default',
             }}
-              onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 20px 48px rgba(13,148,136,.1)'; e.currentTarget.style.borderColor = '#ccfbf1'; }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 20px 48px rgba(201,169,110,.12)'; e.currentTarget.style.borderColor = '#E8D5B0'; }}
               onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#f1f5f9'; }}
             >
               <div style={{
-                width: 48, height: 48, borderRadius: 14, background: '#f0fdfa',
+                width: 48, height: 48, borderRadius: 14, background: '#F5EDD9',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#0d9488', marginBottom: 24,
+                color: '#C9A96E', marginBottom: 24,
               }}>{serviceIcons[i]}</div>
               <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 10, color: '#0f172a' }}>{s.title}</h3>
               <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.7 }}>{s.desc}</p>
@@ -488,52 +487,52 @@ const App = () => {
             </div>
           </div>
 
-        {/* Problems/Solutions cards */}
-<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-  {[
-    {
-      problem: isRtl ? 'عندي فكرة بس مش عارف أبدأ منين' : "I have an idea but don't know where to start",
-      solution: isRtl ? 'نحول فكرتك لمنتج حقيقي من الصفر' : 'We turn your idea into a real product from scratch',
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-    },
-    {
-      problem: isRtl ? 'جربت شركات تانية وخذلتني' : 'I tried other agencies and got disappointed',
-      solution: isRtl ? 'نلتزم بالمواعيد والجودة من أول يوم' : 'We commit to deadlines and quality from day one',
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    },
-    {
-      problem: isRtl ? 'مش عارف التقنية المناسبة لمشروعي' : "I don't know the right tech for my project",
-      solution: isRtl ? 'نختار أنسب تقنية لاحتياجك وميزانيتك' : 'We pick the right tech for your needs and budget',
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-    },
-  ].map((item, i) => (
-    <div key={i} style={{
-      padding: '20px 24px', borderRadius: 18,
-      background: i === 0 ? 'rgba(13,148,136,0.12)' : 'rgba(255,255,255,0.05)',
-      border: `1px solid ${i === 0 ? 'rgba(13,148,136,0.3)' : 'rgba(255,255,255,0.08)'}`,
-      transition: 'all .2s',
-    }}
-      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(13,148,136,0.12)'; e.currentTarget.style.borderColor = 'rgba(13,148,136,0.3)'; }}
-      onMouseLeave={e => { e.currentTarget.style.background = i === 0 ? 'rgba(13,148,136,0.12)' : 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = i === 0 ? 'rgba(13,148,136,0.3)' : 'rgba(255,255,255,0.08)'; }}
-    >
-      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-          background: 'rgba(13,148,136,0.2)', color: '#5eead4',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>{item.icon}</div>
-        <div>
-          <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 6, lineHeight: 1.5 }}>
-            "{item.problem}"
+          {/* Problems/Solutions cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {[
+              {
+                problem: isRtl ? 'عندي فكرة بس مش عارف أبدأ منين' : "I have an idea but don't know where to start",
+                solution: isRtl ? 'نحول فكرتك لمنتج حقيقي من الصفر' : 'We turn your idea into a real product from scratch',
+                icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              },
+              {
+                problem: isRtl ? 'جربت شركات تانية وخذلتني' : 'I tried other agencies and got disappointed',
+                solution: isRtl ? 'نلتزم بالمواعيد والجودة من أول يوم' : 'We commit to deadlines and quality from day one',
+                icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              },
+              {
+                problem: isRtl ? 'مش عارف التقنية المناسبة لمشروعي' : "I don't know the right tech for my project",
+                solution: isRtl ? 'نختار أنسب تقنية لاحتياجك وميزانيتك' : 'We pick the right tech for your needs and budget',
+                icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              },
+            ].map((item, i) => (
+              <div key={i} style={{
+                padding: '20px 24px', borderRadius: 18,
+                background: i === 0 ? 'rgba(201,169,110,0.12)' : 'rgba(255,255,255,0.05)',
+                border: `1px solid ${i === 0 ? 'rgba(201,169,110,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                transition: 'all .2s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,169,110,0.12)'; e.currentTarget.style.borderColor = 'rgba(201,169,110,0.3)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = i === 0 ? 'rgba(201,169,110,0.12)' : 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = i === 0 ? 'rgba(201,169,110,0.3)' : 'rgba(255,255,255,0.08)'; }}
+              >
+                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                    background: 'rgba(201,169,110,0.2)', color: '#C9A96E',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>{item.icon}</div>
+                  <div>
+                    <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 6, lineHeight: 1.5 }}>
+                      "{item.problem}"
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#C9A96E', lineHeight: 1.5 }}>
+                      → {item.solution}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#5eead4', lineHeight: 1.5 }}>
-            → {item.solution}
-          </div>
-        </div>
-      </div>
-    </div>
-  ))}
-</div>  
         </div>
       </Section>
 
@@ -544,21 +543,20 @@ const App = () => {
           <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 800 }}>{t.process.title}</h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, position: 'relative' }}>
-          {/* connector */}
           <div style={{ position: 'absolute', top: 44, left: '8%', right: '8%', height: 1, background: '#e2e8f0' }} className="process-line" />
           {t.process.steps.map((step, i) => (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative', zIndex: 1 }}>
               <div style={{
                 width: 88, height: 88, borderRadius: '50%', background: '#fff',
                 border: '3px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#0d9488', marginBottom: 20, boxShadow: '0 4px 16px rgba(0,0,0,.06)',
+                color: '#C9A96E', marginBottom: 20, boxShadow: '0 4px 16px rgba(0,0,0,.06)',
                 transition: 'transform .3s',
               }}
                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.12)'}
                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
               >{processIcons[i]}</div>
               <div style={{
-                fontSize: 12, fontWeight: 800, color: '#0d9488', letterSpacing: '0.1em',
+                fontSize: 12, fontWeight: 800, color: '#C9A96E', letterSpacing: '0.1em',
                 textTransform: 'uppercase', marginBottom: 6,
               }}>0{i + 1}</div>
               <h4 style={{ fontWeight: 800, fontSize: 17, marginBottom: 8 }}>{step.title}</h4>
@@ -586,8 +584,8 @@ const App = () => {
             <p style={{ color: '#64748b', fontSize: 16, marginBottom: 40, lineHeight: 1.7 }}>{t.contact.sub}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {[
-               { Icon: Mail, label: isRtl ? 'راسلنا' : 'Email us', value: 'sales@zeiia.com' },
-{ Icon: Phone, label: isRtl ? 'اتصل / واتساب' : 'Call / WhatsApp', value: '+20 100 000 0000' },
+                { Icon: Mail, label: isRtl ? 'راسلنا' : 'Email us', value: 'sales@zeiia.com' },
+                { Icon: Phone, label: isRtl ? 'اتصل / واتساب' : 'Call / WhatsApp', value: '+20 100 000 0000' },
               ].map(({ Icon, label, value }) => (
                 <div key={label} style={{
                   display: 'flex', alignItems: 'center', gap: 16,
@@ -595,7 +593,7 @@ const App = () => {
                   border: '1px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,.04)',
                   transition: 'all .2s', cursor: 'pointer',
                 }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = '#ccfbf1'}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = '#E8D5B0'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = '#f1f5f9'}
                 >
                   <div style={{ width: 40, height: 40, borderRadius: 12, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
@@ -603,7 +601,8 @@ const App = () => {
                   </div>
                   <div>
                     <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{label}</div>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: '#0f172a' }} dir="ltr">{value}</div>                  </div>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: '#0f172a' }} dir="ltr">{value}</div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -621,147 +620,149 @@ const App = () => {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-  
-  {/* name + email */}
-  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-    <div>
-      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>
-        {t.contact.formName}
-      </label>
-      <input
-        required
-        type="text"
-        placeholder={isRtl ? 'محمد أحمد' : 'John Doe'}
-        value={formData.name}
-        onChange={e => {
-          const val = e.target.value;
-          if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) {
-            setFormData({ ...formData, name: val });
-          }
-        }}
-        style={{
-          width: '100%', padding: '12px 16px', borderRadius: 12,
-          border: '1.5px solid #e2e8f0', background: '#f8fafc',
-          fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
-          transition: 'border-color .2s', boxSizing: 'border-box',
-        }}
-        onFocus={e => e.target.style.borderColor = '#0d9488'}
-        onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-      />
-    </div>
-    <div>
-      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>
-        {t.contact.formEmail}
-      </label>
-      <input
-        required
-        type="email"
-        placeholder="hello@example.com"
-        value={formData.email}
-        onChange={e => setFormData({ ...formData, email: e.target.value })}
-        style={{
-          width: '100%', padding: '12px 16px', borderRadius: 12,
-          border: '1.5px solid #e2e8f0', background: '#f8fafc',
-          fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
-          transition: 'border-color .2s', boxSizing: 'border-box',
-        }}
-        onFocus={e => e.target.style.borderColor = '#0d9488'}
-        onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-      />
-    </div>
-  </div>
 
-  {/* phone */}
-  <div>
-    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>
-      {isRtl ? 'رقم الهاتف' : 'Phone Number'}
-    </label>
-    <input
-      required
-      type="tel"
-      dir="ltr"
-      placeholder="+20 100 000 0000"
-      value={formData.phone}
-      onChange={e => {
-        const val = e.target.value;
-        if (/^[0-9+\s()-]*$/.test(val)) {
-          setFormData({ ...formData, phone: val });
-        }
-      }}
-      style={{
-        width: '100%', padding: '12px 16px', borderRadius: 12,
-        border: `1.5px solid ${formData.phone && !/^[0-9+\s()-]{7,15}$/.test(formData.phone) ? '#f87171' : '#e2e8f0'}`,
-        background: '#f8fafc',
-        fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
-        transition: 'border-color .2s', boxSizing: 'border-box',
-      }}
-      onFocus={e => e.target.style.borderColor = '#0d9488'}
-      onBlur={e => {
-        if (formData.phone && !/^[0-9+\s()-]{7,15}$/.test(formData.phone)) {
-          e.target.style.borderColor = '#f87171';
-        } else {
-          e.target.style.borderColor = '#e2e8f0';
-        }
-      }}
-    />
-    {formData.phone && !/^[0-9+\s()-]{7,15}$/.test(formData.phone) && (
-      <p style={{ fontSize: 11, color: '#f87171', marginTop: 6, fontWeight: 600 }}>
-        {isRtl ? 'رقم الهاتف غير صحيح' : 'Invalid phone number'}
-      </p>
-    )}
-  </div>
+                {/* name + email */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>
+                      {t.contact.formName}
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      placeholder={isRtl ? 'محمد أحمد' : 'John Doe'}
+                      value={formData.name}
+                      onChange={e => {
+                        const val = e.target.value;
+                        if (/^[\u0600-\u06FFa-zA-Z\s]*$/.test(val)) {
+                          setFormData({ ...formData, name: val });
+                        }
+                      }}
+                      style={{
+                        width: '100%', padding: '12px 16px', borderRadius: 12,
+                        border: '1.5px solid #e2e8f0', background: '#f8fafc',
+                        fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
+                        transition: 'border-color .2s', boxSizing: 'border-box',
+                      }}
+                      onFocus={e => e.target.style.borderColor = '#C9A96E'}
+                      onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>
+                      {t.contact.formEmail}
+                    </label>
+                    <input
+                      required
+                      type="email"
+                      placeholder="hello@example.com"
+                      value={formData.email}
+                      onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      style={{
+                        width: '100%', padding: '12px 16px', borderRadius: 12,
+                        border: '1.5px solid #e2e8f0', background: '#f8fafc',
+                        fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
+                        transition: 'border-color .2s', boxSizing: 'border-box',
+                      }}
+                      onFocus={e => e.target.style.borderColor = '#C9A96E'}
+                      onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                    />
+                  </div>
+                </div>
 
-  {/* message */}
-  <div>
-    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>
-      {t.contact.formMsg}
-    </label>
-    <textarea
-      required
-      rows={5}
-      placeholder={isRtl ? 'اكتب رسالتك هنا...' : 'Tell us about your project...'}
-      value={formData.message}
-      onChange={e => setFormData({ ...formData, message: e.target.value })}
-      style={{
-        width: '100%', padding: '12px 16px', borderRadius: 12,
-        border: '1.5px solid #e2e8f0', background: '#f8fafc',
-        fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
-        resize: 'none', transition: 'border-color .2s', boxSizing: 'border-box',
-      }}
-      onFocus={e => e.target.style.borderColor = '#0d9488'}
-      onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-    />
-  </div>
+                {/* phone */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>
+                    {isRtl ? 'رقم الهاتف' : 'Phone Number'}
+                  </label>
+                  <input
+                    required
+                    type="tel"
+                    dir="ltr"
+                    placeholder="+20 100 000 0000"
+                    value={formData.phone}
+                    onChange={e => {
+                      const val = e.target.value;
+                      if (/^[0-9+\s()-]*$/.test(val)) {
+                        setFormData({ ...formData, phone: val });
+                      }
+                    }}
+                    style={{
+                      width: '100%', padding: '12px 16px', borderRadius: 12,
+                      border: `1.5px solid ${formData.phone && !/^[0-9+\s()-]{7,15}$/.test(formData.phone) ? '#f87171' : '#e2e8f0'}`,
+                      background: '#f8fafc',
+                      fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
+                      transition: 'border-color .2s', boxSizing: 'border-box',
+                    }}
+                    onFocus={e => e.target.style.borderColor = '#C9A96E'}
+                    onBlur={e => {
+                      if (formData.phone && !/^[0-9+\s()-]{7,15}$/.test(formData.phone)) {
+                        e.target.style.borderColor = '#f87171';
+                      } else {
+                        e.target.style.borderColor = '#e2e8f0';
+                      }
+                    }}
+                  />
+                  {formData.phone && !/^[0-9+\s()-]{7,15}$/.test(formData.phone) && (
+                    <p style={{ fontSize: 11, color: '#f87171', marginTop: 6, fontWeight: 600 }}>
+                      {isRtl ? 'رقم الهاتف غير صحيح' : 'Invalid phone number'}
+                    </p>
+                  )}
+                </div>
 
-  {/* submit */}
-  <button
-    type="submit"
-    style={{
-      padding: '16px', background: '#0f172a', color: '#fff',
-      borderRadius: 14, fontWeight: 800, fontSize: 15, border: 'none',
-      cursor: 'pointer', fontFamily: 'Tajawal, sans-serif',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-      transition: 'background .2s', boxShadow: '0 8px 24px rgba(15,23,42,.15)',
-    }}
-    onMouseEnter={e => e.currentTarget.style.background = '#0d9488'}
-    onMouseLeave={e => e.currentTarget.style.background = '#0f172a'}
-  >
-    {t.contact.formBtn}
-    <ArrowRight size={18} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
-  </button>
+                {/* message */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>
+                    {t.contact.formMsg}
+                  </label>
+                  <textarea
+                    required
+                    rows={5}
+                    placeholder={isRtl ? 'اكتب رسالتك هنا...' : 'Tell us about your project...'}
+                    value={formData.message}
+                    onChange={e => setFormData({ ...formData, message: e.target.value })}
+                    style={{
+                      width: '100%', padding: '12px 16px', borderRadius: 12,
+                      border: '1.5px solid #e2e8f0', background: '#f8fafc',
+                      fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
+                      resize: 'none', transition: 'border-color .2s', boxSizing: 'border-box',
+                    }}
+                    onFocus={e => e.target.style.borderColor = '#C9A96E'}
+                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                  />
+                </div>
 
-</form>
+                {/* submit */}
+                <button
+                  type="submit"
+                  style={{
+                    padding: '16px', background: '#0f172a', color: '#fff',
+                    borderRadius: 14, fontWeight: 800, fontSize: 15, border: 'none',
+                    cursor: 'pointer', fontFamily: 'Tajawal, sans-serif',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    transition: 'background .2s', boxShadow: '0 8px 24px rgba(15,23,42,.15)',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#C9A96E'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#0f172a'}
+                >
+                  {t.contact.formBtn}
+                  <ArrowRight size={18} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
+                </button>
+
+              </form>
             )}
           </div>
         </div>
       </Section>
 
       {/* ── FOOTER ── */}
-          <footer style={{ background: '#0f172a', color: '#94a3b8', padding: '80px 24px 40px', borderRadius: '24px 24px 0 0', margin: '0 16px' }}>          <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+      <footer style={{ background: '#0f172a', color: '#94a3b8', padding: '80px 24px 40px', borderRadius: '24px 24px 0 0', margin: '0 16px' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px,1fr))', gap: 48, marginBottom: 56, paddingBottom: 48, borderBottom: '1px solid #1e293b' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-              <img src={logoBase64} alt="zeiia" style={{ width: 80, height: 80, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />              </div>
+                <img src={logoBase64} alt="zeiia" style={{ width: 80, height: 80, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
+              </div>
               <p style={{ fontSize: 13, lineHeight: 1.7 }}>{t.footer.desc}</p>
             </div>
             <div>
@@ -769,88 +770,77 @@ const App = () => {
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {[[t.nav.services,'#services'],[t.nav.whyUs,'#why-us'],[t.nav.process,'#process']].map(([label, href]) => (
                   <li key={href}><a href={href} style={{ color: '#94a3b8', textDecoration: 'none', fontSize: 13, transition: 'color .2s' }}
-                    onMouseEnter={e => e.target.style.color = '#5eead4'}
+                    onMouseEnter={e => e.target.style.color = '#C9A96E'}
                     onMouseLeave={e => e.target.style.color = '#94a3b8'}>{label}</a></li>
                 ))}
               </ul>
             </div>
             <div>
-<h5 style={{ color: '#fff', fontWeight: 800, marginBottom: 24, fontSize: 15 }}>
-  {isRtl ? 'الدعم' : 'Support'}
-</h5>
+              <h5 style={{ color: '#fff', fontWeight: 800, marginBottom: 24, fontSize: 15 }}>
+                {isRtl ? 'الدعم' : 'Support'}
+              </h5>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
-{[
-  [isRtl ? 'مركز المساعدة' : 'Help Center', '#'],
-  [isRtl ? 'سياسة الخصوصية' : 'Privacy Policy', '#'],
-  [isRtl ? 'الشروط والأحكام' : 'Terms', '#'],
-].map(([label, href]) => (                  <li key={label}><a href={href} style={{ color: '#94a3b8', textDecoration: 'none', fontSize: 13, transition: 'color .2s' }}
-                    onMouseEnter={e => e.target.style.color = '#5eead4'}
+                {[
+                  [isRtl ? 'مركز المساعدة' : 'Help Center', '#'],
+                  [isRtl ? 'سياسة الخصوصية' : 'Privacy Policy', '#'],
+                  [isRtl ? 'الشروط والأحكام' : 'Terms', '#'],
+                ].map(([label, href]) => (
+                  <li key={label}><a href={href} style={{ color: '#94a3b8', textDecoration: 'none', fontSize: 13, transition: 'color .2s' }}
+                    onMouseEnter={e => e.target.style.color = '#C9A96E'}
                     onMouseLeave={e => e.target.style.color = '#94a3b8'}>{label}</a></li>
                 ))}
               </ul>
             </div>
             <div>
-<h5 style={{ color: '#fff', fontWeight: 800, marginBottom: 24, fontSize: 15 }}>{isRtl ? 'التواصل الاجتماعي' : 'Social'}</h5>              <div style={{ display: 'flex', gap: 12 }}>
-       {[
-  {
-    label: 'Fb',
-    href: 'https://www.facebook.com/your-page',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M22 12a10 10 0 10-11.5 9.87v-6.99h-2.7V12h2.7V9.8c0-2.66 1.58-4.13 4-4.13 1.16 0 2.38.2 2.38.2v2.62h-1.34c-1.32 0-1.73.82-1.73 1.66V12h2.94l-.47 2.88h-2.47v6.99A10 10 0 0022 12z"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'Li',
-    href: 'https://www.linkedin.com/company/zeiia',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
-        <circle cx="4" cy="4" r="2"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'Tk',
-    href: 'https://www.tiktok.com/@your-account',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12.75 2h3.5a5.75 5.75 0 005.75 5.75v3.5a9.25 9.25 0 01-5.75-1.96v6.96a6.5 6.5 0 11-6.5-6.5c.27 0 .53.02.79.06v3.58a3 3 0 103 3V2z"/>
-      </svg>
-    ),
-  },
-].map(({ label, icon, href }) => (
-  <a
-    key={label}
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{
-      width: 40,
-      height: 40,
-      borderRadius: '50%',
-      background: '#1e293b',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      color: '#94a3b8',
-      transition: 'all .2s',
-      textDecoration: 'none',
-    }}
-    onMouseEnter={e => {
-      e.currentTarget.style.background = '#0d9488';
-      e.currentTarget.style.color = '#fff';
-    }}
-    onMouseLeave={e => {
-      e.currentTarget.style.background = '#1e293b';
-      e.currentTarget.style.color = '#94a3b8';
-    }}
-  >
-    {icon}
-  </a>
-))}
+              <h5 style={{ color: '#fff', fontWeight: 800, marginBottom: 24, fontSize: 15 }}>{isRtl ? 'التواصل الاجتماعي' : 'Social'}</h5>
+              <div style={{ display: 'flex', gap: 12 }}>
+                {[
+                  {
+                    label: 'Fb',
+                    href: 'https://www.facebook.com/your-page',
+                    icon: (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22 12a10 10 0 10-11.5 9.87v-6.99h-2.7V12h2.7V9.8c0-2.66 1.58-4.13 4-4.13 1.16 0 2.38.2 2.38.2v2.62h-1.34c-1.32 0-1.73.82-1.73 1.66V12h2.94l-.47 2.88h-2.47v6.99A10 10 0 0022 12z"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    label: 'Li',
+                    href: 'https://www.linkedin.com/company/zeiia',
+                    icon: (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
+                        <circle cx="4" cy="4" r="2"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    label: 'Tk',
+                    href: 'https://www.tiktok.com/@your-account',
+                    icon: (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.75 2h3.5a5.75 5.75 0 005.75 5.75v3.5a9.25 9.25 0 01-5.75-1.96v6.96a6.5 6.5 0 11-6.5-6.5c.27 0 .53.02.79.06v3.58a3 3 0 103 3V2z"/>
+                      </svg>
+                    ),
+                  },
+                ].map(({ label, icon, href }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      width: 40, height: 40, borderRadius: '50%',
+                      background: '#1e293b',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', color: '#94a3b8', transition: 'all .2s', textDecoration: 'none',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#C9A96E'; e.currentTarget.style.color = '#fff'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = '#1e293b'; e.currentTarget.style.color = '#94a3b8'; }}
+                  >
+                    {icon}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
@@ -882,7 +872,6 @@ const App = () => {
         .animation-delay-2000 { animation-delay: 2s; }
         html { scroll-behavior: smooth; }
 
-        /* Responsive */
         @media (max-width: 900px) {
           .hero-grid, .why-grid, .contact-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
           .hero-illustration { display: none; }
@@ -896,25 +885,20 @@ const App = () => {
           .mobile-nav { display: none !important; }
         }
       `}</style>
+
+      {/* WhatsApp floating button */}
       <a
-/* WhatsApp floating button */
-      
         href="https://wa.me/201000000000"
         target="_blank"
         rel="noopener noreferrer"
         style={{
-          position: 'fixed',
-          bottom: 32,
-          left: isRtl ? 32 : 'auto',
-          right: isRtl ? 'auto' : 32,
-          zIndex: 999,
-          width: 56, height: 56,
-          borderRadius: '50%',
+          position: 'fixed', bottom: 32,
+          left: isRtl ? 32 : 'auto', right: isRtl ? 'auto' : 32,
+          zIndex: 999, width: 56, height: 56, borderRadius: '50%',
           background: '#25d366',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 8px 24px rgba(37,211,102,.4)',
-          transition: 'transform .2s, box-shadow .2s',
-          textDecoration: 'none',
+          transition: 'transform .2s, box-shadow .2s', textDecoration: 'none',
         }}
         onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(37,211,102,.5)'; }}
         onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(37,211,102,.4)'; }}
@@ -923,10 +907,9 @@ const App = () => {
           <path d="M14 2C7.373 2 2 7.373 2 14c0 2.15.57 4.17 1.57 5.91L2 26l6.26-1.54A11.94 11.94 0 0014 26c6.627 0 12-5.373 12-12S20.627 2 14 2z" fill="white"/>
           <path d="M19.5 16.9c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.87 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35z" fill="#25d366"/>
         </svg>
-      </a>      
-      
+      </a>
+
     </div>
-    
   );
 };
 
