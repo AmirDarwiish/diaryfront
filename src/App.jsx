@@ -103,12 +103,12 @@ const HeroIllustration = ({ isRtl }) => {
 
   return (
     <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
-      <div style={{ position: 'absolute', top: '50%', left: '50%', width: 0, height: 0, zIndex: 1, pointerEvents: 'none' }}>
-        <div className="orb1" style={{ position: 'absolute', width: 8, height: 8, borderRadius: '50%', background: '#C9A96E', opacity: 0.5, marginTop: -4, marginLeft: -4 }} />
-      </div>
-      <div style={{ position: 'absolute', top: '50%', left: '50%', width: 0, height: 0, zIndex: 1, pointerEvents: 'none' }}>
-        <div className="orb2" style={{ position: 'absolute', width: 5, height: 5, borderRadius: '50%', background: '#A8864F', opacity: 0.35, marginTop: -2.5, marginLeft: -2.5 }} />
-      </div>
+    <div style={{ position: 'absolute', top: '50%', left: '50%', width: 0, height: 0, zIndex: 3, pointerEvents: 'none' }}>
+  <div className="orb1" style={{ position: 'absolute', width: 10, height: 10, borderRadius: '50%', background: '#C9A96E', opacity: 0.6, marginTop: -5, marginLeft: -5 }} />
+</div>
+<div style={{ position: 'absolute', top: '50%', left: '50%', width: 0, height: 0, zIndex: 3, pointerEvents: 'none' }}>
+  <div className="orb2" style={{ position: 'absolute', width: 6, height: 6, borderRadius: '50%', background: '#A8864F', opacity: 0.4, marginTop: -3, marginLeft: -3 }} />
+</div>
       <div style={{
         position: 'absolute', top: -40, right: isRtl ? 'auto' : -40, left: isRtl ? -40 : 'auto',
         width: 280, height: 280, borderRadius: '50%',
@@ -563,8 +563,8 @@ const App = () => {
       <style>{`
         @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
         @keyframes blob { 0% { transform: translate(0,0) scale(1); } 33% { transform: translate(30px,-50px) scale(1.1); } 66% { transform: translate(-20px,20px) scale(0.9); } 100% { transform: translate(0,0) scale(1); } }
-        @keyframes orbit { from { transform: rotate(0deg) translateX(140px) rotate(0deg); } to { transform: rotate(360deg) translateX(140px) rotate(-360deg); } }
-        @keyframes orbit2 { from { transform: rotate(180deg) translateX(110px) rotate(-180deg); } to { transform: rotate(540deg) translateX(110px) rotate(-540deg); } }
+        @keyframes orbit { from { transform: rotate(0deg) translateX(180px) rotate(0deg); } to { transform: rotate(360deg) translateX(180px) rotate(-360deg); } }
+        @keyframes orbit2 { from { transform: rotate(180deg) translateX(150px) rotate(-180deg); } to { transform: rotate(540deg) translateX(150px) rotate(-540deg); } }
         .animate-blob { animation: blob 7s infinite; }
         .orb1 { animation: orbit 8s linear infinite; }
         .orb2 { animation: orbit2 12s linear infinite; }
