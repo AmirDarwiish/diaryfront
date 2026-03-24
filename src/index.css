@@ -89,14 +89,8 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-html[dir="rtl"], body {
-  direction: rtl;
-  unicode-bidi: embed;
-}
+
 * {
   -webkit-text-size-adjust: 100%;
 }
-body {
-  text-align: right;
-  line-height: 1.6;
-}
+

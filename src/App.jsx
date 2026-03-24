@@ -321,7 +321,7 @@ useEffect(() => {
 {/* ── INTRO ── */}
 {showIntro && (
   <div style={{
-    position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: introLeave ? 'none' : 'auto',opacity: introLeave ? 0 : 1,
+    position: 'fixed', inset: 0, zIndex: 9999, 
 background: 'rgba(255,255,255,0.15)',
 backdropFilter: 'blur(20px)',
 WebkitBackdropFilter: 'blur(20px)',
