@@ -392,7 +392,7 @@ useEffect(() => {
         {/* النص السفلي الفخم */}
         <div style={{ 
           marginTop: '30px', fontFamily: "'Tajawal', sans-serif", color: '#D4AF37', 
-          fontSize: '15px', fontWeight: '900', letterSpacing: '8px', textTransform: 'uppercase',
+          fontSize: '15px', fontWeight: '900', letterSpacing: '4px', textTransform: 'uppercase',
           opacity: 0, animation: 'fadeInLogo 1s ease forwards 2s'        }}>
           {isRtl ? 'شريكك التقني' : 'YOUR TECH PARTNER'}
         </div>
@@ -406,7 +406,7 @@ useEffect(() => {
       @keyframes pulseDot { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.25); filter: brightness(1.4); } }
       @keyframes introOut {
         0% { transform: scale(1); opacity: 1; filter: blur(0); }
-        100% { transform: scale(1.05); opacity: 0; filter: blur(10px); transform: translateY(-30px); }
+        100% { transform: scale(1.05); opacity: 0; filter: blur(30px); transform: translateY(-30px); }
       }
     `}</style>
   </div>
