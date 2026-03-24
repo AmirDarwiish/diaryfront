@@ -318,77 +318,100 @@ useEffect(() => {
 
   return (
     <div dir={isRtl ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', background: '#fff', color: '#0f172a', overflowX: 'hidden' }}>
-{/* ── INTRO ── */}
 {showIntro && (
   <div style={{
-    position: 'fixed', inset: 0, zIndex: 9999, 
-background: 'rgba(255,255,255,0.15)',
-backdropFilter: 'blur(20px)',
-WebkitBackdropFilter: 'blur(20px)',
+    position: 'fixed', inset: 0, zIndex: 9999,
+    background: 'rgba(255, 255, 255, 0.22)', 
+    backdropFilter: 'blur(45px)', 
+    WebkitBackdropFilter: 'blur(45px)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    animation: introLeave ? 'introOut 1.2s cubic-bezier(0.76,0,0.24,1) forwards' : 'none',
+    // جعلت الخروج أبطأ وأكثر سلاسة (1.6 ثانية)
+    animation: introLeave ? 'introOut 1.6s cubic-bezier(0.85, 0, 0.15, 1) forwards' : 'none',
   }}>
-    <svg width="520" height="520" viewBox="0 0 520 520" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* outer ring */}
-      <circle cx="260" cy="260" r="200" stroke="#C9A96E" strokeWidth="0.5" opacity="0.2"
-        style={{ strokeDasharray: 1257, strokeDashoffset: 1257, animation: 'drawRing 2s ease forwards 0.2s' }}/>
-      <circle cx="260" cy="260" r="160" stroke="#C9A96E" strokeWidth="0.3" opacity="0.15"
-        style={{ strokeDasharray: 1005, strokeDashoffset: 1005, animation: 'drawRing 2s ease forwards 0.5s' }}/>
+    
+    <div style={{ position: 'relative', width: 600, height: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      
+      {/* ── الخلفية: الخطوط الذهبية الفخمة ── */}
+      <svg width="600" height="600" viewBox="0 0 520 520" style={{ position: 'absolute', zIndex: 1 }}>
+        <defs>
+          <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        
+        <circle cx="260" cy="260" r="160" fill="url(#goldGlow)" style={{ opacity: 0, animation: 'fadeInLogo 2s ease forwards 0.5s' }} />
 
-      {/* golden wave lines */}
-      {[0,1,2,3,4,5,6,7,8].map(i => (
-        <path key={i}
-          d={`M ${80 + i*4} ${200 + Math.sin(i)*20} Q ${200 + i*10} ${140 + i*8} ${260} ${220 + i*5} Q ${320 - i*8} ${300 - i*6} ${440 - i*4} ${200 + Math.cos(i)*15}`}
-          stroke="#C9A96E" strokeWidth="0.8" opacity={0.15 + i * 0.08} fill="none"
-          style={{ strokeDasharray: 500, strokeDashoffset: 500, animation: `drawLine 1.8s ease forwards ${0.1 + i * 0.12}s` }}
-        />
-      ))}
-      {[0,1,2,3,4,5].map(i => (
-        <path key={`b${i}`}
-          d={`M ${100 + i*5} ${320 - i*3} Q ${200 - i*8} ${380 + i*5} ${260} ${300 - i*4} Q ${330 + i*6} ${240 - i*5} ${420 - i*4} ${330 + i*3}`}
-          stroke="#C9A96E" strokeWidth="0.6" opacity={0.1 + i * 0.06} fill="none"
-          style={{ strokeDasharray: 400, strokeDashoffset: 400, animation: `drawLine 1.8s ease forwards ${0.3 + i * 0.15}s` }}
-        />
-      ))}
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+          <path key={i}
+            d={`M ${120 + i * 2} ${260} C ${200} ${200 - i * 5}, ${320} ${320 + i * 5}, ${400 - i * 2} ${260}`}
+            stroke="#C9A96E" strokeWidth="0.6" opacity={0.12 + i * 0.04} fill="none"
+            style={{ 
+              strokeDasharray: 450, strokeDashoffset: 450, 
+              animation: `drawLines 2.5s ease-out forwards ${0.1 + i * 0.12}s` 
+            }}
+          />
+        ))}
+      </svg>
 
-      {/* center logo text */}
-      <text x="260" y="248" textAnchor="middle"
-        style={{ fontFamily: 'Georgia, serif', fontSize: 52, fontWeight: 400, fill: '#0f172a', letterSpacing: 12, opacity: 0, animation: 'fadeInLogo 1s ease forwards 1.4s' }}>
-        ZEIIA
-      </text>
+      {/* ── المحتوى الرئيسي: لوجو "زي" بنظام الـ Neural ── */}
+      <div style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
+        <svg width="380" height="220" viewBox="0 0 200 120" fill="none" style={{ overflow: 'visible' }}>
+          <defs>
+            <linearGradient id="premiumGold" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#008080" /> 
+              <stop offset="50%" stopColor="#D4AF37" /> 
+              <stop offset="100%" stopColor="#C9A96E" />
+            </linearGradient>
+            <filter id="goldShadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
 
+          {/* مسار اللوجو - رسم ناعم */}
+          <path 
+            d="M170 30C170 30 150 20 130 50C110 80 90 80 70 50C50 20 30 30 30 30" 
+            stroke="url(#premiumGold)" strokeWidth="6.5" strokeLinecap="round" filter="url(#goldShadow)"
+            style={{ 
+              strokeDasharray: 1000, strokeDashoffset: 1000, 
+              animation: 'drawLines 3s cubic-bezier(0.45, 0, 0.55, 1) forwards 0.5s' 
+            }}
+          />
 
-      {/* tagline */}
-      <text x="260" y="300" textAnchor="middle"
-        style={{ fontFamily: 'Tajawal, sans-serif', fontSize: 15, fontWeight: 400, fill: '#4a9688', letterSpacing: isRtl ? 0 : 4, opacity: 0, textTransform: 'uppercase', animation: 'fadeInLogo 1s ease forwards 2s' }}>
-        {isRtl ? 'شريكك التقني' : 'YOUR TECH PARTNER'}
-      </text>
+          {/* النقاط بتأثير Elastic Pop */}
+          <circle cx="170" cy="18" r="5.5" fill="#D4AF37" filter="url(#goldShadow)"
+            style={{ opacity: 0, animation: 'popIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards 2.5s, pulseDot 2.5s infinite 4s' }} />
+          
+          <circle cx="98" cy="88" r="4.5" fill="#008080" filter="url(#goldShadow)"
+            style={{ opacity: 0, animation: 'popIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards 2.8s' }} />
+          <circle cx="116" cy="88" r="4.5" fill="#008080" filter="url(#goldShadow)"
+            style={{ opacity: 0, animation: 'popIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards 3s' }} />
+        </svg>
 
-      {/* corner dots */}
-      {[[100,100],[420,100],[100,420],[420,420]].map(([x,y],i) => (
-        <circle key={i} cx={x} cy={y} r="2" fill="#C9A96E" opacity="0"
-          style={{ animation: `fadeInLogo 0.5s ease forwards ${1.2 + i*0.1}s` }}/>
-      ))}
-    </svg>
+        {/* النص السفلي الفخم */}
+        <div style={{ 
+          marginTop: '30px', fontFamily: "'Tajawal', sans-serif", color: '#D4AF37', 
+          fontSize: '15px', fontWeight: '900', letterSpacing: '8px', textTransform: 'uppercase',
+          opacity: 0, animation: 'fadeInLogo 1s ease forwards 2s'        }}>
+          {isRtl ? 'شريكك التقني' : 'YOUR TECH PARTNER'}
+        </div>
+      </div>
+    </div>
 
     <style>{`
-      @keyframes drawLine {
-        to { stroke-dashoffset: 0; }
-      }
-      @keyframes drawRing {
-        to { stroke-dashoffset: 0; }
-      }
-      @keyframes fadeInLogo {
-        to { opacity: 1; }
-      }
+      @keyframes drawLines { to { stroke-dashoffset: 0; } }
+      @keyframes popIn { 0% { opacity: 0; transform: scale(0); } 100% { opacity: 1; transform: scale(1); } }
+      @keyframes fadeInLogo { from { opacity: 0; filter: blur(8px); } to { opacity: 1; filter: blur(0); } }
+      @keyframes pulseDot { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.25); filter: brightness(1.4); } }
       @keyframes introOut {
-        0% { transform: translateY(0); opacity: 1; }
-        100% { transform: translateY(-100%); opacity: 0; }
+        0% { transform: scale(1); opacity: 1; filter: blur(0); }
+        100% { transform: scale(1.05); opacity: 0; filter: blur(10px); transform: translateY(-30px); }
       }
     `}</style>
   </div>
-)}
-      {/* NAV */}
+)}  
+    {/* NAV */}
       <nav style={css.navWrap}>
         <div style={css.navInner}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
