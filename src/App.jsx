@@ -180,7 +180,7 @@ const App = () => {
   const [lang, setLang] = useState('ar');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState(null);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', countryCode: '+20', message: '' });
   const [showIntro, setShowIntro] = useState(true);
 const [introLeave, setIntroLeave] = useState(false);
 useEffect(() => {
@@ -194,7 +194,22 @@ const revealWhyUs   = useReveal();
 const revealProcess = useReveal();
 const revealAbout   = useReveal();
 const revealContact = useReveal();
-
+useEffect(() => {
+  fetch('https://ipapi.co/json/')
+    .then(r => r.json())
+    .then(data => {
+      const map = {
+        'EG': '+20', 'SA': '+966', 'AE': '+971',
+        'KW': '+965', 'QA': '+974', 'BH': '+973',
+        'OM': '+968', 'JO': '+962', 'LB': '+961',
+        'GB': '+44', 'US': '+1',
+      };
+      if (map[data.country_code]) {
+        setFormData(prev => ({ ...prev, countryCode: map[data.country_code] }));
+      }
+    })
+    .catch(() => {});
+}, []);
   const translations = {
     en: {
       companyName: "zeiia",
@@ -573,15 +588,60 @@ WebkitBackdropFilter: 'blur(20px)',
                         onFocus={e => e.target.style.borderColor = '#C9A96E'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
                     </div>
                   </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>{isRtl ? 'رقم الهاتف' : 'Phone Number'}</label>
-                    <input required type="tel" dir="ltr" placeholder="+20 100 000 0000" value={formData.phone}
-                      onChange={e => { const val = e.target.value; if (/^[0-9+\s()-]*$/.test(val)) setFormData({ ...formData, phone: val }); }}
-                      style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: `1.5px solid ${formData.phone && !/^[0-9+\s()-]{7,15}$/.test(formData.phone) ? '#f87171' : '#e2e8f0'}`, background: '#f8fafc', fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none', transition: 'border-color .2s', boxSizing: 'border-box' }}
-                      onFocus={e => e.target.style.borderColor = '#C9A96E'}
-                      onBlur={e => { if (formData.phone && !/^[0-9+\s()-]{7,15}$/.test(formData.phone)) { e.target.style.borderColor = '#f87171'; } else { e.target.style.borderColor = '#e2e8f0'; } }} />
-                    {formData.phone && !/^[0-9+\s()-]{7,15}$/.test(formData.phone) && <p style={{ fontSize: 11, color: '#f87171', marginTop: 6, fontWeight: 600 }}>{isRtl ? 'رقم الهاتف غير صحيح' : 'Invalid phone number'}</p>}
-                  </div>
+                 <div>
+  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>
+    {isRtl ? 'رقم الهاتف' : 'Phone Number'}
+  </label>
+  <div style={{ display: 'flex', gap: 8 }}>
+    <select
+      value={formData.countryCode}
+      onChange={e => setFormData({ ...formData, countryCode: e.target.value })}
+      style={{
+        padding: '12px 8px', borderRadius: 12,
+        border: '1.5px solid #e2e8f0', background: '#f8fafc',
+        fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
+        cursor: 'pointer', flexShrink: 0,
+      }}
+      onFocus={e => e.target.style.borderColor = '#C9A96E'}
+      onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+    >
+      {[
+        { code: '+20', flag: '🇪🇬', name: 'مصر' },
+        { code: '+966', flag: '🇸🇦', name: 'السعودية' },
+        { code: '+971', flag: '🇦🇪', name: 'الإمارات' },
+        { code: '+965', flag: '🇰🇼', name: 'الكويت' },
+        { code: '+974', flag: '🇶🇦', name: 'قطر' },
+        { code: '+973', flag: '🇧🇭', name: 'البحرين' },
+        { code: '+968', flag: '🇴🇲', name: 'عُمان' },
+        { code: '+962', flag: '🇯🇴', name: 'الأردن' },
+        { code: '+961', flag: '🇱🇧', name: 'لبنان' },
+        { code: '+44', flag: '🇬🇧', name: 'UK' },
+        { code: '+1', flag: '🇺🇸', name: 'USA' },
+      ].map(c => (
+        <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+      ))}
+    </select>
+    <input
+      required
+      type="tel"
+      dir="ltr"
+      placeholder="100 000 0000"
+      value={formData.phone}
+      onChange={e => {
+        const val = e.target.value;
+        if (/^[0-9\s]*$/.test(val)) setFormData({ ...formData, phone: val });
+      }}
+      style={{
+        flex: 1, padding: '12px 16px', borderRadius: 12,
+        border: '1.5px solid #e2e8f0', background: '#f8fafc',
+        fontSize: 14, fontFamily: 'Tajawal, sans-serif', outline: 'none',
+        transition: 'border-color .2s', boxSizing: 'border-box',
+      }}
+      onFocus={e => e.target.style.borderColor = '#C9A96E'}
+      onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+    />
+  </div>
+</div>
                   <div>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 8 }}>{t.contact.formMsg}</label>
                     <textarea required rows={5} placeholder={isRtl ? 'اكتب رسالتك هنا...' : 'Tell us about your project...'} value={formData.message}
