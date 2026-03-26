@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { LangProvider, useLang } from './context/LangContext';
+import ScrollToTop from './components/ScrollToTop';
 
 // Layout
 import Navbar       from './Navbar';
@@ -13,8 +14,7 @@ import ServicesPage from './pages/ServicesPage';
 import WhyUsPage    from './pages/WhyUsPage';
 import ContactPage  from './pages/ContactPage';
 
-// Global styles
-import './index.css';   // أو App.css — حسب مشروعك
+import './index.css';   
 
 /* ─────────────────────────────────────────────────────────────
    Layout wrapper — Navbar + page content + Footer
@@ -100,6 +100,7 @@ const AppRoutes = () => {
    ───────────────────────────────────────────────────────────── */
 const App = () => (
   <Router>
+      <ScrollToTop /> 
     <LangProvider>
       <AppRoutes />
     </LangProvider>
