@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ChevronRight, ArrowRight, Cpu, TabletSmartphone, Gem, 
-  ShieldCheck, Search, PenTool, CodeXml, Rocket, Zap 
+  ShieldCheck, Search, PenTool, CodeXml, Rocket,
+  Globe, ShoppingCart, BarChart2, Layers, ShoppingBag
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
