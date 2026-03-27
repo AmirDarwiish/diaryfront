@@ -145,7 +145,7 @@ function Badge({ status }) {
 }
 
 /* ════════════════════════════════
-   ACTION MENU
+   ACTION MENU (Mobile Responsive)
 ════════════════════════════════ */
 function ActionMenu({ lead, onAction }) {
   const [open, setOpen]           = useState(false)
@@ -153,23 +153,53 @@ function ActionMenu({ lead, onAction }) {
   const btnRef  = useRef()
   const menuRef = useRef()
 
+  // 1. التحكم في قفل القائمة عند الضغط خارجها أو عند السحب
   useEffect(() => {
     const close = e => {
       if (btnRef.current && !btnRef.current.contains(e.target) &&
           menuRef.current && !menuRef.current.contains(e.target)) setOpen(false)
     }
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [])
+    const closeOnScroll = () => setOpen(false)
 
+    // ضفنا touchstart لدعم أقوى على الموبايل
+    document.addEventListener('mousedown', close)
+    document.addEventListener('touchstart', close)
+    
+    // لو القائمة مفتوحة واليوزر عمل سكرول، تقفل تلقائي عشان متفضلش طايرة
+    if (open) window.addEventListener('scroll', closeOnScroll, { passive: true })
+
+    return () => {
+      document.removeEventListener('mousedown', close)
+      document.removeEventListener('touchstart', close)
+      window.removeEventListener('scroll', closeOnScroll)
+    }
+  }, [open])
+
+  // 2. حساب الموضع الذكي (Smart Positioning)
   useEffect(() => {
     if (!open || !btnRef.current) return
     const rect   = btnRef.current.getBoundingClientRect()
+    
+    // حساب المساحة الرأسية (فوق أو تحت)
     const openUp = window.innerHeight - rect.bottom < 320
+    
+    // حساب المساحة الأفقية (عشان متخرجش برا الشاشة)
+    const menuWidth = 195;
+    let safeLeft = rect.left;
+
+    // لو القائمة هتخرج من يمين الشاشة
+    if (safeLeft + menuWidth > window.innerWidth) {
+      safeLeft = window.innerWidth - menuWidth - 16; // 16px هامش أمان
+    }
+    // لو هتخرج من شمال الشاشة
+    if (safeLeft < 16) {
+      safeLeft = 16;
+    }
+
     setMenuStyle({
-      position:'fixed', zIndex:9999, left: rect.left,
+      position:'fixed', zIndex:9999, left: safeLeft,
       ...(openUp ? { bottom: window.innerHeight - rect.top + 6 } : { top: rect.bottom + 6 }),
-      minWidth: 195,
+      minWidth: menuWidth,
     })
   }, [open])
 
@@ -216,7 +246,6 @@ function ActionMenu({ lead, onAction }) {
     </>
   )
 }
-
 /* ════════════════════════════════
    CREATE LEAD MODAL
 ════════════════════════════════ */
