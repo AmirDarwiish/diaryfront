@@ -1,16 +1,17 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom' // تم إضافة هذا السطر
 import API_BASE_URL from '../../config'
 
 const PAGE_SIZE = 15
 
 const BADGES = {
-  New:        { bg: 'rgba(56,189,248,.15)',   color: '#38bdf8', label: 'جديد' },
-  Contacted:  { bg: 'rgba(167,139,250,.15)',  color: '#a78bfa', label: 'تم التواصل' },
+  New:         { bg: 'rgba(56,189,248,.15)',   color: '#38bdf8', label: 'جديد' },
+  Contacted:   { bg: 'rgba(167,139,250,.15)',  color: '#a78bfa', label: 'تم التواصل' },
   Interested: { bg: 'rgba(201,169,110,.18)',  color: '#C9A96E', label: 'مهتم' },
-  FollowUp:   { bg: 'rgba(251,191,36,.15)',   color: '#fbbf24', label: 'متابعة' },
-  Converted:  { bg: 'rgba(52,211,153,.15)',   color: '#34d399', label: 'تم التحويل' },
-  Lost:       { bg: 'rgba(248,113,113,.15)',  color: '#f87171', label: 'خسرنا' },
-  Cold:       { bg: 'rgba(148,163,184,.15)',  color: '#94a3b8', label: 'بارد' },
+  FollowUp:    { bg: 'rgba(251,191,36,.15)',   color: '#fbbf24', label: 'متابعة' },
+  Converted:   { bg: 'rgba(52,211,153,.15)',   color: '#34d399', label: 'تم التحويل' },
+  Lost:        { bg: 'rgba(248,113,113,.15)',  color: '#f87171', label: 'خسرنا' },
+  Cold:        { bg: 'rgba(148,163,184,.15)',  color: '#94a3b8', label: 'بارد' },
 }
 
 const STATUS_LIST = Object.entries(BADGES).map(([k, v]) => ({ value: k, label: v.label }))
@@ -34,13 +35,13 @@ const resolveStatus = s => {
 
 /* ─── Status options with numeric IDs matching LeadStages table ─── */
 const STATUS_OPTIONS = [
-  { id: 1, key: 'New',        label: 'جديد' },
-  { id: 2, key: 'Contacted',  label: 'تم التواصل' },
+  { id: 1, key: 'New',         label: 'جديد' },
+  { id: 2, key: 'Contacted',   label: 'تم التواصل' },
   { id: 3, key: 'Interested', label: 'مهتم' },
-  { id: 4, key: 'FollowUp',   label: 'متابعة' },
-  { id: 5, key: 'Converted',  label: 'تم التحويل' },
-  { id: 6, key: 'Lost',       label: 'خسرنا' },
-  { id: 7, key: 'Cold',       label: 'بارد' },
+  { id: 4, key: 'FollowUp',    label: 'متابعة' },
+  { id: 5, key: 'Converted',   label: 'تم التحويل' },
+  { id: 6, key: 'Lost',        label: 'خسرنا' },
+  { id: 7, key: 'Cold',        label: 'بارد' },
 ]
 
 /* resolve current lead status → numeric id for the PUT payload */
@@ -346,6 +347,7 @@ const IconLogout = () => (
 /* ─── Action Menu ─── */
 function ActionMenu({ lead, onAction }) {
   const [open, setOpen] = useState(false)
+  const [coords, setCoords] = useState({ top: 0, left: 0 }) // تم إضافة الحالة لتخزين الإحداثيات
   const ref = useRef()
 
   useEffect(() => {
@@ -353,6 +355,15 @@ function ActionMenu({ lead, onAction }) {
     document.addEventListener('mousedown', close)
     return () => document.removeEventListener('mousedown', close)
   }, [])
+
+  const toggleMenu = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setCoords({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX
+    });
+    setOpen(o => !o);
+  };
 
   const actions = [
     { key: 'status',   Icon: IconRefresh,  label: 'تغيير الحالة',  color: '#38bdf8' },
@@ -365,7 +376,7 @@ function ActionMenu({ lead, onAction }) {
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
       <button
-        onClick={() => setOpen(o => !o)}
+        onClick={toggleMenu}
         style={{
           background: open ? 'rgba(201,169,110,.12)' : 'rgba(255,255,255,.04)',
           border: `1px solid ${open ? '#C9A96E' : '#334155'}`,
@@ -377,12 +388,13 @@ function ActionMenu({ lead, onAction }) {
       >
         إجراءات <IconChevron up={open} />
       </button>
-      {open && (
+      {open && createPortal(
         <div style={{
-          position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 500,
+          position: 'absolute', top: coords.top + 6, left: coords.left, zIndex: 9999,
           background: '#0d1829', border: '1px solid #1e3a5f',
           borderRadius: 10, minWidth: 180,
           boxShadow: '0 16px 40px rgba(0,0,0,.6)', overflow: 'hidden',
+          direction: 'rtl',
         }}>
           {actions.map((a, i) => (
             <button key={a.key}
@@ -412,7 +424,8 @@ function ActionMenu({ lead, onAction }) {
               {a.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
@@ -566,7 +579,7 @@ function useIsMobile() {
 }
 
 /* ═══════════════════════════════════════
-   MAIN DASHBOARD
+    MAIN DASHBOARD
 ═══════════════════════════════════════ */
 export default function Dashboard() {
   const [all, setAll]           = useState([])
@@ -678,7 +691,7 @@ export default function Dashboard() {
 
   /* ─ stats ─ */
   const stats = [
-    { label: 'إجمالي الليدز', val: all.length,                                                          sub: 'كل السجلات' },
+    { label: 'إجمالي الليدز', val: all.length,                                                                        sub: 'كل السجلات' },
     { label: 'جدد',           val: all.filter(l => resolveStatus(l.status) === 'New').length,            sub: 'New' },
     { label: 'مهتمين',        val: all.filter(l => resolveStatus(l.status) === 'Interested').length,     sub: 'Interested' },
     { label: 'تم التحويل',    val: all.filter(l => resolveStatus(l.status) === 'Converted').length,      sub: 'Converted' },
@@ -690,7 +703,7 @@ export default function Dashboard() {
   /* ─ loading / error ─ */
   const wrapBase = { background: '#0f172a', minHeight: '100vh', padding: 24, direction: 'rtl', color: '#fff', fontFamily: "'Cairo',sans-serif" }
   if (loading) return <div style={{ ...wrapBase, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: '#C9A96E' }}>جاري تحميل البيانات...</span></div>
-  if (error)   return <div style={{ ...wrapBase, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: '#f87171' }}>{error}</span></div>
+  if (error)    return <div style={{ ...wrapBase, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: '#f87171' }}>{error}</span></div>
 
   const statsGridStyle = {
     display: 'grid',
@@ -699,14 +712,14 @@ export default function Dashboard() {
   }
 
   const COLS = [
-    { label: 'الاسم',           key: 'fullName',              width: 160 },
+    { label: 'الاسم',            key: 'fullName',             width: 160 },
     { label: 'التليفون',        key: 'phone',                 width: 130 },
-    { label: 'الحالة',          key: 'status',                width: 110 },
-    { label: 'المصدر',          key: 'source',                width: 110 },
-    { label: 'مسند لـ',         key: 'assignedTo',            width: 130 },
-    { label: 'آخر تفاعل',       key: 'lastInteraction',       width: 160 },
+    { label: 'الحالة',           key: 'status',                width: 110 },
+    { label: 'المصدر',           key: 'source',                width: 110 },
+    { label: 'مسند لـ',          key: 'assignedTo',            width: 130 },
+    { label: 'آخر تفاعل',        key: 'lastInteraction',       width: 160 },
     { label: 'الإيميل',         key: 'email',                 width: 180 },
-    { label: 'تاريخ الإضافة',   key: 'createdAt',             width: 120 },
+    { label: 'تاريخ الإضافة',    key: 'createdAt',             width: 120 },
     { label: 'إجراءات',         key: 'actions',               width: 130 },
   ]
 
@@ -891,9 +904,9 @@ export default function Dashboard() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
                     {[
                       { label: 'التليفون', val: l.phone || '—' },
-                      { label: 'المصدر',   val: l.source || '—' },
+                      { label: 'المصدر',    val: l.source || '—' },
                       { label: 'مسند لـ',  val: l.assignedTo || 'غير مسند' },
-                      { label: 'التاريخ',  val: fmt(l.createdAt) },
+                      { label: 'التاريخ',   val: fmt(l.createdAt) },
                     ].map(f => (
                       <div key={f.label} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, letterSpacing: .5 }}>{f.label}</div>
