@@ -14,16 +14,7 @@ const BADGES = {
 }
 
 const STATUS_LIST = Object.entries(BADGES).map(([k, v]) => ({ value: k, label: v.label }))
-
-const STATUS_NUM_MAP = {
-  1: 'New',
-  2: 'Contacted',
-  3: 'Interested',
-  4: 'FollowUp',
-  5: 'Converted',
-  6: 'Lost',
-  7: 'Cold',
-}
+const STATUS_NUM_MAP = { 1:'New',2:'Contacted',3:'Interested',4:'FollowUp',5:'Converted',6:'Lost',7:'Cold' }
 
 const resolveStatus = s => {
   if (typeof s === 'number') return STATUS_NUM_MAP[s] || String(s)
@@ -32,13 +23,13 @@ const resolveStatus = s => {
 }
 
 const STATUS_OPTIONS = [
-  { id: 1, key: 'New',        label: 'جديد' },
-  { id: 2, key: 'Contacted',  label: 'تم التواصل' },
-  { id: 3, key: 'Interested', label: 'مهتم' },
-  { id: 4, key: 'FollowUp',   label: 'متابعة' },
-  { id: 5, key: 'Converted',  label: 'تم التحويل' },
-  { id: 6, key: 'Lost',       label: 'خسرنا' },
-  { id: 7, key: 'Cold',       label: 'بارد' },
+  { id:1, key:'New',        label:'جديد' },
+  { id:2, key:'Contacted',  label:'تم التواصل' },
+  { id:3, key:'Interested', label:'مهتم' },
+  { id:4, key:'FollowUp',   label:'متابعة' },
+  { id:5, key:'Converted',  label:'تم التحويل' },
+  { id:6, key:'Lost',       label:'خسرنا' },
+  { id:7, key:'Cold',       label:'بارد' },
 ]
 
 const resolveStatusId = s => {
@@ -56,8 +47,25 @@ const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('token')}`,
 })
 
-/* ─── Modal Backdrop ─── */
-function Modal({ title, onClose, children }) {
+/* ════════════════════════════════
+   SHARED STYLES
+════════════════════════════════ */
+const lbl = { fontSize:12, color:'#94a3b8', fontWeight:600, display:'block', marginBottom:6 }
+const inp = {
+  width:'100%', boxSizing:'border-box', height:38,
+  background:'#0f172a', border:'1px solid #334155', borderRadius:8,
+  color:'#f1f5f9', fontSize:13, padding:'0 11px',
+  fontFamily:"'Cairo',sans-serif", outline:'none',
+}
+const sel      = { ...inp, cursor:'pointer' }
+const btnPrim  = { height:38, padding:'0 20px', borderRadius:8, border:'none', background:'#C9A96E', color:'#0f172a', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:"'Cairo',sans-serif" }
+const btnSec   = { height:38, padding:'0 16px', borderRadius:8, border:'1px solid #334155', background:'transparent', color:'#94a3b8', fontSize:13, cursor:'pointer', fontFamily:"'Cairo',sans-serif" }
+const btnDanger= { height:38, padding:'0 16px', borderRadius:8, border:'1px solid rgba(248,113,113,.3)', background:'rgba(248,113,113,.08)', color:'#f87171', fontSize:13, cursor:'pointer', fontFamily:"'Cairo',sans-serif" }
+
+/* ════════════════════════════════
+   MODAL BACKDROP
+════════════════════════════════ */
+function Modal({ title, onClose, children, maxWidth=420 }) {
   useEffect(() => {
     const esc = e => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', esc)
@@ -66,18 +74,18 @@ function Modal({ title, onClose, children }) {
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
-    }} onClick={e => e.target === e.currentTarget && onClose()}>
+      position:'fixed', inset:0, zIndex:1000,
+      background:'rgba(0,0,0,.65)', backdropFilter:'blur(4px)',
+      display:'flex', alignItems:'center', justifyContent:'center', padding:16,
+    }} onClick={e => e.target===e.currentTarget && onClose()}>
       <div style={{
-        background: '#1e293b', border: '1px solid #334155', borderRadius: 16,
-        width: '100%', maxWidth: 420, padding: 24, direction: 'rtl',
-        boxShadow: '0 25px 60px rgba(0,0,0,.5)',
+        background:'#1e293b', border:'1px solid #334155', borderRadius:16,
+        width:'100%', maxWidth, padding:24, direction:'rtl',
+        boxShadow:'0 25px 60px rgba(0,0,0,.5)', maxHeight:'90vh', overflowY:'auto',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#f1f5f9' }}>{title}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 20, cursor: 'pointer', lineHeight: 1 }}>×</button>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+          <span style={{ fontSize:16, fontWeight:700, color:'#f1f5f9' }}>{title}</span>
+          <button onClick={onClose} style={{ background:'none', border:'none', color:'#94a3b8', fontSize:20, cursor:'pointer', lineHeight:1 }}>×</button>
         </div>
         {children}
       </div>
@@ -85,75 +93,191 @@ function Modal({ title, onClose, children }) {
   )
 }
 
-/* ─── Change Status Modal ─── */
+/* ════════════════════════════════
+   BADGE
+════════════════════════════════ */
+function Badge({ status }) {
+  const b = BADGES[status] || { bg:'rgba(148,163,184,.13)', color:'#94a3b8', label:status||'—' }
+  return (
+    <span style={{
+      display:'inline-block', padding:'3px 10px', borderRadius:20,
+      fontSize:11, fontWeight:700, whiteSpace:'nowrap',
+      background:b.bg, color:b.color,
+    }}>{b.label}</span>
+  )
+}
+
+/* ════════════════════════════════
+   ICONS
+════════════════════════════════ */
+const Ico = ({ d, ...p }) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>{d}</svg>
+const IconRefresh  = () => <Ico d={<><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></>}/>
+const IconUser     = () => <Ico d={<><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></>}/>
+const IconNote     = () => <Ico d={<><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></>}/>
+const IconCalendar = () => <Ico d={<><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>}/>
+const IconEye      = () => <Ico d={<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>}/>
+const IconEdit     = () => <Ico d={<><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></>}/>
+const IconArchive  = () => <Ico d={<><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></>}/>
+const IconConvert  = () => <Ico d={<><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></>}/>
+const IconTask     = () => <Ico d={<><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></>}/>
+const IconChevron  = ({ up }) => <Ico d={up ? <polyline points="18 15 12 9 6 15"/> : <polyline points="6 9 12 15 18 9"/>}/>
+const IconLogout   = () => <Ico d={<><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></>}/>
+const IconUpload   = () => <Ico d={<><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></>}/>
+const IconKanban   = () => <Ico d={<><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></>}/>
+const IconList     = () => <Ico d={<><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></>}/>
+
+/* ════════════════════════════════
+   ACTION MENU  — fixed positioning
+════════════════════════════════ */
+function ActionMenu({ lead, onAction }) {
+  const [open, setOpen]         = useState(false)
+  const [menuStyle, setMenuStyle] = useState({})
+  const btnRef = useRef()
+  const menuRef = useRef()
+
+  useEffect(() => {
+    const close = e => {
+      if (btnRef.current && !btnRef.current.contains(e.target) &&
+          menuRef.current && !menuRef.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+
+  useEffect(() => {
+    if (!open || !btnRef.current) return
+    const rect = btnRef.current.getBoundingClientRect()
+    const openUp = window.innerHeight - rect.bottom < 300
+    setMenuStyle({
+      position:'fixed', zIndex:9999, left:rect.left,
+      ...(openUp ? { bottom:window.innerHeight-rect.top+6 } : { top:rect.bottom+6 }),
+      minWidth:195,
+    })
+  }, [open])
+
+  const isConverted = resolveStatus(lead.status) === 'Converted'
+
+  const actions = [
+    { key:'status',  Icon:IconRefresh,  label:'تغيير الحالة',  color:'#38bdf8' },
+    { key:'assign',  Icon:IconUser,     label:'تعيين موظف',    color:'#a78bfa' },
+    { key:'note',    Icon:IconNote,     label:'إضافة ملاحظة',  color:'#C9A96E' },
+    { key:'task',    Icon:IconTask,     label:'إضافة مهمة',    color:'#fbbf24' },
+    { key:'followup',Icon:IconCalendar, label:'موعد متابعة',   color:'#fbbf24' },
+    { key:'details', Icon:IconEye,      label:'التفاصيل',      color:'#34d399' },
+    { key:'edit',    Icon:IconEdit,     label:'تعديل',         color:'#60a5fa' },
+    ...(!isConverted ? [{ key:'convert', Icon:IconConvert, label:'تحويل لعميل', color:'#34d399' }] : []),
+    { key:'archive', Icon:IconArchive,  label:lead.isArchived?'استعادة':'أرشفة', color:'#f87171' },
+  ]
+
+  return (
+    <>
+      <button ref={btnRef} onClick={() => setOpen(o => !o)} style={{
+        background:open?'rgba(201,169,110,.12)':'rgba(255,255,255,.04)',
+        border:`1px solid ${open?'#C9A96E':'#334155'}`,
+        borderRadius:8, color:open?'#C9A96E':'#94a3b8',
+        cursor:'pointer', padding:'5px 12px', fontSize:12,
+        fontFamily:"'Cairo',sans-serif", display:'flex', alignItems:'center', gap:6,
+        transition:'all .15s',
+      }}>
+        إجراءات <IconChevron up={open}/>
+      </button>
+
+      {open && (
+        <div ref={menuRef} style={{
+          ...menuStyle,
+          background:'#0d1829', border:'1px solid #1e3a5f',
+          borderRadius:10, boxShadow:'0 16px 40px rgba(0,0,0,.6)', overflow:'hidden',
+        }}>
+          {actions.map((a, i) => (
+            <button key={a.key}
+              onClick={() => { setOpen(false); onAction(a.key, lead) }}
+              style={{
+                display:'flex', alignItems:'center', gap:10,
+                width:'100%', background:'none', border:'none',
+                borderBottom:i<actions.length-1?'1px solid rgba(30,58,95,.6)':'none',
+                color:'#cbd5e1', cursor:'pointer', padding:'10px 14px',
+                fontSize:13, fontFamily:"'Cairo',sans-serif", textAlign:'right',
+                transition:'all .12s',
+              }}
+              onMouseEnter={e=>{
+                e.currentTarget.style.background='rgba(201,169,110,.07)'
+                e.currentTarget.style.color='#f1f5f9'
+                e.currentTarget.querySelector('.ai').style.color=a.color
+              }}
+              onMouseLeave={e=>{
+                e.currentTarget.style.background='none'
+                e.currentTarget.style.color='#cbd5e1'
+                e.currentTarget.querySelector('.ai').style.color='#475569'
+              }}
+            >
+              <span className="ai" style={{ color:'#475569', display:'flex', alignItems:'center', transition:'color .12s' }}><a.Icon/></span>
+              {a.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  )
+}
+
+/* ════════════════════════════════
+   STATUS MODAL
+════════════════════════════════ */
 function StatusModal({ lead, onClose, onSuccess }) {
   const [statusId, setStatusId] = useState(resolveStatusId(lead.status))
   const [reason, setReason]     = useState('')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
 
-  const isLost = statusId === 6
-
   const submit = async () => {
     setLoading(true); setError('')
     try {
-      const body = { status: statusId, ...(isLost && reason ? { reason } : {}) }
       const res = await fetch(`${API_BASE_URL}/api/leads/${lead.id}/status`, {
-        method: 'PUT', headers: authHeaders(), credentials: 'include',
-        body: JSON.stringify(body),
+        method:'PUT', headers:authHeaders(), credentials:'include',
+        body:JSON.stringify({ status:statusId, ...(statusId===6&&reason?{reason}:{}) }),
       })
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}))
-        throw new Error(j?.detail || j?.title || j?.message || `خطأ ${res.status}`)
-      }
+      if (!res.ok) { const j=await res.json().catch(()=>({})); throw new Error(j?.detail||j?.message||`خطأ ${res.status}`) }
       onSuccess()
-    } catch (e) { setError(e.message) }
+    } catch(e) { setError(e.message) }
     finally { setLoading(false) }
   }
 
   return (
     <Modal title={`تغيير حالة: ${lead.fullName}`} onClose={onClose}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div>
-          <label style={lbl}>الحالة الجديدة</label>
-          <select value={statusId} onChange={e => setStatusId(parseInt(e.target.value))} style={sel}>
-            {STATUS_OPTIONS.map(s => (
-              <option key={s.id} value={s.id}>{s.label}</option>
-            ))}
+      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        <div><label style={lbl}>الحالة الجديدة</label>
+          <select value={statusId} onChange={e=>setStatusId(parseInt(e.target.value))} style={sel}>
+            {STATUS_OPTIONS.map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
           </select>
         </div>
-        {isLost && (
-          <div>
-            <label style={lbl}>سبب الخسارة</label>
-            <input value={reason} onChange={e => setReason(e.target.value)} placeholder="اكتب السبب..." style={inp} />
-          </div>
-        )}
-        {error && <div style={{ color: '#f87171', fontSize: 12, background: 'rgba(248,113,113,.08)', padding: '8px 10px', borderRadius: 7 }}>{error}</div>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+        {statusId===6 && <div><label style={lbl}>سبب الخسارة</label><input value={reason} onChange={e=>setReason(e.target.value)} placeholder="اكتب السبب..." style={inp}/></div>}
+        {error && <div style={{ color:'#f87171', fontSize:12, background:'rgba(248,113,113,.08)', padding:'8px 10px', borderRadius:7 }}>{error}</div>}
+        <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
           <button onClick={onClose} style={btnSec}>إلغاء</button>
-          <button onClick={submit} disabled={loading} style={btnPrim}>{loading ? '...' : 'حفظ'}</button>
+          <button onClick={submit} disabled={loading} style={btnPrim}>{loading?'...':'حفظ'}</button>
         </div>
       </div>
     </Modal>
   )
 }
 
-/* ─── Assign User Modal ─── */
+/* ════════════════════════════════
+   ASSIGN MODAL
+════════════════════════════════ */
 function AssignModal({ lead, onClose, onSuccess }) {
-  const [users, setUsers] = useState([])
-  const [userId, setUserId] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [users, setUsers]       = useState([])
+  const [userId, setUserId]     = useState('')
+  const [loading, setLoading]   = useState(false)
   const [fetching, setFetching] = useState(true)
-  const [error, setError] = useState('')
+  const [error, setError]       = useState('')
 
   useEffect(() => {
     ;(async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/users`, { headers: authHeaders(), credentials: 'include' })
+        const res = await fetch(`${API_BASE_URL}/api/users`, { headers:authHeaders(), credentials:'include' })
         if (!res.ok) throw new Error()
         const data = await res.json()
-        const list = Array.isArray(data) ? data : (data?.data || [])
-        setUsers(list)
+        setUsers(Array.isArray(data)?data:(data?.data||[]))
       } catch { setUsers([]) }
       finally { setFetching(false) }
     })()
@@ -164,424 +288,735 @@ function AssignModal({ lead, onClose, onSuccess }) {
     setLoading(true); setError('')
     try {
       const res = await fetch(`${API_BASE_URL}/api/leads/${lead.id}/assign`, {
-        method: 'PUT', headers: authHeaders(), credentials: 'include',
-        body: JSON.stringify({ userId: parseInt(userId) }),
+        method:'PUT', headers:authHeaders(), credentials:'include',
+        body:JSON.stringify({ userId:parseInt(userId) }),
       })
       if (!res.ok) throw new Error(`خطأ ${res.status}`)
       onSuccess()
-    } catch (e) { setError(e.message) }
+    } catch(e) { setError(e.message) }
     finally { setLoading(false) }
   }
 
   return (
     <Modal title={`تعيين موظف: ${lead.fullName}`} onClose={onClose}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
         {fetching
-          ? <div style={{ color: '#94a3b8', textAlign: 'center', padding: 20 }}>جاري التحميل...</div>
-          : (
-            <div>
-              <label style={lbl}>اختر الموظف</label>
-              <select value={userId} onChange={e => setUserId(e.target.value)} style={sel}>
+          ? <div style={{ color:'#94a3b8', textAlign:'center', padding:20 }}>جاري التحميل...</div>
+          : <div><label style={lbl}>اختر الموظف</label>
+              <select value={userId} onChange={e=>setUserId(e.target.value)} style={sel}>
                 <option value="">-- اختر --</option>
-                {users.map(u => <option key={u.id} value={u.id}>{u.fullName}</option>)}
+                {users.map(u=><option key={u.id} value={u.id}>{u.fullName}</option>)}
               </select>
             </div>
-          )
         }
-        {error && <div style={{ color: '#f87171', fontSize: 12 }}>{error}</div>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+        {error && <div style={{ color:'#f87171', fontSize:12 }}>{error}</div>}
+        <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
           <button onClick={onClose} style={btnSec}>إلغاء</button>
-          <button onClick={submit} disabled={loading || fetching} style={btnPrim}>{loading ? '...' : 'تعيين'}</button>
+          <button onClick={submit} disabled={loading||fetching} style={btnPrim}>{loading?'...':'تعيين'}</button>
         </div>
       </div>
     </Modal>
   )
 }
 
-/* ─── Add Note Modal ─── */
+/* ════════════════════════════════
+   NOTE MODAL
+════════════════════════════════ */
 const INTERACTION_TYPES = [
-  { value: 'GeneralNote', label: 'ملاحظة عامة' },
-  { value: 'Call', label: 'مكالمة' },
-  { value: 'Email', label: 'إيميل' },
-  { value: 'WhatsApp', label: 'واتساب' },
-  { value: 'Meeting', label: 'اجتماع' },
-  { value: 'Complaint', label: 'شكوى' },
+  { value:'GeneralNote',label:'ملاحظة عامة' },
+  { value:'Call',       label:'مكالمة' },
+  { value:'Email',      label:'إيميل' },
+  { value:'WhatsApp',   label:'واتساب' },
+  { value:'Meeting',    label:'اجتماع' },
+  { value:'Complaint',  label:'شكوى' },
 ]
 
 function NoteModal({ lead, onClose, onSuccess }) {
-  const [note, setNote] = useState('')
-  const [type, setType] = useState('GeneralNote')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [note, setNote]         = useState('')
+  const [type, setType]         = useState('GeneralNote')
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
 
   const submit = async () => {
     if (!note.trim()) { setError('اكتب الملاحظة'); return }
     setLoading(true); setError('')
     try {
       const res = await fetch(`${API_BASE_URL}/api/leads/${lead.id}/notes`, {
-        method: 'POST', headers: authHeaders(), credentials: 'include',
-        body: JSON.stringify({ note, interactionType: type }),
+        method:'POST', headers:authHeaders(), credentials:'include',
+        body:JSON.stringify({ note, interactionType:type }),
       })
       if (!res.ok) throw new Error(`خطأ ${res.status}`)
       onSuccess()
-    } catch (e) { setError(e.message) }
+    } catch(e) { setError(e.message) }
     finally { setLoading(false) }
   }
 
   return (
     <Modal title={`إضافة ملاحظة: ${lead.fullName}`} onClose={onClose}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div>
-          <label style={lbl}>نوع التفاعل</label>
-          <select value={type} onChange={e => setType(e.target.value)} style={sel}>
-            {INTERACTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        <div><label style={lbl}>نوع التفاعل</label>
+          <select value={type} onChange={e=>setType(e.target.value)} style={sel}>
+            {INTERACTION_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
-        <div>
-          <label style={lbl}>الملاحظة</label>
-          <textarea
-            value={note} onChange={e => setNote(e.target.value)}
-            placeholder="اكتب ملاحظتك هنا..."
-            rows={4}
-            style={{ ...inp, resize: 'vertical', height: 'auto', padding: '10px 11px', lineHeight: 1.6 }}
-          />
+        <div><label style={lbl}>الملاحظة</label>
+          <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="اكتب ملاحظتك هنا..." rows={4}
+            style={{ ...inp, resize:'vertical', height:'auto', padding:'10px 11px', lineHeight:1.6 }}/>
         </div>
-        {error && <div style={{ color: '#f87171', fontSize: 12 }}>{error}</div>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+        {error && <div style={{ color:'#f87171', fontSize:12 }}>{error}</div>}
+        <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
           <button onClick={onClose} style={btnSec}>إلغاء</button>
-          <button onClick={submit} disabled={loading} style={btnPrim}>{loading ? '...' : 'إضافة'}</button>
+          <button onClick={submit} disabled={loading} style={btnPrim}>{loading?'...':'إضافة'}</button>
         </div>
       </div>
     </Modal>
   )
 }
 
-/* ─── Follow-Up Modal ─── */
+/* ════════════════════════════════
+   TASK MODAL  ★ NEW
+════════════════════════════════ */
+function TaskModal({ lead, onClose, onSuccess }) {
+  const [title, setTitle]       = useState('')
+  const [dueDate, setDueDate]   = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
+
+  const submit = async () => {
+    if (!title.trim()) { setError('اكتب عنوان المهمة'); return }
+    setLoading(true); setError('')
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/leads/${lead.id}/tasks`, {
+        method:'POST', headers:authHeaders(), credentials:'include',
+        body:JSON.stringify({ title, ...(dueDate?{dueDate}:{}) }),
+      })
+      if (!res.ok) throw new Error(`خطأ ${res.status}`)
+      onSuccess()
+    } catch(e) { setError(e.message) }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <Modal title={`إضافة مهمة: ${lead.fullName}`} onClose={onClose}>
+      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        <div><label style={lbl}>عنوان المهمة</label><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="اكتب المهمة..." style={inp}/></div>
+        <div><label style={lbl}>تاريخ الاستحقاق (اختياري)</label><input type="date" value={dueDate} onChange={e=>setDueDate(e.target.value)} style={{ ...inp, colorScheme:'dark' }}/></div>
+        {error && <div style={{ color:'#f87171', fontSize:12 }}>{error}</div>}
+        <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
+          <button onClick={onClose} style={btnSec}>إلغاء</button>
+          <button onClick={submit} disabled={loading} style={btnPrim}>{loading?'...':'إضافة'}</button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+/* ════════════════════════════════
+   FOLLOW-UP MODAL
+════════════════════════════════ */
 function FollowUpModal({ lead, onClose, onSuccess }) {
-  const [date, setDate] = useState('')
-  const [reason, setReason] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [date, setDate]         = useState('')
+  const [reason, setReason]     = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
 
   const submit = async () => {
     if (!date) { setError('اختر التاريخ'); return }
     setLoading(true); setError('')
     try {
       const res = await fetch(`${API_BASE_URL}/api/leads/${lead.id}/follow-up`, {
-        method: 'PUT', headers: authHeaders(), credentials: 'include',
-        body: JSON.stringify({ followUpDate: date, reason }),
+        method:'PUT', headers:authHeaders(), credentials:'include',
+        body:JSON.stringify({ followUpDate:date, reason }),
       })
       if (!res.ok) throw new Error(`خطأ ${res.status}`)
       onSuccess()
-    } catch (e) { setError(e.message) }
+    } catch(e) { setError(e.message) }
     finally { setLoading(false) }
   }
 
   return (
     <Modal title={`تحديد موعد متابعة: ${lead.fullName}`} onClose={onClose}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div>
-          <label style={lbl}>تاريخ المتابعة</label>
-          <input type="date" value={date} onChange={e => setDate(e.target.value)}
-            style={{ ...inp, colorScheme: 'dark' }} />
-        </div>
-        <div>
-          <label style={lbl}>السبب (اختياري)</label>
-          <input value={reason} onChange={e => setReason(e.target.value)} placeholder="سبب المتابعة..." style={inp} />
-        </div>
-        {error && <div style={{ color: '#f87171', fontSize: 12 }}>{error}</div>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        <div><label style={lbl}>تاريخ المتابعة</label><input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{ ...inp, colorScheme:'dark' }}/></div>
+        <div><label style={lbl}>السبب (اختياري)</label><input value={reason} onChange={e=>setReason(e.target.value)} placeholder="سبب المتابعة..." style={inp}/></div>
+        {error && <div style={{ color:'#f87171', fontSize:12 }}>{error}</div>}
+        <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
           <button onClick={onClose} style={btnSec}>إلغاء</button>
-          <button onClick={submit} disabled={loading} style={btnPrim}>{loading ? '...' : 'حفظ'}</button>
+          <button onClick={submit} disabled={loading} style={btnPrim}>{loading?'...':'حفظ'}</button>
         </div>
       </div>
     </Modal>
   )
 }
 
-/* ─── SVG Icons ─── */
-const IconRefresh = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-  </svg>
-)
-const IconUser = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-  </svg>
-)
-const IconNote = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-  </svg>
-)
-const IconCalendar = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-  </svg>
-)
-const IconEye = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-  </svg>
-)
-const IconChevron = ({ up }) => (
-  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    {up ? <polyline points="18 15 12 9 6 15"/> : <polyline points="6 9 12 15 18 9"/>}
-  </svg>
-)
-const IconLogout = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-    <polyline points="16 17 21 12 16 7"/>
-    <line x1="21" y1="12" x2="9" y2="12"/>
-  </svg>
-)
+/* ════════════════════════════════
+   EDIT MODAL  ★ NEW
+════════════════════════════════ */
+function EditModal({ lead, onClose, onSuccess }) {
+  const [form, setForm]         = useState({ fullName:lead.fullName||'', phone:lead.phone||'', email:lead.email||'', source:lead.source||'' })
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
+  const set = (k,v) => setForm(f=>({...f,[k]:v}))
 
-/* ─── Action Menu — uses fixed positioning so dropdown escapes overflow:hidden ─── */
-function ActionMenu({ lead, onAction }) {
-  const [open, setOpen] = useState(false)
-  const [menuStyle, setMenuStyle] = useState({})
-  const btnRef = useRef()
-  const menuRef = useRef()
+  const submit = async () => {
+    if (!form.fullName.trim()) { setError('الاسم مطلوب'); return }
+    if (!form.phone.trim())    { setError('التليفون مطلوب'); return }
+    setLoading(true); setError('')
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/leads/${lead.id}`, {
+        method:'PUT', headers:authHeaders(), credentials:'include',
+        body:JSON.stringify(form),
+      })
+      if (!res.ok) { const j=await res.json().catch(()=>({})); throw new Error(j?.message||`خطأ ${res.status}`) }
+      onSuccess()
+    } catch(e) { setError(e.message) }
+    finally { setLoading(false) }
+  }
 
-  /* Close on outside click */
-  useEffect(() => {
-    const close = e => {
-      if (
-        btnRef.current && !btnRef.current.contains(e.target) &&
-        menuRef.current && !menuRef.current.contains(e.target)
-      ) setOpen(false)
-    }
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [])
-
-  /* Recalculate position on open */
-  useEffect(() => {
-    if (!open || !btnRef.current) return
-    const rect = btnRef.current.getBoundingClientRect()
-    const menuHeight = 220 // approx height of 5 items
-    const spaceBelow = window.innerHeight - rect.bottom
-    const openUpward = spaceBelow < menuHeight + 10
-
-    setMenuStyle({
-      position: 'fixed',
-      zIndex: 9999,
-      left: rect.left,
-      ...(openUpward
-        ? { bottom: window.innerHeight - rect.top + 6 }
-        : { top: rect.bottom + 6 }),
-      minWidth: 180,
-    })
-  }, [open])
-
-  const actions = [
-    { key: 'status',   Icon: IconRefresh,  label: 'تغيير الحالة',  color: '#38bdf8' },
-    { key: 'assign',   Icon: IconUser,     label: 'تعيين موظف',    color: '#a78bfa' },
-    { key: 'note',     Icon: IconNote,     label: 'إضافة ملاحظة',  color: '#C9A96E' },
-    { key: 'followup', Icon: IconCalendar, label: 'موعد متابعة',   color: '#fbbf24' },
-    { key: 'details',  Icon: IconEye,      label: 'التفاصيل',      color: '#34d399' },
+  const fields = [
+    { k:'fullName', label:'الاسم الكامل', placeholder:'الاسم...' },
+    { k:'phone',    label:'التليفون',     placeholder:'01xxxxxxxxx' },
+    { k:'email',    label:'الإيميل',      placeholder:'example@mail.com' },
+    { k:'source',   label:'المصدر',       placeholder:'Facebook, Website...' },
   ]
 
   return (
-    <>
-      <button
-        ref={btnRef}
-        onClick={() => setOpen(o => !o)}
-        style={{
-          background: open ? 'rgba(201,169,110,.12)' : 'rgba(255,255,255,.04)',
-          border: `1px solid ${open ? '#C9A96E' : '#334155'}`,
-          borderRadius: 8, color: open ? '#C9A96E' : '#94a3b8',
-          cursor: 'pointer', padding: '5px 12px', fontSize: 12,
-          fontFamily: "'Cairo',sans-serif", display: 'flex', alignItems: 'center', gap: 6,
-          transition: 'all .15s',
-        }}
-      >
-        إجراءات <IconChevron up={open} />
-      </button>
-
-      {open && (
-        <div
-          ref={menuRef}
-          style={{
-            ...menuStyle,
-            background: '#0d1829',
-            border: '1px solid #1e3a5f',
-            borderRadius: 10,
-            boxShadow: '0 16px 40px rgba(0,0,0,.6)',
-            overflow: 'hidden',
-          }}
-        >
-          {actions.map((a, i) => (
-            <button key={a.key}
-              onClick={() => { setOpen(false); onAction(a.key, lead) }}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                width: '100%', background: 'none', border: 'none',
-                borderBottom: i < actions.length - 1 ? '1px solid rgba(30,58,95,.6)' : 'none',
-                color: '#cbd5e1', cursor: 'pointer', padding: '10px 14px',
-                fontSize: 13, fontFamily: "'Cairo',sans-serif", textAlign: 'right',
-                transition: 'all .12s',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(201,169,110,.07)'
-                e.currentTarget.style.color = '#f1f5f9'
-                e.currentTarget.querySelector('.act-icon').style.color = a.color
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'none'
-                e.currentTarget.style.color = '#cbd5e1'
-                e.currentTarget.querySelector('.act-icon').style.color = '#475569'
-              }}
-            >
-              <span className="act-icon" style={{ color: '#475569', display: 'flex', alignItems: 'center', transition: 'color .12s' }}>
-                <a.Icon />
-              </span>
-              {a.label}
-            </button>
-          ))}
+    <Modal title={`تعديل: ${lead.fullName}`} onClose={onClose}>
+      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        {fields.map(f=>(
+          <div key={f.k}><label style={lbl}>{f.label}</label>
+            <input value={form[f.k]} onChange={e=>set(f.k,e.target.value)} placeholder={f.placeholder} style={inp}/>
+          </div>
+        ))}
+        {error && <div style={{ color:'#f87171', fontSize:12, background:'rgba(248,113,113,.08)', padding:'8px 10px', borderRadius:7 }}>{error}</div>}
+        <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
+          <button onClick={onClose} style={btnSec}>إلغاء</button>
+          <button onClick={submit} disabled={loading} style={btnPrim}>{loading?'...':'حفظ التعديلات'}</button>
         </div>
-      )}
-    </>
+      </div>
+    </Modal>
   )
 }
 
-/* ─── Lead Details Drawer ─── */
-function DetailsDrawer({ lead, onClose }) {
-  const [details, setDetails] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+/* ════════════════════════════════
+   CONVERT MODAL  ★ NEW
+════════════════════════════════ */
+function ConvertModal({ lead, onClose, onSuccess }) {
+  const [classes, setClasses]   = useState([])
+  const [classId, setClassId]   = useState('')
+  const [paid, setPaid]         = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [fetching, setFetching] = useState(true)
+  const [error, setError]       = useState('')
 
   useEffect(() => {
     ;(async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/leads/${lead.id}/details`, {
-          headers: authHeaders(), credentials: 'include',
-        })
-        if (!res.ok) throw new Error(`خطأ ${res.status}`)
+        const res = await fetch(`${API_BASE_URL}/api/course-classes`, { headers:authHeaders(), credentials:'include' })
+        if (!res.ok) throw new Error()
         const data = await res.json()
-        setDetails(data)
-      } catch (e) { setError(e.message) }
+        setClasses(Array.isArray(data)?data:(data?.data||[]))
+      } catch { setClasses([]) }
+      finally { setFetching(false) }
+    })()
+  }, [])
+
+  const selected = classes.find(c=>c.id===parseInt(classId))
+
+  const submit = async () => {
+    if (!classId) { setError('اختر الكورس'); return }
+    setLoading(true); setError('')
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/leads/${lead.id}/convert`, {
+        method:'POST', headers:authHeaders(), credentials:'include',
+        body:JSON.stringify({ courseClassId:parseInt(classId), ...(paid?{paidAmount:parseFloat(paid)}:{}) }),
+      })
+      if (!res.ok) { const j=await res.json().catch(()=>({})); throw new Error(j?.message||`خطأ ${res.status}`) }
+      onSuccess()
+    } catch(e) { setError(e.message) }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <Modal title={`تحويل لعميل: ${lead.fullName}`} onClose={onClose}>
+      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        <div style={{ background:'rgba(52,211,153,.06)', border:'1px solid rgba(52,211,153,.2)', borderRadius:8, padding:'10px 14px', fontSize:12, color:'#34d399' }}>
+          سيتم إنشاء حساب عميل جديد وتسجيله في الكورس المختار
+        </div>
+        <div><label style={lbl}>الكورس</label>
+          {fetching
+            ? <div style={{ color:'#94a3b8', padding:10 }}>جاري التحميل...</div>
+            : <select value={classId} onChange={e=>setClassId(e.target.value)} style={sel}>
+                <option value="">-- اختر الكورس --</option>
+                {classes.map(c=><option key={c.id} value={c.id}>{c.courseName||c.name} {c.price?`— ${c.price} ج`:''}</option>)}
+              </select>
+          }
+        </div>
+        {selected && (
+          <div><label style={lbl}>المبلغ المدفوع (اختياري — max: {selected.price} ج)</label>
+            <input type="number" value={paid} onChange={e=>setPaid(e.target.value)} placeholder="0" max={selected.price} style={inp}/>
+          </div>
+        )}
+        {error && <div style={{ color:'#f87171', fontSize:12, background:'rgba(248,113,113,.08)', padding:'8px 10px', borderRadius:7 }}>{error}</div>}
+        <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
+          <button onClick={onClose} style={btnSec}>إلغاء</button>
+          <button onClick={submit} disabled={loading||fetching} style={{ ...btnPrim, background:'#34d399' }}>{loading?'...':'تحويل الآن'}</button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+/* ════════════════════════════════
+   ARCHIVE CONFIRM MODAL  ★ NEW
+════════════════════════════════ */
+function ArchiveModal({ lead, onClose, onSuccess }) {
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
+  const isArchived = lead.isArchived
+
+  const submit = async () => {
+    setLoading(true); setError('')
+    try {
+      const url = isArchived
+        ? `${API_BASE_URL}/api/leads/${lead.id}/restore`
+        : `${API_BASE_URL}/api/leads/${lead.id}/archive`
+      const res = await fetch(url, { method:'PUT', headers:authHeaders(), credentials:'include' })
+      if (!res.ok) throw new Error(`خطأ ${res.status}`)
+      onSuccess()
+    } catch(e) { setError(e.message) }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <Modal title={isArchived?`استعادة: ${lead.fullName}`:`أرشفة: ${lead.fullName}`} onClose={onClose}>
+      <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+        <div style={{ color:'#94a3b8', fontSize:14, lineHeight:1.7 }}>
+          {isArchived
+            ? 'هل تريد استعادة هذا الليد وإعادته للقائمة النشطة؟'
+            : 'هل تريد أرشفة هذا الليد؟ يمكنك استعادته لاحقاً من تاب الأرشيف.'}
+        </div>
+        {error && <div style={{ color:'#f87171', fontSize:12 }}>{error}</div>}
+        <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
+          <button onClick={onClose} style={btnSec}>إلغاء</button>
+          <button onClick={submit} disabled={loading} style={isArchived?btnPrim:btnDanger}>
+            {loading?'...':(isArchived?'استعادة':'أرشفة')}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+/* ════════════════════════════════
+   IMPORT EXCEL MODAL  ★ NEW
+════════════════════════════════ */
+function ImportModal({ onClose, onSuccess }) {
+  const [file, setFile]         = useState(null)
+  const [loading, setLoading]   = useState(false)
+  const [result, setResult]     = useState(null)
+  const [error, setError]       = useState('')
+  const fileRef = useRef()
+
+  const submit = async () => {
+    if (!file) { setError('اختر ملف Excel'); return }
+    setLoading(true); setError(''); setResult(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch(`${API_BASE_URL}/api/leads/import`, {
+        method:'POST',
+        headers:{ Authorization:`Bearer ${localStorage.getItem('token')}` },
+        credentials:'include', body:fd,
+      })
+      if (!res.ok) throw new Error(`خطأ ${res.status}`)
+      setResult(await res.json())
+    } catch(e) { setError(e.message) }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <Modal title="استيراد Leads من Excel" onClose={onClose}>
+      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        <div style={{ background:'rgba(56,189,248,.06)', border:'1px solid rgba(56,189,248,.2)', borderRadius:8, padding:'10px 14px', fontSize:12, color:'#38bdf8', lineHeight:1.7 }}>
+          الأعمدة المطلوبة بالترتيب: <strong>FullName · Phone · Email · Source</strong>
+        </div>
+        <div
+          onClick={()=>fileRef.current?.click()}
+          onDragOver={e=>{ e.preventDefault(); e.currentTarget.style.borderColor='#C9A96E' }}
+          onDragLeave={e=>{ e.currentTarget.style.borderColor=file?'#C9A96E':'#334155' }}
+          onDrop={e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(f) setFile(f) }}
+          style={{
+            border:`2px dashed ${file?'#C9A96E':'#334155'}`, borderRadius:10, padding:'28px 16px',
+            textAlign:'center', cursor:'pointer', background:file?'rgba(201,169,110,.06)':'transparent',
+            transition:'all .15s',
+          }}
+        >
+          <input ref={fileRef} type="file" accept=".xlsx,.xls" style={{ display:'none' }} onChange={e=>setFile(e.target.files[0])}/>
+          <div style={{ fontSize:13, color:file?'#C9A96E':'#64748b' }}>
+            {file?`✓ ${file.name}`:'اضغط أو اسحب ملف Excel هنا'}
+          </div>
+        </div>
+        {error && <div style={{ color:'#f87171', fontSize:12, background:'rgba(248,113,113,.08)', padding:'8px 10px', borderRadius:7 }}>{error}</div>}
+        {result && (
+          <div style={{ background:'rgba(52,211,153,.06)', border:'1px solid rgba(52,211,153,.2)', borderRadius:8, padding:'12px 14px', fontSize:13 }}>
+            <div style={{ color:'#34d399', fontWeight:700, marginBottom:6 }}>✓ تم الاستيراد</div>
+            <div style={{ color:'#94a3b8' }}>تم استيراد: <strong style={{ color:'#f1f5f9' }}>{result.imported}</strong></div>
+            <div style={{ color:'#94a3b8' }}>تم تخطيه: <strong style={{ color:'#fbbf24' }}>{result.skipped}</strong></div>
+            {result.errors?.slice(0,3).map((e,i)=><div key={i} style={{ fontSize:11, color:'#f87171', marginTop:2 }}>{e}</div>)}
+          </div>
+        )}
+        <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
+          <button onClick={result?onSuccess:onClose} style={btnSec}>{result?'إغلاق وتحديث':'إلغاء'}</button>
+          {!result && <button onClick={submit} disabled={loading||!file} style={btnPrim}>{loading?'جاري الاستيراد...':'استيراد'}</button>}
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+/* ════════════════════════════════
+   DETAILS DRAWER  (ENHANCED + tabs)
+════════════════════════════════ */
+function DetailsDrawer({ lead, onClose }) {
+  const [details, setDetails]         = useState(null)
+  const [notes, setNotes]             = useState([])
+  const [followHistory, setFollowHistory] = useState([])
+  const [loading, setLoading]         = useState(true)
+  const [error, setError]             = useState('')
+  const [tab, setTab]                 = useState('info')
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const [dr, nr, fhr] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/leads/${lead.id}/details`,          { headers:authHeaders(), credentials:'include' }),
+          fetch(`${API_BASE_URL}/api/leads/${lead.id}/notes`,            { headers:authHeaders(), credentials:'include' }),
+          fetch(`${API_BASE_URL}/api/leads/${lead.id}/follow-up-history`,{ headers:authHeaders(), credentials:'include' }),
+        ])
+        if (dr.ok)  setDetails(await dr.json())
+        if (nr.ok)  setNotes(await nr.json())
+        if (fhr.ok) setFollowHistory(await fhr.json())
+      } catch(e) { setError(e.message) }
       finally { setLoading(false) }
     })()
   }, [lead.id])
 
+  const tabs = [
+    { id:'info',     label:'المعلومات' },
+    { id:'notes',    label:`الملاحظات${notes.length?` (${notes.length})`:''}` },
+    { id:'stages',   label:'المراحل' },
+    { id:'followup', label:'المتابعات' },
+    { id:'activity', label:'الأنشطة' },
+  ]
+
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 900,
-      background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(3px)',
-      display: 'flex', justifyContent: 'flex-end',
-    }} onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{
-        width: '100%', maxWidth: 480, height: '100%', overflowY: 'auto',
-        background: '#0f172a', borderLeft: '1px solid #334155',
-        padding: 24, direction: 'rtl',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <span style={{ fontSize: 17, fontWeight: 800, color: '#C9A96E' }}>تفاصيل الليد</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 22, cursor: 'pointer' }}>×</button>
+      position:'fixed', inset:0, zIndex:900,
+      background:'rgba(0,0,0,.55)', backdropFilter:'blur(3px)',
+      display:'flex', justifyContent:'flex-end',
+    }} onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{ width:'100%', maxWidth:520, height:'100%', display:'flex', flexDirection:'column', background:'#0f172a', borderLeft:'1px solid #334155', direction:'rtl' }}>
+
+        {/* Header + tabs */}
+        <div style={{ padding:'16px 20px', borderBottom:'1px solid #334155', flexShrink:0 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+            <span style={{ fontSize:17, fontWeight:800, color:'#C9A96E' }}>تفاصيل الليد</span>
+            <button onClick={onClose} style={{ background:'none', border:'none', color:'#94a3b8', fontSize:22, cursor:'pointer' }}>×</button>
+          </div>
+          <div style={{ display:'flex', gap:2, flexWrap:'wrap' }}>
+            {tabs.map(t=>(
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{
+                height:30, padding:'0 12px', borderRadius:6, border:'none', cursor:'pointer',
+                fontSize:12, fontFamily:"'Cairo',sans-serif", transition:'all .15s',
+                background:tab===t.id?'rgba(201,169,110,.15)':'transparent',
+                color:tab===t.id?'#C9A96E':'#64748b',
+                borderBottom:tab===t.id?'2px solid #C9A96E':'2px solid transparent',
+              }}>{t.label}</button>
+            ))}
+          </div>
         </div>
 
-        {loading && <div style={{ color: '#94a3b8', textAlign: 'center', padding: 40 }}>جاري التحميل...</div>}
-        {error && <div style={{ color: '#f87171', padding: 16, background: 'rgba(248,113,113,.08)', borderRadius: 8 }}>{error}</div>}
+        {/* Scrollable content */}
+        <div style={{ flex:1, overflowY:'auto', padding:20 }}>
+          {loading && <div style={{ color:'#94a3b8', textAlign:'center', padding:40 }}>جاري التحميل...</div>}
+          {error   && <div style={{ color:'#f87171', padding:16, background:'rgba(248,113,113,.08)', borderRadius:8 }}>{error}</div>}
 
-        {details && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 12, padding: 16 }}>
-              <div style={{ fontSize: 11, color: '#C9A96E', fontWeight: 700, marginBottom: 12, letterSpacing: 1 }}>معلومات أساسية</div>
-              {[
-                { label: 'الاسم', val: details.leadInfo?.name },
-                { label: 'التليفون', val: details.leadInfo?.phone },
-                { label: 'الإيميل', val: details.leadInfo?.email },
-                { label: 'المصدر', val: details.leadInfo?.source },
-                { label: 'مسند لـ', val: details.leadInfo?.assignedUser?.fullName },
-                { label: 'الحالة', val: details.currentStage?.name },
-                { label: 'سبب الخسارة', val: details.leadInfo?.lostReason },
-              ].filter(f => f.val).map(f => (
-                <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(51,65,85,.4)', fontSize: 13 }}>
-                  <span style={{ color: '#94a3b8' }}>{f.label}</span>
-                  <span style={{ color: '#f1f5f9', fontWeight: 500 }}>{f.val}</span>
-                </div>
-              ))}
-              {details.metrics && (
-                <div style={{ marginTop: 10, padding: '8px 10px', background: 'rgba(201,169,110,.06)', borderRadius: 8, fontSize: 12, color: '#C9A96E' }}>
-                  أيام في البيب لاين: {Math.floor(details.metrics.daysInPipeline)} يوم
-                </div>
-              )}
+          {/* INFO */}
+          {!loading && tab==='info' && details && (
+            <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+              <div style={{ background:'#1e293b', border:'1px solid #334155', borderRadius:12, padding:16 }}>
+                <div style={{ fontSize:11, color:'#C9A96E', fontWeight:700, marginBottom:12, letterSpacing:1 }}>معلومات أساسية</div>
+                {[
+                  { label:'الاسم',       val:details.leadInfo?.name },
+                  { label:'التليفون',    val:details.leadInfo?.phone },
+                  { label:'الإيميل',     val:details.leadInfo?.email },
+                  { label:'المصدر',      val:details.leadInfo?.source },
+                  { label:'مسند لـ',     val:details.leadInfo?.assignedUser?.fullName },
+                  { label:'الحالة',      val:details.currentStage?.name },
+                  { label:'سبب الخسارة',val:details.leadInfo?.lostReason },
+                ].filter(f=>f.val).map(f=>(
+                  <div key={f.label} style={{ display:'flex', justifyContent:'space-between', padding:'6px 0', borderBottom:'1px solid rgba(51,65,85,.4)', fontSize:13 }}>
+                    <span style={{ color:'#94a3b8' }}>{f.label}</span>
+                    <span style={{ color:'#f1f5f9', fontWeight:500 }}>{f.val}</span>
+                  </div>
+                ))}
+                {details.metrics && (
+                  <div style={{ marginTop:10, padding:'8px 10px', background:'rgba(201,169,110,.06)', borderRadius:8, fontSize:12, color:'#C9A96E' }}>
+                    أيام في البيب لاين: {Math.floor(details.metrics.daysInPipeline)} يوم
+                  </div>
+                )}
+              </div>
             </div>
+          )}
 
-            {details.stageHistory?.length > 0 && (
-              <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 12, padding: 16 }}>
-                <div style={{ fontSize: 11, color: '#C9A96E', fontWeight: 700, marginBottom: 12, letterSpacing: 1 }}>تاريخ المراحل</div>
-                {details.stageHistory.slice(0, 5).map((h, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: i < 4 ? '1px solid rgba(51,65,85,.3)' : 'none', fontSize: 12 }}>
-                    <span style={{ color: '#94a3b8' }}>{fmt(h.changedAt)} · {h.changedByName}</span>
-                    <span style={{ color: '#f1f5f9' }}>{h.fromStage ? `${h.fromStage} ← ` : ''}{h.toStage}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {details.activityTimeline?.length > 0 && (
-              <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 12, padding: 16 }}>
-                <div style={{ fontSize: 11, color: '#C9A96E', fontWeight: 700, marginBottom: 12, letterSpacing: 1 }}>آخر الأنشطة</div>
-                {details.activityTimeline.slice(0, 8).map((a, i) => (
-                  <div key={i} style={{ padding: '8px 0', borderBottom: i < 7 ? '1px solid rgba(51,65,85,.3)' : 'none', fontSize: 12 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <span style={{
-                        background: a.type === 'Note' ? 'rgba(167,139,250,.15)' : a.type === 'Stage' ? 'rgba(52,211,153,.12)' : 'rgba(56,189,248,.12)',
-                        color: a.type === 'Note' ? '#a78bfa' : a.type === 'Stage' ? '#34d399' : '#38bdf8',
-                        padding: '1px 7px', borderRadius: 4, fontSize: 10, fontWeight: 700,
-                      }}>{a.type}</span>
-                      <span style={{ color: '#64748b', fontSize: 11 }}>{fmt(a.createdAt)} · {a.createdByName}</span>
+          {/* NOTES */}
+          {!loading && tab==='notes' && (
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              {notes.length===0
+                ? <div style={{ color:'#64748b', textAlign:'center', padding:40 }}>لا توجد ملاحظات</div>
+                : notes.map((n,i)=>(
+                  <div key={i} style={{ background:'#1e293b', border:'1px solid #334155', borderRadius:10, padding:'12px 14px' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                      <span style={{ background:'rgba(167,139,250,.12)', color:'#a78bfa', padding:'1px 7px', borderRadius:4, fontSize:10, fontWeight:700 }}>{n.interactionType}</span>
+                      <span style={{ fontSize:11, color:'#64748b' }}>{fmt(n.createdAt)} · {n.createdBy}</span>
                     </div>
-                    {a.description && <div style={{ color: '#cbd5e1', lineHeight: 1.5 }}>{a.description}</div>}
+                    <div style={{ fontSize:13, color:'#cbd5e1', lineHeight:1.6 }}>{n.note}</div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                ))
+              }
+            </div>
+          )}
+
+          {/* STAGE HISTORY */}
+          {!loading && tab==='stages' && details && (
+            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+              {(!details.stageHistory||details.stageHistory.length===0)
+                ? <div style={{ color:'#64748b', textAlign:'center', padding:40 }}>لا يوجد تاريخ</div>
+                : details.stageHistory.map((h,i)=>(
+                  <div key={i} style={{ background:'#1e293b', border:'1px solid #334155', borderRadius:10, padding:'12px 14px' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
+                      <span style={{ fontSize:13, color:'#f1f5f9', fontWeight:600 }}>
+                        {h.fromStage?`${h.fromStage} ← `:''}{h.toStage}
+                      </span>
+                      <span style={{ fontSize:11, color:'#64748b' }}>{fmt(h.changedAt)}</span>
+                    </div>
+                    <div style={{ fontSize:12, color:'#94a3b8' }}>بواسطة: {h.changedByName}</div>
+                  </div>
+                ))
+              }
+            </div>
+          )}
+
+          {/* FOLLOW-UP HISTORY */}
+          {!loading && tab==='followup' && (
+            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+              {followHistory.length===0
+                ? <div style={{ color:'#64748b', textAlign:'center', padding:40 }}>لا توجد متابعات مسجلة</div>
+                : followHistory.map((f,i)=>(
+                  <div key={i} style={{ background:'#1e293b', border:'1px solid #334155', borderRadius:10, padding:'12px 14px' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
+                      <span style={{ fontSize:13, color:'#fbbf24', fontWeight:600 }}>{fmt(f.followUpDate)}</span>
+                      <span style={{ background:'rgba(251,191,36,.1)', color:'#fbbf24', padding:'1px 7px', borderRadius:4, fontSize:10, fontWeight:700 }}>{f.source}</span>
+                    </div>
+                    {f.reason&&<div style={{ fontSize:12, color:'#94a3b8' }}>{f.reason}</div>}
+                    <div style={{ fontSize:11, color:'#475569', marginTop:4 }}>{fmt(f.createdAt)}</div>
+                  </div>
+                ))
+              }
+            </div>
+          )}
+
+          {/* ACTIVITY */}
+          {!loading && tab==='activity' && details && (
+            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+              {(!details.activityTimeline||details.activityTimeline.length===0)
+                ? <div style={{ color:'#64748b', textAlign:'center', padding:40 }}>لا توجد أنشطة</div>
+                : details.activityTimeline.map((a,i)=>(
+                  <div key={i} style={{ background:'#1e293b', border:'1px solid #334155', borderRadius:10, padding:'12px 14px' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+                      <span style={{
+                        background:a.type==='Note'?'rgba(167,139,250,.15)':a.type==='Stage'?'rgba(52,211,153,.12)':'rgba(56,189,248,.12)',
+                        color:a.type==='Note'?'#a78bfa':a.type==='Stage'?'#34d399':'#38bdf8',
+                        padding:'1px 7px', borderRadius:4, fontSize:10, fontWeight:700,
+                      }}>{a.type}</span>
+                      <span style={{ color:'#64748b', fontSize:11 }}>{fmt(a.createdAt)} · {a.createdByName}</span>
+                    </div>
+                    {a.description&&<div style={{ color:'#cbd5e1', fontSize:13, lineHeight:1.5 }}>{a.description}</div>}
+                  </div>
+                ))
+              }
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-/* ─── shared mini-styles ─── */
-const lbl = { fontSize: 12, color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: 6 }
-const inp = {
-  width: '100%', boxSizing: 'border-box', height: 38,
-  background: '#0f172a', border: '1px solid #334155', borderRadius: 8,
-  color: '#f1f5f9', fontSize: 13, padding: '0 11px',
-  fontFamily: "'Cairo',sans-serif", outline: 'none',
-}
-const sel = { ...inp, cursor: 'pointer' }
-const btnPrim = {
-  height: 38, padding: '0 20px', borderRadius: 8, border: 'none',
-  background: '#C9A96E', color: '#0f172a', fontSize: 13, fontWeight: 700,
-  cursor: 'pointer', fontFamily: "'Cairo',sans-serif",
-}
-const btnSec = {
-  height: 38, padding: '0 16px', borderRadius: 8,
-  border: '1px solid #334155', background: 'transparent',
-  color: '#94a3b8', fontSize: 13, cursor: 'pointer', fontFamily: "'Cairo',sans-serif",
-}
+/* ════════════════════════════════
+   KANBAN BOARD  ★ NEW
+════════════════════════════════ */
+function KanbanBoard({ onAction }) {
+  const [pipeline, setPipeline] = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState('')
 
-/* ─── Badge ─── */
-function Badge({ status }) {
-  const b = BADGES[status] || { bg: 'rgba(148,163,184,.13)', color: '#94a3b8', label: status || '—' }
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/leads/pipeline`, { headers:authHeaders(), credentials:'include' })
+        if (!res.ok) throw new Error(`خطأ ${res.status}`)
+        setPipeline(await res.json())
+      } catch(e) { setError(e.message) }
+      finally { setLoading(false) }
+    })()
+  }, [])
+
+  if (loading) return <div style={{ color:'#C9A96E', textAlign:'center', padding:60 }}>جاري تحميل البيب لاين...</div>
+  if (error)   return <div style={{ color:'#f87171', textAlign:'center', padding:40 }}>{error}</div>
+
+  const stageColor = { New:'#38bdf8',Contacted:'#a78bfa',Interested:'#C9A96E',FollowUp:'#fbbf24',Converted:'#34d399',Lost:'#f87171',Cold:'#94a3b8' }
+
   return (
-    <span style={{
-      display: 'inline-block', padding: '3px 10px', borderRadius: 20,
-      fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
-      background: b.bg, color: b.color,
-    }}>{b.label}</span>
+    <div style={{ overflowX:'auto', paddingBottom:12 }}>
+      <style>{`.kb::-webkit-scrollbar{height:6px}.kb::-webkit-scrollbar-track{background:#0f172a}.kb::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}`}</style>
+      <div className="kb" style={{ display:'flex', gap:12, minWidth:'max-content', padding:'4px 2px 12px' }}>
+        {pipeline.map(stage => {
+          const color = stageColor[stage.stageName] || '#94a3b8'
+          return (
+            <div key={stage.stageId} style={{ width:230, background:'#1e293b', border:'1px solid #334155', borderRadius:12, overflow:'hidden', flexShrink:0 }}>
+              <div style={{ padding:'10px 14px', borderBottom:'1px solid #334155', background:'rgba(15,23,42,.6)', borderTop:`3px solid ${color}` }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                  <span style={{ fontSize:13, fontWeight:700, color:'#f1f5f9' }}>{BADGES[stage.stageName]?.label||stage.stageName}</span>
+                  <span style={{ background:`${color}22`, color, padding:'2px 8px', borderRadius:10, fontSize:11, fontWeight:700 }}>{stage.totalLeads}</span>
+                </div>
+              </div>
+              <div style={{ padding:8, display:'flex', flexDirection:'column', gap:8, maxHeight:500, overflowY:'auto' }}>
+                {stage.leads.length===0
+                  ? <div style={{ color:'#475569', textAlign:'center', padding:'20px 0', fontSize:12 }}>لا يوجد</div>
+                  : stage.leads.map(l=>(
+                    <div key={l.id} style={{ background:'#0f172a', border:'1px solid #334155', borderRadius:8, padding:'10px 12px' }}>
+                      <div style={{ fontSize:13, fontWeight:700, color:'#f1f5f9', marginBottom:4 }}>{l.name}</div>
+                      {l.assignedUser && <div style={{ fontSize:11, color:'#64748b', marginBottom:6 }}>👤 {l.assignedUser.fullName}</div>}
+                      {l.lastActivityAt && <div style={{ fontSize:10, color:'#475569' }}>آخر نشاط: {fmt(l.lastActivityAt)}</div>}
+                      <div style={{ marginTop:8 }}>
+                        <button onClick={()=>onAction('details',{id:l.id,fullName:l.name})} style={{ height:24, padding:'0 10px', borderRadius:5, border:'1px solid #334155', background:'transparent', color:'#94a3b8', fontSize:11, cursor:'pointer', fontFamily:"'Cairo',sans-serif" }}>التفاصيل</button>
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
-/* ─── Mobile detection ─── */
+/* ════════════════════════════════
+   FOLLOW-UPS VIEW  ★ NEW
+════════════════════════════════ */
+function FollowUpsView({ onAction }) {
+  const [today, setToday]     = useState([])
+  const [overdue, setOverdue] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const [tr, or] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/leads/follow-ups?today=true`,   { headers:authHeaders(), credentials:'include' }),
+          fetch(`${API_BASE_URL}/api/leads/follow-ups?overdue=true`, { headers:authHeaders(), credentials:'include' }),
+        ])
+        if (tr.ok) setToday(await tr.json())
+        if (or.ok) setOverdue(await or.json())
+      } catch {}
+      finally { setLoading(false) }
+    })()
+  }, [])
+
+  if (loading) return <div style={{ color:'#C9A96E', textAlign:'center', padding:60 }}>جاري التحميل...</div>
+
+  const Row = ({ l, color }) => (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', borderBottom:'1px solid rgba(51,65,85,.4)' }}>
+      <div>
+        <div style={{ fontSize:13, fontWeight:700, color:'#f1f5f9' }}>{l.fullName}</div>
+        <div style={{ fontSize:11, color:'#94a3b8', marginTop:2 }}>{l.phone}{l.followUpReason?` · ${l.followUpReason}`:''}</div>
+      </div>
+      <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+        <Badge status={resolveStatus(l.status)}/>
+        <span style={{ fontSize:11, color, fontWeight:700 }}>{fmt(l.followUpDate)}</span>
+        <button onClick={()=>onAction('details',{id:l.id,fullName:l.fullName})} style={{ ...btnSec, height:28, padding:'0 10px', fontSize:11 }}>تفاصيل</button>
+      </div>
+    </div>
+  )
+
+  const Section = ({ title, leads, color, empty }) => (
+    <div style={{ background:'#1e293b', border:'1px solid #334155', borderRadius:12, overflow:'hidden', marginBottom:16 }}>
+      <div style={{ padding:'12px 16px', borderBottom:'1px solid #334155', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <span style={{ fontSize:14, fontWeight:700, color:'#f1f5f9' }}>{title}</span>
+        <span style={{ background:`${color}22`, color, padding:'2px 10px', borderRadius:10, fontSize:12, fontWeight:700 }}>{leads.length}</span>
+      </div>
+      {leads.length===0
+        ? <div style={{ padding:24, textAlign:'center', color:'#475569', fontSize:13 }}>{empty}</div>
+        : leads.map((l,i)=><Row key={i} l={l} color={color}/>)
+      }
+    </div>
+  )
+
+  return (
+    <>
+      <Section title="متابعات اليوم"   leads={today}  color="#C9A96E" empty="لا توجد متابعات اليوم 🎉"/>
+      <Section title="متابعات متأخرة" leads={overdue} color="#f87171" empty="لا توجد متابعات متأخرة"/>
+    </>
+  )
+}
+
+/* ════════════════════════════════
+   ARCHIVED VIEW  ★ NEW
+════════════════════════════════ */
+function ArchivedView({ onAction }) {
+  const [leads, setLeads]     = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/leads/archived`, { headers:authHeaders(), credentials:'include' })
+        if (res.ok) setLeads(await res.json())
+      } catch {}
+      finally { setLoading(false) }
+    })()
+  }, [])
+
+  if (loading) return <div style={{ color:'#C9A96E', textAlign:'center', padding:60 }}>جاري التحميل...</div>
+
+  return (
+    <div style={{ background:'#1e293b', border:'1px solid #334155', borderRadius:12, overflow:'hidden' }}>
+      {leads.length===0
+        ? <div style={{ padding:40, textAlign:'center', color:'#475569' }}>لا توجد leads مؤرشفة</div>
+        : leads.map(l=>(
+          <div key={l.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderBottom:'1px solid rgba(51,65,85,.4)' }}>
+            <div>
+              <div style={{ fontSize:13, fontWeight:700, color:'#94a3b8' }}>{l.fullName}</div>
+              <div style={{ fontSize:11, color:'#475569', marginTop:2 }}>أُرشف: {fmt(l.archivedAt)}</div>
+            </div>
+            <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+              <Badge status={resolveStatus(l.status)}/>
+              <button onClick={()=>onAction('archive',{...l,isArchived:true})} style={{ ...btnPrim, height:30, padding:'0 12px', fontSize:12 }}>استعادة</button>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  )
+}
+
+/* ════════════════════════════════
+   MOBILE HOOK
+════════════════════════════════ */
 function useIsMobile() {
   const [mob, setMob] = useState(window.innerWidth < 640)
   useEffect(() => {
@@ -592,368 +1027,369 @@ function useIsMobile() {
   return mob
 }
 
-/* ═══════════════════════════════════════
+/* ════════════════════════════════════════════════════
    MAIN DASHBOARD
-═══════════════════════════════════════ */
+════════════════════════════════════════════════════ */
 export default function Dashboard() {
-  const [all, setAll]           = useState([])
-  const [filtered, setFiltered] = useState([])
-  const [search, setSearch]     = useState('')
-  const [fStatus, setFStatus]   = useState('')
-  const [fSource, setFSource]   = useState('')
-  const [sources, setSources]   = useState([])
-  const [page, setPage]         = useState(1)
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState(null)
+  const [all, setAll]               = useState([])
+  const [filtered, setFiltered]     = useState([])
+  const [search, setSearch]         = useState('')
+  const [fStatus, setFStatus]       = useState('')
+  const [fSource, setFSource]       = useState('')
+  const [sources, setSources]       = useState([])
+  const [page, setPage]             = useState(1)
+  const [loading, setLoading]       = useState(true)
+  const [error, setError]           = useState(null)
   const [lastUpdate, setLastUpdate] = useState('')
-  const [toast, setToast]       = useState(null)
-
-  const [modal, setModal]       = useState(null)
-  const [drawer, setDrawer]     = useState(null)
-
+  const [toast, setToast]           = useState(null)
+  const [view, setView]             = useState('table')  // table|kanban|followups|archived
+  const [modal, setModal]           = useState(null)     // { type, lead }
+  const [drawer, setDrawer]         = useState(null)
+  const [showImport, setShowImport] = useState(false)
+  const [todayCount, setTodayCount] = useState(0)
   const isMobile = useIsMobile()
 
+  /* ── logout ── */
   const handleLogout = async () => {
-    try {
-      await fetch(`${API_BASE_URL}/api/auth/logout`, {
-        method: 'POST',
-        headers: authHeaders(),
-        credentials: 'include',
-      })
-    } catch (_) {}
+    try { await fetch(`${API_BASE_URL}/api/auth/logout`,{method:'POST',headers:authHeaders(),credentials:'include'}) } catch {}
     localStorage.removeItem('token')
-    window.location.href = '/dashboard/login'
+    window.location.href='/dashboard/login'
   }
 
+  /* ── load leads ── */
   const loadLeads = useCallback(async () => {
     const token = localStorage.getItem('token')
     if (!token) { setError('غير مسجل الدخول'); setLoading(false); return }
     try {
-      let pg = 1, size = 100, total = Infinity, acc = []
-      while (acc.length < total) {
-        const res = await fetch(`${API_BASE_URL}/api/leads?pageNumber=${pg}&pageSize=${size}`, {
-          headers: { Authorization: `Bearer ${token}` }, credentials: 'include',
+      let pg=1, size=100, total=Infinity, acc=[]
+      while (acc.length<total) {
+        const res = await fetch(`${API_BASE_URL}/api/leads?pageNumber=${pg}&pageSize=${size}`,{
+          headers:{ Authorization:`Bearer ${token}` }, credentials:'include',
         })
         if (!res.ok) throw new Error(res.status)
         const json = await res.json()
-        const d = json?.data || json
-        const items = d?.data || d || []
-        total = d?.totalCount ?? items.length
-        acc = [...acc, ...items]
-        if (items.length < size) break
+        const d = json?.data||json
+        const items = d?.data||d||[]
+        total = d?.totalCount??items.length
+        acc = [...acc,...items]
+        if (items.length<size) break
         pg++
       }
-      setAll(acc)
-      setFiltered(acc)
-      setSources([...new Set(acc.map(l => l.source).filter(Boolean))])
-      setLastUpdate('آخر تحديث: ' + new Date().toLocaleTimeString('ar-EG'))
+      setAll(acc); setFiltered(acc)
+      setSources([...new Set(acc.map(l=>l.source).filter(Boolean))])
+      setLastUpdate('آخر تحديث: '+new Date().toLocaleTimeString('ar-EG'))
       setLoading(false)
-    } catch (e) {
-      setError('فشل تحميل البيانات: ' + e.message)
-      setLoading(false)
-    }
+    } catch(e) { setError('فشل تحميل البيانات: '+e.message); setLoading(false) }
   }, [])
 
-  useEffect(() => { loadLeads() }, [loadLeads])
+  /* ── today follow-up badge ── */
+  const loadTodayCount = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/leads/follow-ups?today=true`,{headers:authHeaders(),credentials:'include'})
+      if (res.ok) { const d=await res.json(); setTodayCount(d.length||0) }
+    } catch {}
+  }, [])
 
+  useEffect(() => { loadLeads(); loadTodayCount() }, [loadLeads, loadTodayCount])
+
+  /* ── filters ── */
   const applyFilters = useCallback(() => {
     const q = search.trim().toLowerCase()
     setFiltered(all.filter(l =>
-      (!q || (l.fullName || '').toLowerCase().includes(q) || (l.phone || '').includes(q)) &&
-      (!fStatus || resolveStatus(l.status) === fStatus) &&
-      (!fSource || l.source === fSource)
+      (!q||(l.fullName||'').toLowerCase().includes(q)||(l.phone||'').includes(q)) &&
+      (!fStatus||resolveStatus(l.status)===fStatus) &&
+      (!fSource||l.source===fSource)
     ))
     setPage(1)
   }, [all, search, fStatus, fSource])
 
   useEffect(() => { applyFilters() }, [applyFilters])
 
-  const showToast = (msg, ok = true) => {
-    setToast({ msg, ok })
-    setTimeout(() => setToast(null), 3000)
+  /* ── toast ── */
+  const showToast = (msg, ok=true) => {
+    setToast({msg,ok}); setTimeout(()=>setToast(null),3000)
   }
 
+  /* ── action handler ── */
   const handleAction = (type, lead) => {
-    if (type === 'details') { setDrawer(lead); return }
+    if (type==='details') { setDrawer(lead); return }
     setModal({ type, lead })
   }
 
   const onModalSuccess = () => {
     setModal(null)
     showToast('تم الحفظ بنجاح ✓')
-    loadLeads()
+    loadLeads(); loadTodayCount()
   }
 
+  /* ── export CSV ── */
   const exportCSV = () => {
-    const h = ['الاسم', 'التليفون', 'الإيميل', 'المصدر', 'الحالة', 'تاريخ الإضافة', 'مسند لـ']
+    const h=['الاسم','التليفون','الإيميل','المصدر','الحالة','تاريخ الإضافة','مسند لـ']
     const rows = filtered.map(l =>
-      [l.fullName, l.phone, l.email, l.source, BADGES[l.status]?.label || l.status, fmt(l.createdAt), l.assignedTo || '']
-        .map(v => `"${(v || '').replace(/"/g, '""')}"`)
+      [l.fullName,l.phone,l.email,l.source,BADGES[l.status]?.label||l.status,fmt(l.createdAt),l.assignedTo||'']
+        .map(v=>`"${(v||'').replace(/"/g,'""')}"`)
         .join(',')
     )
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(new Blob(['\uFEFF' + [h.join(','), ...rows].join('\n')], { type: 'text/csv;charset=utf-8' }))
-    a.download = 'zeiia-leads.csv'
-    a.click()
+    const a=document.createElement('a')
+    a.href=URL.createObjectURL(new Blob(['\uFEFF'+[h.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8'}))
+    a.download='zeiia-leads.csv'; a.click()
   }
 
+  /* ── export Excel ── */
+  const exportExcel = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/leads/export`,{
+        headers:{ Authorization:`Bearer ${localStorage.getItem('token')}` }, credentials:'include',
+      })
+      if (!res.ok) throw new Error('فشل التصدير')
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `leads_${new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')}.xlsx`
+      a.click()
+    } catch(e) { showToast(e.message, false) }
+  }
+
+  /* ── stats ── */
   const stats = [
-    { label: 'إجمالي الليدز', val: all.length,                                                          sub: 'كل السجلات' },
-    { label: 'جدد',           val: all.filter(l => resolveStatus(l.status) === 'New').length,            sub: 'New' },
-    { label: 'مهتمين',        val: all.filter(l => resolveStatus(l.status) === 'Interested').length,     sub: 'Interested' },
-    { label: 'تم التحويل',    val: all.filter(l => resolveStatus(l.status) === 'Converted').length,      sub: 'Converted' },
+    { label:'إجمالي الليدز', val:all.length,                                                        sub:'كل السجلات' },
+    { label:'جدد',           val:all.filter(l=>resolveStatus(l.status)==='New').length,              sub:'New' },
+    { label:'مهتمين',        val:all.filter(l=>resolveStatus(l.status)==='Interested').length,       sub:'Interested' },
+    { label:'تم التحويل',    val:all.filter(l=>resolveStatus(l.status)==='Converted').length,        sub:'Converted' },
   ]
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
-  const slice      = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-
-  const wrapBase = { background: '#0f172a', minHeight: '100vh', padding: 24, direction: 'rtl', color: '#fff', fontFamily: "'Cairo',sans-serif" }
-  if (loading) return <div style={{ ...wrapBase, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: '#C9A96E' }}>جاري تحميل البيانات...</span></div>
-  if (error)   return <div style={{ ...wrapBase, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: '#f87171' }}>{error}</span></div>
-
-  const statsGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: isMobile ? 'repeat(2,minmax(0,1fr))' : 'repeat(4,minmax(0,1fr))',
-    gap: 10, marginBottom: 20,
-  }
+  const totalPages = Math.ceil(filtered.length/PAGE_SIZE)
+  const slice      = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE)
 
   const COLS = [
-    { label: 'الاسم',           key: 'fullName',              width: 160 },
-    { label: 'التليفون',        key: 'phone',                 width: 130 },
-    { label: 'الحالة',          key: 'status',                width: 110 },
-    { label: 'المصدر',          key: 'source',                width: 110 },
-    { label: 'مسند لـ',         key: 'assignedTo',            width: 130 },
-    { label: 'آخر تفاعل',       key: 'lastInteraction',       width: 160 },
-    { label: 'الإيميل',         key: 'email',                 width: 180 },
-    { label: 'تاريخ الإضافة',   key: 'createdAt',             width: 120 },
-    { label: 'إجراءات',         key: 'actions',               width: 130 },
+    { label:'الاسم',         key:'fullName',        width:160 },
+    { label:'التليفون',      key:'phone',           width:130 },
+    { label:'الحالة',        key:'status',          width:110 },
+    { label:'المصدر',        key:'source',          width:110 },
+    { label:'مسند لـ',       key:'assignedTo',      width:130 },
+    { label:'آخر تفاعل',     key:'lastInteraction', width:160 },
+    { label:'الإيميل',       key:'email',           width:180 },
+    { label:'تاريخ الإضافة', key:'createdAt',       width:120 },
+    { label:'إجراءات',       key:'actions',         width:140 },
+  ]
+
+  const wrapBase = { background:'#0f172a', minHeight:'100vh', padding:24, direction:'rtl', color:'#fff', fontFamily:"'Cairo',sans-serif" }
+  if (loading) return <div style={{ ...wrapBase,display:'flex',alignItems:'center',justifyContent:'center' }}><span style={{ color:'#C9A96E' }}>جاري تحميل البيانات...</span></div>
+  if (error)   return <div style={{ ...wrapBase,display:'flex',alignItems:'center',justifyContent:'center' }}><span style={{ color:'#f87171' }}>{error}</span></div>
+
+  const viewTabs = [
+    { id:'table',    label:'القائمة',    Icon:IconList     },
+    { id:'kanban',   label:'البيب لاين', Icon:IconKanban   },
+    { id:'followups',label:`المتابعات${todayCount>0?` (${todayCount})`:''}`, Icon:IconCalendar },
+    { id:'archived', label:'الأرشيف',   Icon:IconArchive   },
   ]
 
   return (
     <div style={wrapBase}>
+      <style>{`
+        .leads-tbl::-webkit-scrollbar{height:6px}
+        .leads-tbl::-webkit-scrollbar-track{background:#0f172a}
+        .leads-tbl::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+        .leads-tbl::-webkit-scrollbar-thumb:hover{background:#C9A96E}
+      `}</style>
 
       {/* Toast */}
       {toast && (
         <div style={{
-          position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 2000,
-          background: toast.ok ? 'rgba(52,211,153,.15)' : 'rgba(248,113,113,.15)',
-          border: `1px solid ${toast.ok ? '#34d399' : '#f87171'}`,
-          color: toast.ok ? '#34d399' : '#f87171',
-          borderRadius: 10, padding: '10px 22px', fontSize: 14, fontWeight: 600,
-          boxShadow: '0 8px 24px rgba(0,0,0,.4)', pointerEvents: 'none',
-        }}>
-          {toast.msg}
-        </div>
+          position:'fixed',top:20,left:'50%',transform:'translateX(-50%)',zIndex:2000,
+          background:toast.ok?'rgba(52,211,153,.15)':'rgba(248,113,113,.15)',
+          border:`1px solid ${toast.ok?'#34d399':'#f87171'}`,
+          color:toast.ok?'#34d399':'#f87171',
+          borderRadius:10,padding:'10px 22px',fontSize:14,fontWeight:600,
+          boxShadow:'0 8px 24px rgba(0,0,0,.4)',pointerEvents:'none',
+        }}>{toast.msg}</div>
       )}
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 22 }}>
+      {/* ── Header ── */}
+      <div style={{ display:'flex',alignItems:'flex-start',justifyContent:'space-between',flexWrap:'wrap',gap:12,marginBottom:22 }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#C9A96E' }} />
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#C9A96E', letterSpacing: 2 }}>ZEIIA CRM</div>
+          <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
+            <div style={{ width:8,height:8,borderRadius:'50%',background:'#C9A96E' }}/>
+            <div style={{ fontSize:11,fontWeight:700,color:'#C9A96E',letterSpacing:2 }}>ZEIIA CRM</div>
           </div>
-          <div style={{ fontSize: 22, fontWeight: 800 }}>Leads Dashboard</div>
-          <div style={{ width: 36, height: 2, background: '#C9A96E', borderRadius: 2, margin: '5px 0' }} />
-          <div style={{ fontSize: 12, color: '#94a3b8' }}>{lastUpdate}</div>
+          <div style={{ fontSize:22,fontWeight:800 }}>Leads Dashboard</div>
+          <div style={{ width:36,height:2,background:'#C9A96E',borderRadius:2,margin:'5px 0' }}/>
+          <div style={{ fontSize:12,color:'#94a3b8' }}>{lastUpdate}</div>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button onClick={loadLeads} style={{ ...btnSec, height: 36, padding: '0 14px', fontSize: 13 }}>↻ تحديث</button>
-          <button onClick={exportCSV} style={{ ...btnPrim, height: 36, fontSize: 13 }}>↓ تصدير CSV</button>
-          <button
-            onClick={handleLogout}
-            title="تسجيل الخروج"
-            style={{
-              height: 36, width: 36, borderRadius: 8, border: '1px solid #334155',
-              background: 'rgba(248,113,113,.08)', color: '#f87171',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all .15s', flexShrink: 0,
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(248,113,113,.18)'; e.currentTarget.style.borderColor = '#f87171' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(248,113,113,.08)'; e.currentTarget.style.borderColor = '#334155' }}
-          >
-            <IconLogout />
-          </button>
+        <div style={{ display:'flex',gap:8,alignItems:'center',flexWrap:'wrap' }}>
+          <button onClick={loadLeads}            style={{ ...btnSec,height:36,padding:'0 14px',fontSize:13 }}>↻ تحديث</button>
+          <button onClick={exportCSV}            style={{ ...btnSec,height:36,fontSize:13 }}>↓ CSV</button>
+          <button onClick={exportExcel}          style={{ ...btnSec,height:36,fontSize:13 }}>↓ Excel</button>
+          <button onClick={()=>setShowImport(true)} style={{ ...btnSec,height:36,padding:'0 14px',fontSize:13,display:'flex',alignItems:'center',gap:6 }}><IconUpload/> استيراد</button>
+          <button onClick={handleLogout} title="تسجيل الخروج" style={{
+            height:36,width:36,borderRadius:8,border:'1px solid #334155',
+            background:'rgba(248,113,113,.08)',color:'#f87171',
+            cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
+          }}><IconLogout/></button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div style={statsGridStyle}>
-        {stats.map(s => (
-          <div key={s.label} style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 12, padding: '14px 16px', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: 0, right: 0, width: 3, height: '100%', background: '#C9A96E' }} />
-            <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 6, fontWeight: 500 }}>{s.label}</div>
-            <div style={{ fontSize: 24, fontWeight: 800 }}>{s.val}</div>
-            <div style={{ fontSize: 10, color: '#C9A96E', marginTop: 3 }}>{s.sub}</div>
+      {/* ── Stats ── */}
+      <div style={{ display:'grid', gridTemplateColumns:isMobile?'repeat(2,minmax(0,1fr))':'repeat(4,minmax(0,1fr))', gap:10, marginBottom:20 }}>
+        {stats.map(s=>(
+          <div key={s.label} style={{ background:'#1e293b',border:'1px solid #334155',borderRadius:12,padding:'14px 16px',position:'relative',overflow:'hidden' }}>
+            <div style={{ position:'absolute',top:0,right:0,width:3,height:'100%',background:'#C9A96E' }}/>
+            <div style={{ fontSize:11,color:'#94a3b8',marginBottom:6,fontWeight:500 }}>{s.label}</div>
+            <div style={{ fontSize:24,fontWeight:800 }}>{s.val}</div>
+            <div style={{ fontSize:10,color:'#C9A96E',marginTop:3 }}>{s.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-        <input
-          style={{ height: 36, background: '#1e293b', border: '1px solid #334155', borderRadius: 8, color: '#fff', fontSize: 13, padding: '0 11px', fontFamily: "'Cairo',sans-serif", outline: 'none', flex: 1, maxWidth: 240 }}
-          placeholder="ابحث بالاسم أو التليفون..."
-          value={search} onChange={e => setSearch(e.target.value)}
-        />
-        <select style={{ height: 36, background: '#1e293b', border: '1px solid #334155', borderRadius: 8, color: '#fff', fontSize: 13, padding: '0 11px', fontFamily: "'Cairo',sans-serif", outline: 'none' }} value={fStatus} onChange={e => setFStatus(e.target.value)}>
-          <option value="">كل الحالات</option>
-          {STATUS_LIST.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </select>
-        <select style={{ height: 36, background: '#1e293b', border: '1px solid #334155', borderRadius: 8, color: '#fff', fontSize: 13, padding: '0 11px', fontFamily: "'Cairo',sans-serif", outline: 'none' }} value={fSource} onChange={e => setFSource(e.target.value)}>
-          <option value="">كل المصادر</option>
-          {sources.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
+      {/* ── View Tabs ── */}
+      <div style={{ display:'flex',gap:4,marginBottom:16,flexWrap:'wrap' }}>
+        {viewTabs.map(t=>(
+          <button key={t.id} onClick={()=>setView(t.id)} style={{
+            height:36,padding:'0 16px',borderRadius:8,border:'1px solid',
+            borderColor:view===t.id?'#C9A96E':'#334155',
+            background:view===t.id?'rgba(201,169,110,.1)':'transparent',
+            color:view===t.id?'#C9A96E':'#64748b',
+            cursor:'pointer',fontSize:13,fontFamily:"'Cairo',sans-serif",
+            display:'flex',alignItems:'center',gap:6,transition:'all .15s',
+            fontWeight:view===t.id?700:400,
+          }}>
+            <t.Icon/> {t.label}
+          </button>
+        ))}
       </div>
 
-      {/* ─── Table Container — overflow: visible so dropdown escapes ─── */}
-      <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 14, overflow: 'visible' }}>
-        {!isMobile ? (
-          <>
-            <style>{`
-              .leads-table-scroll::-webkit-scrollbar { height: 6px; }
-              .leads-table-scroll::-webkit-scrollbar-track { background: #0f172a; }
-              .leads-table-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-              .leads-table-scroll::-webkit-scrollbar-thumb:hover { background: #C9A96E; }
-            `}</style>
-            {/* overflow:hidden on this inner wrapper only — clips table but NOT the fixed dropdown */}
-            <div
-              className="leads-table-scroll"
-              style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderRadius: 14 }}
-            >
-              <table style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#0f172a' }}>
-                    {COLS.map(c => (
-                      <th key={c.key} style={{
-                        fontSize: 11, fontWeight: 700, color: '#94a3b8',
-                        textAlign: 'right', padding: '11px 14px',
-                        borderBottom: '1px solid #334155', whiteSpace: 'nowrap',
-                        minWidth: c.width,
-                      }}>{c.label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {slice.length === 0
-                    ? <tr><td colSpan={COLS.length} style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>لا توجد نتائج</td></tr>
-                    : slice.map(l => (
-                      <tr key={l.id}
-                        onMouseEnter={e => Array.from(e.currentTarget.cells).forEach(c => c.style.background = 'rgba(201,169,110,.04)')}
-                        onMouseLeave={e => Array.from(e.currentTarget.cells).forEach(c => c.style.background = '')}>
+      {/* ── Views ── */}
+      {view==='kanban'    && <KanbanBoard    onAction={handleAction}/>}
+      {view==='followups' && <FollowUpsView  onAction={handleAction}/>}
+      {view==='archived'  && <ArchivedView   onAction={handleAction}/>}
 
-                        <td style={{ fontSize: 13, color: '#f1f5f9', textAlign: 'right', padding: '12px 14px', borderBottom: '1px solid rgba(51,65,85,.4)', whiteSpace: 'nowrap', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {l.hasComplaint && <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#f87171', marginLeft: 5, verticalAlign: 'middle' }} title="شكوى" />}
-                          {l.fullName || '—'}
-                        </td>
+      {/* ── Table View ── */}
+      {view==='table' && (
+        <>
+          {/* Filters */}
+          <div style={{ display:'flex',gap:8,flexWrap:'wrap',marginBottom:14 }}>
+            <input
+              style={{ height:36,background:'#1e293b',border:'1px solid #334155',borderRadius:8,color:'#fff',fontSize:13,padding:'0 11px',fontFamily:"'Cairo',sans-serif",outline:'none',flex:1,maxWidth:240 }}
+              placeholder="ابحث بالاسم أو التليفون..." value={search} onChange={e=>setSearch(e.target.value)}
+            />
+            <select style={{ height:36,background:'#1e293b',border:'1px solid #334155',borderRadius:8,color:'#fff',fontSize:13,padding:'0 11px',fontFamily:"'Cairo',sans-serif",outline:'none' }} value={fStatus} onChange={e=>setFStatus(e.target.value)}>
+              <option value="">كل الحالات</option>
+              {STATUS_LIST.map(s=><option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+            <select style={{ height:36,background:'#1e293b',border:'1px solid #334155',borderRadius:8,color:'#fff',fontSize:13,padding:'0 11px',fontFamily:"'Cairo',sans-serif",outline:'none' }} value={fSource} onChange={e=>setFSource(e.target.value)}>
+              <option value="">كل المصادر</option>
+              {sources.map(s=><option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
 
-                        <td style={{ fontSize: 12, color: '#f1f5f9', textAlign: 'right', padding: '12px 14px', borderBottom: '1px solid rgba(51,65,85,.4)', fontFamily: 'monospace', letterSpacing: .5, whiteSpace: 'nowrap' }}>
-                          {l.phone || '—'}
-                        </td>
-
-                        <td style={{ padding: '12px 14px', borderBottom: '1px solid rgba(51,65,85,.4)', whiteSpace: 'nowrap' }}>
-                          <Badge status={resolveStatus(l.status)} />
-                        </td>
-
-                        <td style={{ fontSize: 13, color: '#f1f5f9', textAlign: 'right', padding: '12px 14px', borderBottom: '1px solid rgba(51,65,85,.4)', whiteSpace: 'nowrap' }}>
-                          {l.source
-                            ? <span style={{ background: 'rgba(201,169,110,.08)', color: '#C9A96E', padding: '2px 8px', borderRadius: 6, fontSize: 11 }}>{l.source}</span>
-                            : '—'}
-                        </td>
-
-                        <td style={{ fontSize: 12, color: '#94a3b8', textAlign: 'right', padding: '12px 14px', borderBottom: '1px solid rgba(51,65,85,.4)', whiteSpace: 'nowrap' }}>
-                          {l.assignedTo || <span style={{ color: '#475569', fontStyle: 'italic' }}>غير مسند</span>}
-                        </td>
-
-                        <td style={{ fontSize: 12, color: '#94a3b8', textAlign: 'right', padding: '12px 14px', borderBottom: '1px solid rgba(51,65,85,.4)', whiteSpace: 'nowrap' }}>
-                          {fmtI(l.lastInteractionDate, l.lastInteractionType)}
-                        </td>
-
-                        <td style={{ fontSize: 12, color: '#64748b', textAlign: 'right', padding: '12px 14px', borderBottom: '1px solid rgba(51,65,85,.4)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {l.email || '—'}
-                        </td>
-
-                        <td style={{ fontSize: 12, color: '#94a3b8', textAlign: 'right', padding: '12px 14px', borderBottom: '1px solid rgba(51,65,85,.4)', whiteSpace: 'nowrap' }}>
-                          {fmt(l.createdAt)}
-                        </td>
-
-                        <td style={{ padding: '10px 14px', borderBottom: '1px solid rgba(51,65,85,.4)', whiteSpace: 'nowrap' }}>
-                          <ActionMenu lead={l} onAction={handleAction} />
-                        </td>
-                      </tr>
-                    ))
-                  }
-                </tbody>
-              </table>
-            </div>
-          </>
-        ) : (
-          /* ── Mobile cards ── */
-          <div>
-            {slice.length === 0
-              ? <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>لا توجد نتائج</div>
-              : slice.map(l => (
-                <div key={l.id} style={{ padding: '14px 16px', borderBottom: '1px solid rgba(51,65,85,.4)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700 }}>
-                      {l.hasComplaint && <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#f87171', marginLeft: 5, verticalAlign: 'middle' }} />}
-                      {l.fullName || '—'}
-                    </div>
-                    <Badge status={resolveStatus(l.status)} />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
-                    {[
-                      { label: 'التليفون', val: l.phone || '—' },
-                      { label: 'المصدر',   val: l.source || '—' },
-                      { label: 'مسند لـ',  val: l.assignedTo || 'غير مسند' },
-                      { label: 'التاريخ',  val: fmt(l.createdAt) },
-                    ].map(f => (
-                      <div key={f.label} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, letterSpacing: .5 }}>{f.label}</div>
-                        <div style={{ fontSize: 12, color: '#f1f5f9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.val}</div>
+          <div style={{ background:'#1e293b',border:'1px solid #334155',borderRadius:14,overflow:'visible' }}>
+            {!isMobile ? (
+              <div className="leads-tbl" style={{ overflowX:'auto',WebkitOverflowScrolling:'touch',borderRadius:14 }}>
+                <table style={{ width:'max-content',minWidth:'100%',borderCollapse:'collapse' }}>
+                  <thead>
+                    <tr style={{ background:'#0f172a' }}>
+                      {COLS.map(c=>(
+                        <th key={c.key} style={{ fontSize:11,fontWeight:700,color:'#94a3b8',textAlign:'right',padding:'11px 14px',borderBottom:'1px solid #334155',whiteSpace:'nowrap',minWidth:c.width }}>
+                          {c.label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {slice.length===0
+                      ? <tr><td colSpan={COLS.length} style={{ padding:40,textAlign:'center',color:'#94a3b8' }}>لا توجد نتائج</td></tr>
+                      : slice.map(l=>(
+                        <tr key={l.id}
+                          onMouseEnter={e=>Array.from(e.currentTarget.cells).forEach(c=>c.style.background='rgba(201,169,110,.04)')}
+                          onMouseLeave={e=>Array.from(e.currentTarget.cells).forEach(c=>c.style.background='')}>
+                          <td style={{ fontSize:13,color:'#f1f5f9',textAlign:'right',padding:'12px 14px',borderBottom:'1px solid rgba(51,65,85,.4)',whiteSpace:'nowrap',maxWidth:180,overflow:'hidden',textOverflow:'ellipsis' }}>
+                            {l.hasComplaint&&<span style={{ display:'inline-block',width:7,height:7,borderRadius:'50%',background:'#f87171',marginLeft:5,verticalAlign:'middle' }} title="شكوى"/>}
+                            {l.fullName||'—'}
+                          </td>
+                          <td style={{ fontSize:12,color:'#f1f5f9',textAlign:'right',padding:'12px 14px',borderBottom:'1px solid rgba(51,65,85,.4)',fontFamily:'monospace',letterSpacing:.5,whiteSpace:'nowrap' }}>{l.phone||'—'}</td>
+                          <td style={{ padding:'12px 14px',borderBottom:'1px solid rgba(51,65,85,.4)',whiteSpace:'nowrap' }}><Badge status={resolveStatus(l.status)}/></td>
+                          <td style={{ fontSize:13,color:'#f1f5f9',textAlign:'right',padding:'12px 14px',borderBottom:'1px solid rgba(51,65,85,.4)',whiteSpace:'nowrap' }}>
+                            {l.source?<span style={{ background:'rgba(201,169,110,.08)',color:'#C9A96E',padding:'2px 8px',borderRadius:6,fontSize:11 }}>{l.source}</span>:'—'}
+                          </td>
+                          <td style={{ fontSize:12,color:'#94a3b8',textAlign:'right',padding:'12px 14px',borderBottom:'1px solid rgba(51,65,85,.4)',whiteSpace:'nowrap' }}>
+                            {l.assignedTo||<span style={{ color:'#475569',fontStyle:'italic' }}>غير مسند</span>}
+                          </td>
+                          <td style={{ fontSize:12,color:'#94a3b8',textAlign:'right',padding:'12px 14px',borderBottom:'1px solid rgba(51,65,85,.4)',whiteSpace:'nowrap' }}>{fmtI(l.lastInteractionDate,l.lastInteractionType)}</td>
+                          <td style={{ fontSize:12,color:'#64748b',textAlign:'right',padding:'12px 14px',borderBottom:'1px solid rgba(51,65,85,.4)',maxWidth:200,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{l.email||'—'}</td>
+                          <td style={{ fontSize:12,color:'#94a3b8',textAlign:'right',padding:'12px 14px',borderBottom:'1px solid rgba(51,65,85,.4)',whiteSpace:'nowrap' }}>{fmt(l.createdAt)}</td>
+                          <td style={{ padding:'10px 14px',borderBottom:'1px solid rgba(51,65,85,.4)',whiteSpace:'nowrap' }}>
+                            <ActionMenu lead={l} onAction={handleAction}/>
+                          </td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div>
+                {slice.length===0
+                  ? <div style={{ padding:40,textAlign:'center',color:'#94a3b8' }}>لا توجد نتائج</div>
+                  : slice.map(l=>(
+                    <div key={l.id} style={{ padding:'14px 16px',borderBottom:'1px solid rgba(51,65,85,.4)' }}>
+                      <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10 }}>
+                        <div style={{ fontSize:14,fontWeight:700 }}>
+                          {l.hasComplaint&&<span style={{ display:'inline-block',width:7,height:7,borderRadius:'50%',background:'#f87171',marginLeft:5,verticalAlign:'middle' }}/>}
+                          {l.fullName||'—'}
+                        </div>
+                        <Badge status={resolveStatus(l.status)}/>
                       </div>
-                    ))}
-                  </div>
-                  <ActionMenu lead={l} onAction={handleAction} />
-                </div>
-              ))
-            }
-          </div>
-        )}
+                      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12 }}>
+                        {[
+                          { label:'التليفون',val:l.phone||'—' },
+                          { label:'المصدر',  val:l.source||'—' },
+                          { label:'مسند لـ', val:l.assignedTo||'غير مسند' },
+                          { label:'التاريخ', val:fmt(l.createdAt) },
+                        ].map(f=>(
+                          <div key={f.label} style={{ display:'flex',flexDirection:'column',gap:2 }}>
+                            <div style={{ fontSize:10,color:'#94a3b8',fontWeight:600,letterSpacing:.5 }}>{f.label}</div>
+                            <div style={{ fontSize:12,color:'#f1f5f9',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{f.val}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <ActionMenu lead={l} onAction={handleAction}/>
+                    </div>
+                  ))
+                }
+              </div>
+            )}
 
-        {/* Pagination */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderTop: '1px solid #334155', flexWrap: 'wrap', gap: 8 }}>
-          <div style={{ fontSize: 12, color: '#94a3b8' }}>
-            {filtered.length === 0 ? 'لا توجد نتائج' : `عرض ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, filtered.length)} من ${filtered.length}`}
+            {/* Pagination */}
+            <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',borderTop:'1px solid #334155',flexWrap:'wrap',gap:8 }}>
+              <div style={{ fontSize:12,color:'#94a3b8' }}>
+                {filtered.length===0?'لا توجد نتائج':`عرض ${(page-1)*PAGE_SIZE+1}–${Math.min(page*PAGE_SIZE,filtered.length)} من ${filtered.length}`}
+              </div>
+              <div style={{ display:'flex',flexWrap:'wrap',gap:4 }}>
+                <button style={{ height:30,minWidth:30,padding:'0 9px',fontSize:12,borderRadius:7,border:'1px solid #334155',background:'transparent',color:'#94a3b8',cursor:'pointer',fontFamily:"'Cairo',sans-serif" }} disabled={page===1} onClick={()=>setPage(p=>p-1)}>السابق</button>
+                {Array.from({length:Math.min(totalPages,5)},(_,i)=>{
+                  const s=Math.max(1,page-2), p=s+i
+                  if (p>totalPages) return null
+                  return <button key={p} style={{ height:30,minWidth:30,padding:'0 9px',fontSize:12,borderRadius:7,border:'1px solid #334155',cursor:'pointer',fontFamily:"'Cairo',sans-serif",...(p===page?{background:'#C9A96E',color:'#0f172a',borderColor:'#C9A96E',fontWeight:700}:{background:'transparent',color:'#94a3b8'}) }} onClick={()=>setPage(p)}>{p}</button>
+                })}
+                <button style={{ height:30,minWidth:30,padding:'0 9px',fontSize:12,borderRadius:7,border:'1px solid #334155',background:'transparent',color:'#94a3b8',cursor:'pointer',fontFamily:"'Cairo',sans-serif" }} disabled={page>=totalPages||!totalPages} onClick={()=>setPage(p=>p+1)}>التالي</button>
+              </div>
+            </div>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-            <button
-              style={{ height: 30, minWidth: 30, padding: '0 9px', fontSize: 12, borderRadius: 7, border: '1px solid #334155', background: 'transparent', color: '#94a3b8', cursor: 'pointer', margin: '0 2px', fontFamily: "'Cairo',sans-serif" }}
-              disabled={page === 1} onClick={() => setPage(p => p - 1)}>السابق</button>
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-              const s = Math.max(1, page - 2), p = s + i
-              if (p > totalPages) return null
-              return (
-                <button key={p}
-                  style={{ height: 30, minWidth: 30, padding: '0 9px', fontSize: 12, borderRadius: 7, border: '1px solid #334155', cursor: 'pointer', margin: '0 2px', fontFamily: "'Cairo',sans-serif", ...(p === page ? { background: '#C9A96E', color: '#0f172a', borderColor: '#C9A96E', fontWeight: 700 } : { background: 'transparent', color: '#94a3b8' }) }}
-                  onClick={() => setPage(p)}>{p}</button>
-              )
-            })}
-            <button
-              style={{ height: 30, minWidth: 30, padding: '0 9px', fontSize: 12, borderRadius: 7, border: '1px solid #334155', background: 'transparent', color: '#94a3b8', cursor: 'pointer', margin: '0 2px', fontFamily: "'Cairo',sans-serif" }}
-              disabled={page >= totalPages || !totalPages} onClick={() => setPage(p => p + 1)}>التالي</button>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* Modals */}
-      {modal?.type === 'status'   && <StatusModal   lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-      {modal?.type === 'assign'   && <AssignModal   lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-      {modal?.type === 'note'     && <NoteModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-      {modal?.type === 'followup' && <FollowUpModal lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+      {/* ════ MODALS ════ */}
+      {modal?.type==='status'  && <StatusModal  lead={modal.lead} onClose={()=>setModal(null)} onSuccess={onModalSuccess}/>}
+      {modal?.type==='assign'  && <AssignModal  lead={modal.lead} onClose={()=>setModal(null)} onSuccess={onModalSuccess}/>}
+      {modal?.type==='note'    && <NoteModal    lead={modal.lead} onClose={()=>setModal(null)} onSuccess={onModalSuccess}/>}
+      {modal?.type==='task'    && <TaskModal    lead={modal.lead} onClose={()=>setModal(null)} onSuccess={onModalSuccess}/>}
+      {modal?.type==='followup'&& <FollowUpModal lead={modal.lead} onClose={()=>setModal(null)} onSuccess={onModalSuccess}/>}
+      {modal?.type==='edit'    && <EditModal    lead={modal.lead} onClose={()=>setModal(null)} onSuccess={onModalSuccess}/>}
+      {modal?.type==='convert' && <ConvertModal lead={modal.lead} onClose={()=>setModal(null)} onSuccess={onModalSuccess}/>}
+      {modal?.type==='archive' && <ArchiveModal lead={modal.lead} onClose={()=>setModal(null)} onSuccess={onModalSuccess}/>}
 
-      {/* Details Drawer */}
-      {drawer && <DetailsDrawer lead={drawer} onClose={() => setDrawer(null)} />}
+      {drawer     && <DetailsDrawer lead={drawer} onClose={()=>setDrawer(null)}/>}
+      {showImport && <ImportModal onClose={()=>setShowImport(false)} onSuccess={()=>{ setShowImport(false); showToast('تم الاستيراد بنجاح ✓'); loadLeads() }}/>}
     </div>
   )
 }
