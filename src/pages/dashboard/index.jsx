@@ -1249,13 +1249,21 @@ export default function Dashboard() {
           <button onClick={exportExcel}          style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13 }}>Excel</button>
           <button onClick={() => setShowImport(true)} style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13, display:'flex', alignItems:'center', gap:6 }}>
             <IconUpload /> استيراد
+            <button
+  onClick={() => navigate('/dashboard/users')}
+  style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13, display:'flex', alignItems:'center', gap:6 }}
+>
+  <IconUser /> المستخدمين
+</button>
           </button>
           <button onClick={handleLogout} title="تسجيل الخروج"
             style={{ height:36, width:36, borderRadius:8, border:'1px solid #334155', background:'rgba(248,113,113,.08)', color:'#f87171', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
             onMouseEnter={e => { e.currentTarget.style.background='rgba(248,113,113,.2)'; e.currentTarget.style.borderColor='#f87171' }}
             onMouseLeave={e => { e.currentTarget.style.background='rgba(248,113,113,.08)'; e.currentTarget.style.borderColor='#334155' }}
           ><IconLogout /></button>
+        
         </div>
+
       </div>
 
       {/* Stats */}
