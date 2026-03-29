@@ -292,7 +292,7 @@ function UsersTab({ showToast }) {
           value={search} onChange={e => setSearch(e.target.value)}
         />
             <button style={{ ...S.btnGhost, display:'flex', alignItems:'center', gap:6 }} onClick={() => navigate('/dashboard/reports/activity')}>
-    📊 تقارير النشاط
+     تقارير النشاط
   </button>
         <button style={S.btnGold} onClick={() => { setSelected(null); setModal('create') }}>+ مستخدم جديد</button>
      

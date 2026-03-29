@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import API_BASE_URL from '../../config'
 import { useNavigate } from 'react-router-dom'
-
+import NotificationBell from './NotificationBell';
 /* ════════════════════════════════
    CONSTANTS
 ════════════════════════════════ */
@@ -1251,6 +1251,7 @@ export default function Dashboard() {
           <button onClick={() => setShowImport(true)} style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13, display:'flex', alignItems:'center', gap:6 }}>
             <IconUpload /> استيراد
           </button>
+          <NotificationBell />
           {/* المستخدمين */}
           <button
             onClick={() => navigate('/dashboard/users')}
@@ -1483,4 +1484,5 @@ export default function Dashboard() {
       {showImport && <ImportModal  onClose={() => setShowImport(false)} onSuccess={() => { setShowImport(false); showToast('تم الاستيراد بنجاح'); loadLeads() }} />}
     </div>
   )
+  
 }
