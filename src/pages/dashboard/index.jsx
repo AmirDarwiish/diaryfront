@@ -1249,6 +1249,7 @@ export default function Dashboard() {
           <button onClick={exportExcel}          style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13 }}>Excel</button>
           <button onClick={() => setShowImport(true)} style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13, display:'flex', alignItems:'center', gap:6 }}>
             <IconUpload /> استيراد
+       
           <button
   onClick={() => navigate('/dashboard/users')}
   title="إدارة المستخدمين"
@@ -1261,6 +1262,7 @@ export default function Dashboard() {
   onMouseLeave={e => { e.currentTarget.style.background='rgba(167,139,250,.08)'; e.currentTarget.style.borderColor='#334155' }}
 >
   <IconUser />
+  
 </button>
           </button>
           <button onClick={handleLogout} title="تسجيل الخروج"
@@ -1350,8 +1352,36 @@ export default function Dashboard() {
                             {l.hasComplaint && <span style={{ display:'inline-block', width:7, height:7, borderRadius:'50%', background:'#f87171', marginLeft:5, verticalAlign:'middle' }} title="شكوى" />}
                             {l.fullName || 'unknown'}
                           </td>
-                          <td style={{ fontSize:12, color:'#f1f5f9', textAlign:'right', padding:'12px 14px', borderBottom:'1px solid rgba(51,65,85,.4)', fontFamily:'monospace', letterSpacing:.5, whiteSpace:'nowrap' }}>{l.phone || 'unknown'}</td>
-                          <td style={{ padding:'12px 14px', borderBottom:'1px solid rgba(51,65,85,.4)', whiteSpace:'nowrap' }}><Badge status={resolveStatus(l.status)} /></td>
+{/* Mobile card fields */}
+<div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+  {/* التليفون — منفصل عشان فيه أيقونة */}
+  <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+    <div style={{ fontSize:10, color:'#94a3b8', fontWeight:600, letterSpacing:.5 }}>التليفون</div>
+    <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+      <span style={{ fontSize:12, color:'#f1f5f9' }}>{l.phone || 'unknown'}</span>
+      {l.phone && (
+        <a href={`https://wa.me/${l.phone.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer"
+          style={{ display:'flex', color:'#25d366', textDecoration:'none' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#25d366">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.533 5.857L.057 23.428a.5.5 0 00.609.61l5.627-1.476A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.857a9.857 9.857 0 01-5.028-1.374l-.36-.214-3.732.979.998-3.645-.235-.374A9.821 9.821 0 012.143 12C2.143 6.54 6.54 2.143 12 2.143c5.46 0 9.857 4.397 9.857 9.857 0 5.46-4.397 9.857-9.857 9.857z"/>
+          </svg>
+        </a>
+      )}
+    </div>
+  </div>
+  {/* باقي الفيلدز */}
+  {[
+    { label:'المصدر',  val: l.source || 'unknown' },
+    { label:'مسند لـ', val: l.assignedTo || 'غير مسند' },
+    { label:'التاريخ', val: fmt(l.createdAt) },
+  ].map(f => (
+    <div key={f.label} style={{ display:'flex', flexDirection:'column', gap:2 }}>
+      <div style={{ fontSize:10, color:'#94a3b8', fontWeight:600, letterSpacing:.5 }}>{f.label}</div>
+      <div style={{ fontSize:12, color:'#f1f5f9', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.val}</div>
+    </div>
+  ))}
+</div>                          <td style={{ padding:'12px 14px', borderBottom:'1px solid rgba(51,65,85,.4)', whiteSpace:'nowrap' }}><Badge status={resolveStatus(l.status)} /></td>
                           <td style={{ fontSize:13, color:'#f1f5f9', textAlign:'right', padding:'12px 14px', borderBottom:'1px solid rgba(51,65,85,.4)', whiteSpace:'nowrap' }}>
                             {l.source ? <span style={{ background:'rgba(201,169,110,.08)', color:'#C9A96E', padding:'2px 8px', borderRadius:6, fontSize:11 }}>{l.source}</span> : 'unknown'}
                           </td>
