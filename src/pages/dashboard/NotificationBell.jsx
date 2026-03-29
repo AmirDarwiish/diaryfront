@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../../config";
 
 const authHeaders = () => ({
@@ -7,13 +6,13 @@ const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
-export default function NotificationBell() {
-  const [unreadCount, setUnreadCount] = useState(0);
+export default function NotificationBell({ onOpenLead }) 
+{
+    const [unreadCount, setUnreadCount] = useState(0);
   const [mentions, setMentions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
-  const navigate = useNavigate();
 
   const fetchUnreadCount = async () => {
     try {
@@ -46,7 +45,7 @@ export default function NotificationBell() {
       setMentions((prev) => prev.map((m) => (m.mentionId === mentionId ? { ...m, isRead: true } : m)));
       setUnreadCount((prev) => Math.max(0, prev - 1));
       setIsOpen(false);
-      navigate(`/dashboard/leads/${leadId}`);
+        if (onOpenLead) onOpenLead(leadId);
     } catch (err) {}
   };
 
