@@ -20,7 +20,9 @@ import WhyUsPage    from './pages/WhyUsPage';
 import ContactPage  from './pages/ContactPage';
 import DashboardLogin from './pages/dashboard/login'
 import Dashboard      from './pages/dashboard/index'
-import UsersPage      from './pages/dashboard/users'   // ← جديد
+import UsersPage      from './pages/dashboard/users'   
+import UserActivityReport from './pages/dashboard/UserActivityReport'  
+
 
 import './index.css';
 
