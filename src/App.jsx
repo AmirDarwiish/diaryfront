@@ -21,7 +21,7 @@ import ContactPage  from './pages/ContactPage';
 import DashboardLogin from './pages/dashboard/login'
 import Dashboard      from './pages/dashboard/index'
 import UsersPage      from './pages/dashboard/users'   
-import UserActivityReport from './pages/dashboard/Useractivityreport'  
+import UserActivityReport from './pages/dashboard/Useractivityreport'
 
 
 import './index.css';
