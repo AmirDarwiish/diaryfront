@@ -388,10 +388,55 @@ function AssignModal({ lead, onClose, onSuccess }) {
    NOTE MODAL
 ════════════════════════════════ */
 function NoteModal({ lead, onClose, onSuccess }) {
-  const [note, setNote]       = useState('')
-  const [type, setType]       = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [note, setNote]               = useState('')
+  const [type, setType]               = useState(0)
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
+  const [users, setUsers]             = useState([])
+  const [showMention, setShowMention] = useState(false)
+  const [mentionQuery, setMentionQuery] = useState('')
+  const [mentionPos, setMentionPos]   = useState(0)
+  const textareaRef = useRef()
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/users`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : [])
+      .then(d => setUsers(Array.isArray(d) ? d : (d?.data || [])))
+      .catch(() => {})
+  }, [])
+
+  const filteredUsers = users.filter(u =>
+    u.fullName?.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+    u.email?.toLowerCase().includes(mentionQuery.toLowerCase())
+  )
+
+  const handleNoteChange = (e) => {
+    const val = e.target.value
+    const cursor = e.target.selectionStart
+    setNote(val)
+    const textBefore = val.slice(0, cursor)
+    const atIndex = textBefore.lastIndexOf('@')
+    if (atIndex !== -1) {
+      const query = textBefore.slice(atIndex + 1)
+      if (!query.includes(' ')) {
+        setMentionQuery(query)
+        setMentionPos(atIndex)
+        setShowMention(true)
+        return
+      }
+    }
+    setShowMention(false)
+  }
+
+  const selectUser = (user) => {
+    const handle = user.fullName?.replace(/\s/g, '') || user.email?.split('@')[0]
+    const cursor = textareaRef.current.selectionStart
+    const before = note.slice(0, mentionPos)
+    const after  = note.slice(cursor)
+    setNote(`${before}@${handle} ${after}`)
+    setShowMention(false)
+    setTimeout(() => textareaRef.current?.focus(), 0)
+  }
 
   const submit = async () => {
     if (!note.trim()) { setError('اكتب الملاحظة'); return }
@@ -410,15 +455,47 @@ function NoteModal({ lead, onClose, onSuccess }) {
   return (
     <Modal title={`إضافة ملاحظة: ${lead.fullName}`} onClose={onClose}>
       <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-        <div><label style={lbl}>نوع التفاعل</label>
+        <div>
+          <label style={lbl}>نوع التفاعل</label>
           <select value={type} onChange={e => setType(parseInt(e.target.value))} style={sel}>
             {INTERACTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
-        <div><label style={lbl}>الملاحظة</label>
-          <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="اكتب ملاحظتك هنا..." rows={4}
-            style={{ ...inp, resize:'vertical', height:'auto', padding:'10px 11px', lineHeight:1.6 }} />
+
+        <div style={{ position:'relative' }}>
+          <label style={lbl}>الملاحظة</label>
+          <textarea
+            ref={textareaRef}
+            value={note}
+            onChange={handleNoteChange}
+            placeholder="اكتب ملاحظتك... استخدم @ لذكر موظف"
+            rows={4}
+            style={{ ...inp, resize:'vertical', height:'auto', padding:'10px 11px', lineHeight:1.6 }}
+          />
+
+          {showMention && filteredUsers.length > 0 && (
+            <div style={{
+              position:'absolute', bottom:'100%', right:0, width:'100%',
+              background:'#0d1829', border:'1px solid #1e3a5f', borderRadius:8,
+              boxShadow:'0 8px 24px rgba(0,0,0,.5)', zIndex:999,
+              maxHeight:200, overflowY:'auto', marginBottom:4,
+            }}>
+              {filteredUsers.map(u => (
+                <div key={u.id} onClick={() => selectUser(u)}
+                  style={{ padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid rgba(30,58,95,.4)', display:'flex', flexDirection:'column', gap:2 }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(201,169,110,.1)'}
+                  onMouseLeave={e => e.currentTarget.style.background='transparent'}
+                >
+                  <span style={{ fontSize:13, color:'#f1f5f9', fontWeight:600 }}>{u.fullName}</span>
+                  <span style={{ fontSize:11, color:'#64748b' }}>
+                    @{u.fullName?.replace(/\s/g,'')} · {u.email}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+
         <ErrBox msg={error} />
         <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
           <button onClick={onClose} style={btnSec}>إلغاء</button>
@@ -428,15 +505,59 @@ function NoteModal({ lead, onClose, onSuccess }) {
     </Modal>
   )
 }
-
 /* ════════════════════════════════
    TASK MODAL
 ════════════════════════════════ */
 function TaskModal({ lead, onClose, onSuccess }) {
-  const [title, setTitle]     = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [title, setTitle]             = useState('')
+  const [dueDate, setDueDate]         = useState('')
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
+  const [users, setUsers]             = useState([])
+  const [showMention, setShowMention] = useState(false)
+  const [mentionQuery, setMentionQuery] = useState('')
+  const [mentionPos, setMentionPos]   = useState(0)
+  const inputRef = useRef()
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/users`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : [])
+      .then(d => setUsers(Array.isArray(d) ? d : (d?.data || [])))
+      .catch(() => {})
+  }, [])
+
+  const filteredUsers = users.filter(u =>
+    u.fullName?.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+    u.email?.toLowerCase().includes(mentionQuery.toLowerCase())
+  )
+
+  const handleTitleChange = (e) => {
+    const val = e.target.value
+    const cursor = e.target.selectionStart
+    setTitle(val)
+    const textBefore = val.slice(0, cursor)
+    const atIndex = textBefore.lastIndexOf('@')
+    if (atIndex !== -1) {
+      const query = textBefore.slice(atIndex + 1)
+      if (!query.includes(' ')) {
+        setMentionQuery(query)
+        setMentionPos(atIndex)
+        setShowMention(true)
+        return
+      }
+    }
+    setShowMention(false)
+  }
+
+  const selectUser = (user) => {
+    const handle = user.fullName?.replace(/\s/g, '') || user.email?.split('@')[0]
+    const cursor = inputRef.current.selectionStart
+    const before = title.slice(0, mentionPos)
+    const after  = title.slice(cursor)
+    setTitle(`${before}@${handle} ${after}`)
+    setShowMention(false)
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
 
   const submit = async () => {
     if (!title.trim()) { setError('اكتب عنوان المهمة'); return }
@@ -455,8 +576,43 @@ function TaskModal({ lead, onClose, onSuccess }) {
   return (
     <Modal title={`إضافة مهمة: ${lead.fullName}`} onClose={onClose}>
       <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-        <div><label style={lbl}>عنوان المهمة *</label><input value={title} onChange={e => setTitle(e.target.value)} placeholder="اكتب المهمة..." style={inp} /></div>
-        <div><label style={lbl}>تاريخ الاستحقاق (اختياري)</label><input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} style={{ ...inp, colorScheme:'dark' }} /></div>
+
+        <div style={{ position:'relative' }}>
+          <label style={lbl}>عنوان المهمة *</label>
+          <input
+            ref={inputRef}
+            value={title}
+            onChange={handleTitleChange}
+            placeholder="اكتب المهمة... استخدم @ لذكر موظف"
+            style={inp}
+          />
+
+          {showMention && filteredUsers.length > 0 && (
+            <div style={{
+              position:'absolute', bottom:'100%', right:0, width:'100%',
+              background:'#0d1829', border:'1px solid #1e3a5f', borderRadius:8,
+              boxShadow:'0 8px 24px rgba(0,0,0,.5)', zIndex:999,
+              maxHeight:200, overflowY:'auto', marginBottom:4,
+            }}>
+              {filteredUsers.map(u => (
+                <div key={u.id} onClick={() => selectUser(u)}
+                  style={{ padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid rgba(30,58,95,.4)', display:'flex', flexDirection:'column', gap:2 }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(201,169,110,.1)'}
+                  onMouseLeave={e => e.currentTarget.style.background='transparent'}
+                >
+                  <span style={{ fontSize:13, color:'#f1f5f9', fontWeight:600 }}>{u.fullName}</span>
+                  <span style={{ fontSize:11, color:'#64748b' }}>@{u.fullName?.replace(/\s/g,'')} · {u.email}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label style={lbl}>تاريخ الاستحقاق (اختياري)</label>
+          <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} style={{ ...inp, colorScheme:'dark' }} />
+        </div>
+
         <ErrBox msg={error} />
         <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
           <button onClick={onClose} style={btnSec}>إلغاء</button>
