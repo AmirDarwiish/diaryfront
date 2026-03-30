@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  ArrowRight, LayoutKanban, Users, Zap, BarChart2,
+  ArrowRight, Kanban, Users, Zap, BarChart2,
   Plus, MoreHorizontal, Edit3, Trash2, Loader2,
   CheckCircle2, Circle, PauseCircle, XCircle, TrendingUp,
   Clock, AlertCircle, ChevronDown, UserPlus, Play, Flag,
@@ -37,7 +37,7 @@ const PRIORITY_CFG = {
 }
 
 const TABS = [
-  { key: "kanban",  label: "لوحة المهام",  Icon: LayoutKanban },
+  { key: "kanban",  label: "لوحة المهام",  Icon: Kanban },
   { key: "members", label: "الأعضاء",      Icon: Users        },
   { key: "sprints", label: "السبرينتات",   Icon: Zap          },
   { key: "stats",   label: "الإحصائيات",   Icon: BarChart2    },
@@ -129,7 +129,7 @@ function TaskCard({ task, boards, projectId, onMove, onDelete, onClick }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      onClick={onClick} // ← تم نقل الـ Click هنا
+      onClick={onClick}
       style={{
         background: "#080d16",
         border: "1px solid rgba(255,255,255,0.06)",
@@ -358,7 +358,7 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
                 projectId={projectId}
                 onMove={onMoveTask}
                 onDelete={onDeleteTask}
-                onClick={() => onTaskClick(t.id)} // ← إرسال أمر الفتح للصفحة الرئيسية
+                onClick={() => onTaskClick(t.id)}
               />
             ))
           )}
@@ -829,7 +829,6 @@ export default function ProjectDetails() {
   const [newColColor, setNewColColor] = useState("#C9A96E")
   const [statusMenu, setStatusMenu] = useState(false)
   
-  // ← الـ State الخاصة بالـ Modal أصبحت هنا بشكل صحيح
   const [openTaskId, setOpenTaskId] = useState(null) 
 
   useEffect(() => {
