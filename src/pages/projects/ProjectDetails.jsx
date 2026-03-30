@@ -1,19 +1,20 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   ArrowRight, Kanban, Users, Zap, BarChart2,
-  Plus, MoreHorizontal, Edit3, Trash2, Loader2,
+  Plus, MoreHorizontal, Trash2, Loader2,
   CheckCircle2, Circle, PauseCircle, XCircle, TrendingUp,
-  Clock, AlertCircle, ChevronDown, UserPlus, Play, Flag,
-  Tag, Calendar, Activity, Menu, X,
+  AlertCircle, ChevronDown, UserPlus, Play, Flag,
+  Calendar, Activity,
 } from "lucide-react"
 import {
   getProject, getBoards, getTasks, getMembers, getSprints,
-  getProjectStats, createBoard, updateBoard, deleteBoard,
+  getProjectStats, createBoard, deleteBoard,
   createTask, moveTask, deleteTask, deleteSprint, startSprint, completeSprint,
   createSprint, updateProjectStatus, addMember, removeMember,
 } from "../../services/projectService"
+import TaskModal from "./TaskModal"
 
 // ─────────────────────────────────────────────
 // Constants
@@ -34,10 +35,10 @@ const PRIORITY_CFG = {
 }
 
 const TABS = [
-  { key: "kanban",  label: "المهام",      Icon: Kanban   },
-  { key: "members", label: "الأعضاء",     Icon: Users    },
-  { key: "sprints", label: "السبرينتات",  Icon: Zap      },
-  { key: "stats",   label: "الإحصائيات",  Icon: BarChart2},
+  { key: "kanban",  label: "المهام",      Icon: Kanban    },
+  { key: "members", label: "الأعضاء",     Icon: Users     },
+  { key: "sprints", label: "السبرينتات",  Icon: Zap       },
+  { key: "stats",   label: "الإحصائيات",  Icon: BarChart2 },
 ]
 
 // ─────────────────────────────────────────────
@@ -82,41 +83,22 @@ const S = {
 }
 
 // ─────────────────────────────────────────────
-// Mini Modal base
+// useIsMobile
 // ─────────────────────────────────────────────
-function Modal({ onClose, children, maxWidth = 460 }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{
-        position: "fixed", inset: 0, zIndex: 200,
-        background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 16, direction: "rtl",
-      }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.9, y: 18 }} animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 18 }} transition={{ type: "spring", damping: 20 }}
-        style={{ ...S.card, padding: 22, width: "100%", maxWidth, position: "relative" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div style={{
-          position: "absolute", top: 0, right: 0, left: 0, height: 3,
-          background: "linear-gradient(90deg,#C9A96E,transparent)",
-          borderRadius: "12px 12px 0 0",
-        }} />
-        {children}
-      </motion.div>
-    </motion.div>
-  )
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < breakpoint)
+    window.addEventListener("resize", handler)
+    return () => window.removeEventListener("resize", handler)
+  }, [breakpoint])
+  return isMobile
 }
 
 // ─────────────────────────────────────────────
-// Task Card (Kanban)
+// Task Card
 // ─────────────────────────────────────────────
-function TaskCard({ task, boards, projectId, onMove, onDelete, onClick }) {
+function TaskCard({ task, boards, onMove, onDelete, onClick }) {
   const [menu, setMenu] = useState(false)
   const p = PRIORITY_CFG[task.priority]
 
@@ -128,8 +110,7 @@ function TaskCard({ task, boards, projectId, onMove, onDelete, onClick }) {
       exit={{ opacity: 0, scale: 0.95 }}
       onClick={onClick}
       style={{
-        background: "#080d16",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "#080d16", border: "1px solid rgba(255,255,255,0.06)",
         borderRadius: 10, padding: "12px 14px",
         cursor: "pointer", position: "relative",
       }}
@@ -195,7 +176,7 @@ function TaskCard({ task, boards, projectId, onMove, onDelete, onClick }) {
                 onMouseLeave={() => setMenu(false)}
               >
                 <div style={{ fontSize: 10, color: "#6b7891", padding: "4px 8px", fontWeight: 700 }}>نقل إلى</div>
-                {boards.filter((b) => b.id !== task.boardId).map((b) => (
+                {boards.filter((b) => b.id !== task.boardColumnId && b.id !== task.boardId).map((b) => (
                   <button
                     key={b.id}
                     onClick={() => { onMove(task.id, b.id); setMenu(false) }}
@@ -241,18 +222,18 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
   const [title, setTitle] = useState("")
   const [priority, setPriority] = useState("Medium")
   const [saving, setSaving] = useState(false)
-  const colTasks = tasks.filter((t) => t.boardId === board.id)
+
+  // tasks matching this board — support both boardColumnId and boardId
+  const colTasks = tasks.filter((t) => (t.boardColumnId ?? t.boardId) === board.id)
 
   const handleAdd = async () => {
     if (!title.trim()) return
     setSaving(true)
-    const priorityMap = { Low: 1, Medium: 2, High: 3, Critical: 4 }
     try {
-      // ✅ FIX: parseInt to ensure boardColumnId is always an integer
       await onAddTask({
         title,
-        priority: priorityMap[priority],
-        boardColumnId: parseInt(board.id, 10),
+        priority,
+        boardColumnId: board.id,
       })
       setTitle(""); setPriority("Medium"); setAddOpen(false)
     } finally {
@@ -269,7 +250,7 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
       display: "flex", flexDirection: "column",
       maxHeight: isMobile ? "calc(100vh - 320px)" : "calc(100vh - 280px)",
     }}>
-      {/* Column header */}
+      {/* Header */}
       <div style={{
         padding: "14px 16px",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
@@ -302,14 +283,12 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
         </div>
       </div>
 
-      {/* Quick add */}
+      {/* Quick Add */}
       <AnimatePresence>
         {addOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            style={{ overflow: "hidden" }}
+            initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}
           >
             <div style={{ padding: "12px 14px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
               <input
@@ -343,7 +322,7 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
         )}
       </AnimatePresence>
 
-      {/* Tasks list */}
+      {/* Tasks */}
       <div style={{ padding: "10px", overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
         <AnimatePresence>
           {colTasks.length === 0 ? (
@@ -356,7 +335,6 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
                 key={t.id}
                 task={t}
                 boards={boards}
-                projectId={projectId}
                 onMove={onMoveTask}
                 onDelete={onDeleteTask}
                 onClick={() => onTaskClick(t.id)}
@@ -385,7 +363,7 @@ function MembersTab({ projectId, currentUserRole }) {
     getMembers(projectId).then((d) => {
       setMembers(Array.isArray(d) ? d : d?.data || [])
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [projectId])
 
   const handleAdd = async () => {
@@ -393,7 +371,9 @@ function MembersTab({ projectId, currentUserRole }) {
     setSaving(true); setError("")
     try {
       const res = await addMember(projectId, { email, role })
-      setMembers((m) => [...m, res?.data || res])
+      // re-fetch members to get full data
+      const updated = await getMembers(projectId)
+      setMembers(Array.isArray(updated) ? updated : updated?.data || [])
       setEmail(""); setAddOpen(false)
     } catch (e) { setError(e.message) }
     finally { setSaving(false) }
@@ -423,9 +403,7 @@ function MembersTab({ projectId, currentUserRole }) {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
-        <div style={{ fontSize: 14, fontWeight: 800, color: "#e8edf5" }}>
-          الأعضاء ({members.length})
-        </div>
+        <div style={{ fontSize: 14, fontWeight: 800, color: "#e8edf5" }}>الأعضاء ({members.length})</div>
         {(currentUserRole === "Owner" || currentUserRole === "Manager") && (
           <button onClick={() => setAddOpen((v) => !v)} style={S.btnGold}>
             <UserPlus size={14} /> إضافة عضو
@@ -437,11 +415,10 @@ function MembersTab({ projectId, currentUserRole }) {
         {addOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            style={{ overflow: "hidden", marginBottom: 16 }}
+            exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden", marginBottom: 16 }}
           >
             <div style={{ ...S.card, padding: 18 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 10 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10 }}>
                 <div>
                   <label style={S.lbl}>البريد الإلكتروني</label>
                   <input
@@ -498,10 +475,10 @@ function MembersTab({ projectId, currentUserRole }) {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "#e8edf5" }}>
-                  {m.fullName || m.name}
+                  {m.fullName || m.name || `مستخدم #${m.userId}`}
                 </div>
                 <div style={{ fontSize: 11, color: "#6b7891", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {m.email}
+                  {m.email || `ID: ${m.userId}`}
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -511,9 +488,6 @@ function MembersTab({ projectId, currentUserRole }) {
                 }}>
                   {rc.label}
                 </span>
-                {m.tasksCount !== undefined && (
-                  <span style={{ fontSize: 11, color: "#6b7891" }}>{m.tasksCount} تاسك</span>
-                )}
                 {currentUserRole === "Owner" && m.role !== "Owner" && (
                   <button
                     onClick={() => handleRemove(m.id)}
@@ -545,7 +519,7 @@ function SprintsTab({ projectId }) {
     getSprints(projectId).then((d) => {
       setSprints(Array.isArray(d) ? d : d?.data || [])
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [projectId])
 
   const handleCreate = async () => {
@@ -562,7 +536,10 @@ function SprintsTab({ projectId }) {
   const handleStart = async (id) => {
     try {
       await startSprint(id)
-      setSprints((s) => s.map((x) => ({ ...x, status: x.id === id ? "Active" : (x.status === "Active" ? "Planned" : x.status) })))
+      setSprints((s) => s.map((x) => ({
+        ...x,
+        status: x.id === id ? "Active" : (x.status === "Active" ? "Planned" : x.status),
+      })))
     } catch (e) { alert(e.message) }
   }
 
@@ -583,6 +560,7 @@ function SprintsTab({ projectId }) {
 
   const SPRINT_CFG = {
     Planned:   { label: "مخطط",  color: "#6ea8fe", bg: "rgba(110,168,254,.12)" },
+    Planning:  { label: "مخطط",  color: "#6ea8fe", bg: "rgba(110,168,254,.12)" },
     Active:    { label: "نشط",   color: "#34d399", bg: "rgba(52,211,153,.12)"  },
     Completed: { label: "مكتمل", color: "#C9A96E", bg: "rgba(201,169,110,.12)" },
   }
@@ -609,7 +587,7 @@ function SprintsTab({ projectId }) {
             exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden", marginBottom: 16 }}
           >
             <div style={{ ...S.card, padding: 18 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 12 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
                 <div>
                   <label style={S.lbl}>اسم السبرينت</label>
                   <input
@@ -651,9 +629,9 @@ function SprintsTab({ projectId }) {
           <div style={{ textAlign: "center", padding: 60, color: "#6b7891" }}>لا توجد سبرينتات بعد</div>
         ) : sprints.map((sp, i) => {
           const sc = SPRINT_CFG[sp.status] || SPRINT_CFG.Planned
-          const done = sp.completedTasksCount ?? 0
+          const done  = sp.completedTasksCount ?? 0
           const total = sp.tasksCount ?? 0
-          const pct = total > 0 ? Math.round((done / total) * 100) : 0
+          const pct   = total > 0 ? Math.round((done / total) * 100) : 0
           return (
             <motion.div
               key={sp.id}
@@ -672,7 +650,7 @@ function SprintsTab({ projectId }) {
                   </span>
                 </div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {sp.status === "Planned" && (
+                  {(sp.status === "Planned" || sp.status === "Planning") && (
                     <button onClick={() => handleStart(sp.id)} style={{ ...S.btnGold, height: 32, fontSize: 11 }}>
                       <Play size={12} /> بدء
                     </button>
@@ -741,7 +719,7 @@ function StatsTab({ projectId }) {
     getProjectStats(projectId).then((d) => {
       setStats(d?.data || d)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [projectId])
 
   if (loading) return (
@@ -752,10 +730,10 @@ function StatsTab({ projectId }) {
   if (!stats) return <div style={{ textAlign: "center", padding: 60, color: "#6b7891" }}>لا توجد بيانات</div>
 
   const cards = [
-    { label: "إجمالي المهام",  value: stats.totalTasks   ?? 0, color: "#C9A96E" },
-    { label: "مكتملة",         value: stats.doneTasks    ?? 0, color: "#34d399" },
-    { label: "متأخرة",         value: stats.overdueTasks ?? 0, color: "#f87171" },
-    { label: "قيد التنفيذ",    value: stats.inProgress   ?? 0, color: "#6ea8fe" },
+    { label: "إجمالي المهام",  value: stats.totalTasks   ?? 0,    color: "#C9A96E" },
+    { label: "مكتملة",         value: stats.doneTasks    ?? 0,    color: "#34d399" },
+    { label: "متأخرة",         value: stats.overdueTasks ?? 0,    color: "#f87171" },
+    { label: "قيد التنفيذ",    value: stats.inProgress   ?? 0,    color: "#6ea8fe" },
     { label: "نسبة الإنجاز",   value: `${stats.progressPercent ?? 0}%`, color: "#a78bfa" },
     { label: "ساعات مسجلة",    value: stats.totalTimeLogged ? `${Math.round(stats.totalTimeLogged / 60)}س` : "0س", color: "#fbbf24" },
   ]
@@ -795,7 +773,9 @@ function StatsTab({ projectId }) {
                   {(m.name || "?")[0]}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#e8edf5", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#e8edf5", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {m.name}
+                  </div>
                   <div style={{ height: 3, background: "#080d16", borderRadius: 2 }}>
                     <div style={{
                       height: "100%", borderRadius: 2,
@@ -815,19 +795,6 @@ function StatsTab({ projectId }) {
 }
 
 // ─────────────────────────────────────────────
-// useIsMobile hook
-// ─────────────────────────────────────────────
-function useIsMobile(breakpoint = 640) {
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint)
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < breakpoint)
-    window.addEventListener("resize", handler)
-    return () => window.removeEventListener("resize", handler)
-  }, [breakpoint])
-  return isMobile
-}
-
-// ─────────────────────────────────────────────
 // Main Page
 // ─────────────────────────────────────────────
 export default function ProjectDetails() {
@@ -835,16 +802,15 @@ export default function ProjectDetails() {
   const navigate = useNavigate()
   const isMobile = useIsMobile()
 
-  const [project, setProject]     = useState(null)
-  const [boards, setBoards]       = useState([])
-  const [tasks, setTasks]         = useState([])
-  const [loading, setLoading]     = useState(true)
-  const [activeTab, setActiveTab] = useState("kanban")
+  const [project, setProject]       = useState(null)
+  const [boards, setBoards]         = useState([])
+  const [tasks, setTasks]           = useState([])
+  const [loading, setLoading]       = useState(true)
+  const [activeTab, setActiveTab]   = useState("kanban")
   const [addColOpen, setAddColOpen] = useState(false)
   const [newColName, setNewColName] = useState("")
   const [newColColor, setNewColColor] = useState("#C9A96E")
   const [statusMenu, setStatusMenu] = useState(false)
-  const [mobileTabOpen, setMobileTabOpen] = useState(false)
   const [openTaskId, setOpenTaskId] = useState(null)
 
   useEffect(() => {
@@ -883,12 +849,8 @@ export default function ProjectDetails() {
     } catch (e) { alert(e.message) }
   }
 
-  // ✅ FIX: parseInt boardColumnId before sending to API
   const handleAddTask = async (body) => {
-    const res = await createTask(id, {
-      ...body,
-      boardColumnId: parseInt(body.boardColumnId, 10),
-    })
+    const res = await createTask(id, body)
     const newTask = res?.data || res
     setTasks((t) => [...t, newTask])
   }
@@ -896,7 +858,10 @@ export default function ProjectDetails() {
   const handleMoveTask = async (taskId, boardId) => {
     try {
       await moveTask(id, taskId, boardId)
-      setTasks((t) => t.map((x) => x.id === taskId ? { ...x, boardId } : x))
+      setTasks((t) => t.map((x) => x.id === taskId
+        ? { ...x, boardColumnId: boardId, boardId }
+        : x
+      ))
     } catch (e) { alert(e.message) }
   }
 
@@ -931,10 +896,9 @@ export default function ProjectDetails() {
 
   const st = STATUS_CFG[project.status] || STATUS_CFG.Planning
   const tasksTotal = tasks.length
-  const tasksDone  = tasks.filter((t) => t.status === "Done" || t.boardId === boards.find((b) => b.name?.toLowerCase().includes("done"))?.id).length
+  const tasksDone  = tasks.filter((t) => t.status === "Done").length
   const progress   = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0
-
-  const activeTabCfg = TABS.find(t => t.key === activeTab)
+  const activeTabCfg = TABS.find((t) => t.key === activeTab)
 
   return (
     <div style={{
@@ -944,54 +908,25 @@ export default function ProjectDetails() {
     }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Kanban scroll */
-        .kanban-scroll {
-          display: flex;
-          gap: 16px;
-          overflow-x: auto;
-          padding: 16px 16px 24px;
-        }
-        @media (min-width: 640px) {
-          .kanban-scroll { padding: 20px 28px 28px; }
-        }
+        .kanban-scroll { display: flex; gap: 16px; overflow-x: auto; padding: 16px 16px 24px; }
+        @media (min-width: 640px) { .kanban-scroll { padding: 20px 28px 28px; } }
         .kanban-scroll::-webkit-scrollbar { height: 6px; }
         .kanban-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,.02); border-radius: 10px; }
         .kanban-scroll::-webkit-scrollbar-thumb { background: rgba(201,169,110,.2); border-radius: 10px; }
         .kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,169,110,.5); }
-
         ::-webkit-calendar-picker-indicator { filter: invert(0.8); }
-
-        /* Mobile tab sheet */
-        .mobile-tab-sheet {
-          position: fixed;
-          bottom: 0; left: 0; right: 0;
-          z-index: 150;
-          background: #0d1420;
-          border-top: 1px solid rgba(255,255,255,0.08);
-          border-radius: 18px 18px 0 0;
-          padding: 12px 0 env(safe-area-inset-bottom, 12px);
-        }
-
-        /* Bottom nav bar for mobile */
         .bottom-nav {
-          position: fixed;
-          bottom: 0; left: 0; right: 0;
-          z-index: 100;
-          background: #0a1018;
-          border-top: 1px solid rgba(255,255,255,0.07);
-          display: flex;
-          height: 60px;
-          padding-bottom: env(safe-area-inset-bottom, 0px);
+          position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+          background: #0a1018; border-top: 1px solid rgba(255,255,255,0.07);
+          display: flex; height: 60px; padding-bottom: env(safe-area-inset-bottom, 0px);
         }
       `}</style>
 
-      {/* ── Top Header ── */}
+      {/* Header */}
       <div style={{
         padding: isMobile ? "16px 16px 0" : "24px 28px 0",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
       }}>
-
         {/* Breadcrumb */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: isMobile ? 12 : 18 }}>
           <button
@@ -1002,23 +937,24 @@ export default function ProjectDetails() {
             {!isMobile && "البروجكتات"}
           </button>
           <span style={{ color: "#6b7891", fontSize: 12 }}>/</span>
-          <span style={{ fontSize: 12, color: "#C9A96E", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: isMobile ? 160 : 300 }}>{project.name}</span>
+          <span style={{ fontSize: 12, color: "#C9A96E", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: isMobile ? 160 : 300 }}>
+            {project.name || project.title}
+          </span>
         </div>
 
-        {/* Project title row */}
+        {/* Title row */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: isMobile ? 14 : 20 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ fontSize: isMobile ? 18 : 24, fontWeight: 900, color: "#e8edf5", margin: "0 0 6px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {project.name}
+              {project.name || project.title}
             </h1>
             {project.description && !isMobile && (
               <p style={{ fontSize: 12, color: "#6b7891", margin: 0, maxWidth: 500 }}>{project.description}</p>
             )}
           </div>
 
-          {/* Status + progress */}
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-            {/* progress mini */}
+            {/* Progress mini */}
             <div style={{
               display: "flex", alignItems: "center", gap: 8,
               background: "#0d1420", border: "1px solid rgba(255,255,255,0.06)",
@@ -1031,7 +967,7 @@ export default function ProjectDetails() {
               {!isMobile && <span style={{ fontSize: 11, color: "#6b7891" }}>{tasksTotal} تاسك</span>}
             </div>
 
-            {/* status dropdown */}
+            {/* Status dropdown */}
             <div style={{ position: "relative" }}>
               <button
                 onClick={() => setStatusMenu((v) => !v)}
@@ -1075,7 +1011,7 @@ export default function ProjectDetails() {
           </div>
         </div>
 
-        {/* ── Tabs: Desktop = inline, Mobile = hidden (bottom nav) ── */}
+        {/* Tabs: Desktop */}
         {!isMobile && (
           <div style={{ display: "flex", gap: 4 }}>
             {TABS.map((tab) => (
@@ -1100,7 +1036,7 @@ export default function ProjectDetails() {
           </div>
         )}
 
-        {/* Mobile: show current tab name as pill */}
+        {/* Mobile: current tab label */}
         {isMobile && (
           <div style={{ paddingBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
             {activeTabCfg && (
@@ -1113,7 +1049,7 @@ export default function ProjectDetails() {
         )}
       </div>
 
-      {/* ── Tab Content ── */}
+      {/* Tab Content */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
@@ -1157,14 +1093,8 @@ export default function ProjectDetails() {
                         display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                         transition: "border-color .2s, color .2s",
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(201,169,110,0.4)"
-                        e.currentTarget.style.color = "#C9A96E"
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"
-                        e.currentTarget.style.color = "#6b7891"
-                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(201,169,110,0.4)"; e.currentTarget.style.color = "#C9A96E" }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "#6b7891" }}
                     >
                       <Plus size={16} /> إضافة كولومن
                     </button>
@@ -1193,9 +1123,7 @@ export default function ProjectDetails() {
                         <button onClick={handleAddBoard} style={{ ...S.btnGold, height: 32, flex: 1, fontSize: 11 }}>
                           <Plus size={12} /> إضافة
                         </button>
-                        <button onClick={() => setAddColOpen(false)} style={{ ...S.btnGhost, height: 32 }}>
-                          إلغاء
-                        </button>
+                        <button onClick={() => setAddColOpen(false)} style={{ ...S.btnGhost, height: 32 }}>إلغاء</button>
                       </div>
                     </div>
                   )}
@@ -1204,21 +1132,18 @@ export default function ProjectDetails() {
             </div>
           )}
 
-          {/* MEMBERS */}
           {activeTab === "members" && (
             <div style={{ padding: isMobile ? "16px" : "24px 28px" }}>
               <MembersTab projectId={id} currentUserRole={project.myRole || "Member"} />
             </div>
           )}
 
-          {/* SPRINTS */}
           {activeTab === "sprints" && (
             <div style={{ padding: isMobile ? "16px" : "24px 28px" }}>
               <SprintsTab projectId={id} />
             </div>
           )}
 
-          {/* STATS */}
           {activeTab === "stats" && (
             <div style={{ padding: isMobile ? "16px" : "24px 28px" }}>
               <StatsTab projectId={id} />
@@ -1227,7 +1152,7 @@ export default function ProjectDetails() {
         </motion.div>
       </AnimatePresence>
 
-      {/* ── Mobile Bottom Navigation ── */}
+      {/* Mobile Bottom Nav */}
       {isMobile && (
         <nav className="bottom-nav">
           {TABS.map((tab) => {
@@ -1242,8 +1167,7 @@ export default function ProjectDetails() {
                   background: "none", border: "none", cursor: "pointer",
                   color: isActive ? "#C9A96E" : "#4a5568",
                   fontFamily: "'Cairo',sans-serif",
-                  transition: "color .2s",
-                  position: "relative",
+                  transition: "color .2s", position: "relative",
                 }}
               >
                 {isActive && (
@@ -1271,7 +1195,7 @@ export default function ProjectDetails() {
             taskId={openTaskId}
             projectId={id}
             onClose={() => setOpenTaskId(null)}
-            onUpdated={(updated) => setTasks(t => t.map(x => x.id === updated.id ? { ...x, ...updated } : x))}
+            onUpdated={(updated) => setTasks((t) => t.map((x) => x.id === updated.id ? { ...x, ...updated } : x))}
           />
         )}
       </AnimatePresence>

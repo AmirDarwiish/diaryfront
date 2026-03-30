@@ -2,10 +2,10 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  Plus, FolderKanban, Users, LayoutGrid, Clock,
-  CheckCircle2, Circle, PauseCircle, XCircle, Archive,
-  ChevronRight, Search, SlidersHorizontal, Loader2,
-  TrendingUp, Calendar, MoreHorizontal, Trash2, Edit3,
+  Plus, FolderKanban, Users, LayoutGrid,
+  CheckCircle2, Circle, PauseCircle, XCircle,
+  ChevronRight, Search, Loader2,
+  TrendingUp, MoreHorizontal, Trash2,
 } from "lucide-react"
 import {
   getProjects,
@@ -32,10 +32,6 @@ const PRIORITY_CONFIG = {
   Critical: { label: "حرجة",   color: "#e879f9" },
 }
 
-const INITIAL_FORM = {
-  name: "", description: "", priority: "Medium", status: "Planning",
-}
-
 // ─────────────────────────────────────────────
 // Shared Styles
 // ─────────────────────────────────────────────
@@ -55,88 +51,44 @@ const S = {
     borderRadius: 14,
   },
   input: {
-    width: "100%",
-    boxSizing: "border-box",
-    height: 42,
-    background: "#080d16",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 10,
-    color: "#e8edf5",
-    fontSize: 13,
-    padding: "0 14px",
-    fontFamily: "'Cairo', sans-serif",
-    outline: "none",
-    transition: "border-color .2s",
+    width: "100%", boxSizing: "border-box", height: 42,
+    background: "#080d16", border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 10, color: "#e8edf5", fontSize: 13,
+    padding: "0 14px", fontFamily: "'Cairo', sans-serif",
+    outline: "none", transition: "border-color .2s",
   },
   textarea: {
-    width: "100%",
-    boxSizing: "border-box",
-    background: "#080d16",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 10,
-    color: "#e8edf5",
-    fontSize: 13,
-    padding: "10px 14px",
-    fontFamily: "'Cairo', sans-serif",
-    outline: "none",
-    resize: "vertical",
-    minHeight: 80,
+    width: "100%", boxSizing: "border-box",
+    background: "#080d16", border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 10, color: "#e8edf5", fontSize: 13,
+    padding: "10px 14px", fontFamily: "'Cairo', sans-serif",
+    outline: "none", resize: "vertical", minHeight: 80,
     transition: "border-color .2s",
   },
   select: {
-    width: "100%",
-    boxSizing: "border-box",
-    height: 42,
-    background: "#080d16",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 10,
-    color: "#e8edf5",
-    fontSize: 13,
-    padding: "0 14px",
-    fontFamily: "'Cairo', sans-serif",
-    outline: "none",
-    cursor: "pointer",
-    appearance: "none",
+    width: "100%", boxSizing: "border-box", height: 42,
+    background: "#080d16", border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 10, color: "#e8edf5", fontSize: 13,
+    padding: "0 14px", fontFamily: "'Cairo', sans-serif",
+    outline: "none", cursor: "pointer", appearance: "none",
   },
   lbl: {
-    fontSize: 11,
-    color: "#6b7891",
-    fontWeight: 700,
-    display: "block",
-    marginBottom: 6,
-    letterSpacing: "0.5px",
+    fontSize: 11, color: "#6b7891", fontWeight: 700,
+    display: "block", marginBottom: 6, letterSpacing: "0.5px",
   },
   btnGold: {
-    height: 42,
-    padding: "0 22px",
-    borderRadius: 10,
-    border: "none",
+    height: 42, padding: "0 22px", borderRadius: 10, border: "none",
     background: "linear-gradient(135deg, #d4a855, #C9A96E)",
-    color: "#080d16",
-    fontSize: 13,
-    fontWeight: 800,
-    cursor: "pointer",
-    fontFamily: "'Cairo', sans-serif",
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    whiteSpace: "nowrap",
-    transition: "opacity .2s, transform .1s",
+    color: "#080d16", fontSize: 13, fontWeight: 800, cursor: "pointer",
+    fontFamily: "'Cairo', sans-serif", display: "flex", alignItems: "center",
+    gap: 8, whiteSpace: "nowrap", transition: "opacity .2s, transform .1s",
   },
   btnGhost: {
-    height: 38,
-    padding: "0 16px",
-    borderRadius: 9,
-    border: "1px solid rgba(255,255,255,0.08)",
-    background: "transparent",
-    color: "#6b7891",
-    fontSize: 12,
-    cursor: "pointer",
-    fontFamily: "'Cairo', sans-serif",
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    transition: "border-color .2s, color .2s",
+    height: 38, padding: "0 16px", borderRadius: 9,
+    border: "1px solid rgba(255,255,255,0.08)", background: "transparent",
+    color: "#6b7891", fontSize: 12, cursor: "pointer",
+    fontFamily: "'Cairo', sans-serif", display: "flex", alignItems: "center",
+    gap: 6, transition: "border-color .2s, color .2s",
   },
 }
 
@@ -147,9 +99,9 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const st = STATUS_CONFIG[project.status] || STATUS_CONFIG.Planning
   const StatusIcon = st.Icon
-  const tasksTotal = project.tasksCount ?? project.tasks?.length ?? 0
-  const tasksDone  = project.doneTasksCount ?? 0
-  const progress   = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0
+  const tasksTotal   = project.tasksCount   ?? project.tasks?.length  ?? 0
+  const tasksDone    = project.doneTasksCount ?? 0
+  const progress     = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0
   const membersCount = project.membersCount ?? project.members?.length ?? 0
 
   return (
@@ -186,15 +138,12 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
               fontSize: 15, fontWeight: 800, color: "#e8edf5",
               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
             }}>
-              {project.name}
+              {project.name || project.title}
             </div>
-            <div style={{ fontSize: 11, color: "#6b7891", marginTop: 2 }}>
-              #{project.id}
-            </div>
+            <div style={{ fontSize: 11, color: "#6b7891", marginTop: 2 }}>#{project.id}</div>
           </div>
         </div>
 
-        {/* Menu button */}
         <div style={{ position: "relative", flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => setMenuOpen((v) => !v)}
@@ -217,7 +166,6 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
                 }}
                 onMouseLeave={() => setMenuOpen(false)}
               >
-                {/* Status options */}
                 {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
                   <button
                     key={key}
@@ -231,8 +179,7 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
                       textAlign: "right",
                     }}
                   >
-                    <cfg.Icon size={13} color={cfg.color} />
-                    {cfg.label}
+                    <cfg.Icon size={13} color={cfg.color} /> {cfg.label}
                   </button>
                 ))}
                 <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "6px 0" }} />
@@ -257,15 +204,15 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
       {/* Description */}
       {project.description && (
         <p style={{
-          fontSize: 12, color: "#6b7891", lineHeight: 1.7,
-          marginBottom: 16, overflow: "hidden", display: "-webkit-box",
+          fontSize: 12, color: "#6b7891", lineHeight: 1.7, marginBottom: 16,
+          overflow: "hidden", display: "-webkit-box",
           WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
         }}>
           {project.description}
         </p>
       )}
 
-      {/* Status badge */}
+      {/* Badges */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         <span style={{
           background: st.bg, color: st.color,
@@ -285,7 +232,7 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
         )}
       </div>
 
-      {/* Progress bar */}
+      {/* Progress */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
           <span style={{ fontSize: 11, color: "#6b7891", fontWeight: 600 }}>التقدم</span>
@@ -307,7 +254,7 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
         </div>
       </div>
 
-      {/* Footer stats */}
+      {/* Footer */}
       <div style={{
         display: "flex", justifyContent: "space-between", alignItems: "center",
         paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.05)",
@@ -332,7 +279,7 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
 // Create Project Modal
 // ─────────────────────────────────────────────
 function CreateModal({ onClose, onCreate }) {
-  const [form, setForm] = useState(INITIAL_FORM)
+  const [form, setForm] = useState({ name: "", description: "", priority: "Medium" })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -342,13 +289,12 @@ function CreateModal({ onClose, onCreate }) {
     if (!form.name.trim()) { setError("اسم البروجكت مطلوب"); return }
     setLoading(true); setError("")
     try {
-      const payload = {
-  title: form.name,
-  description: form.description,
-  priority: ["Low", "Medium", "High", "Critical"].indexOf(form.priority)
-}
-
-const res = await createProject(payload)
+      const priorityMap = { Low: 0, Medium: 1, High: 2, Critical: 3 }
+      const res = await createProject({
+        title:       form.name,
+        description: form.description,
+        priority:    priorityMap[form.priority] ?? 1,
+      })
       onCreate(res?.data || res)
       onClose()
     } catch (e) {
@@ -360,9 +306,7 @@ const res = await createProject(payload)
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       style={{
         position: "fixed", inset: 0, zIndex: 100,
         background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)",
@@ -372,14 +316,11 @@ const res = await createProject(payload)
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 20 }}
-        transition={{ type: "spring", damping: 20 }}
+        initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }} transition={{ type: "spring", damping: 20 }}
         style={{ ...S.card, padding: 28, width: "100%", maxWidth: 480, position: "relative" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Gold accent */}
         <div style={{
           position: "absolute", top: 0, right: 0, left: 0, height: 3,
           background: "linear-gradient(90deg,#C9A96E,#d4a855,transparent)",
@@ -407,7 +348,6 @@ const res = await createProject(payload)
               autoFocus
             />
           </div>
-
           <div>
             <label style={S.lbl}>الوصف</label>
             <textarea
@@ -419,24 +359,13 @@ const res = await createProject(payload)
               onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.08)")}
             />
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div>
-              <label style={S.lbl}>الحالة</label>
-              <select style={S.select} value={form.status} onChange={(e) => set("status", e.target.value)}>
-                {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-                  <option key={k} value={k}>{v.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label style={S.lbl}>الأولوية</label>
-              <select style={S.select} value={form.priority} onChange={(e) => set("priority", e.target.value)}>
-                {Object.entries(PRIORITY_CONFIG).map(([k, v]) => (
-                  <option key={k} value={k}>{v.label}</option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label style={S.lbl}>الأولوية</label>
+            <select style={S.select} value={form.priority} onChange={(e) => set("priority", e.target.value)}>
+              {Object.entries(PRIORITY_CONFIG).map(([k, v]) => (
+                <option key={k} value={k}>{v.label}</option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -456,12 +385,13 @@ const res = await createProject(payload)
             disabled={loading}
             style={{ ...S.btnGold, flex: 1, opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} /> : <Plus size={15} />}
+            {loading
+              ? <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} />
+              : <Plus size={15} />
+            }
             {loading ? "جاري الإنشاء..." : "إنشاء البروجكت"}
           </button>
-          <button onClick={onClose} style={{ ...S.btnGhost, height: 42 }}>
-            إلغاء
-          </button>
+          <button onClick={onClose} style={{ ...S.btnGhost, height: 42 }}>إلغاء</button>
         </div>
       </motion.div>
     </motion.div>
@@ -473,10 +403,10 @@ const res = await createProject(payload)
 // ─────────────────────────────────────────────
 export default function ProjectsList() {
   const navigate = useNavigate()
-  const [projects, setProjects] = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState("")
-  const [search, setSearch]     = useState("")
+  const [projects, setProjects]   = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState("")
+  const [search, setSearch]       = useState("")
   const [filterStatus, setFilterStatus] = useState("")
   const [showCreate, setShowCreate]     = useState(false)
 
@@ -498,50 +428,41 @@ export default function ProjectsList() {
     try {
       await deleteProject(id)
       setProjects((p) => p.filter((x) => x.id !== id))
-    } catch (e) {
-      alert(e.message)
-    }
+    } catch (e) { alert(e.message) }
   }
 
   const handleStatusChange = async (id, status) => {
     try {
       await updateProjectStatus(id, status)
       setProjects((p) => p.map((x) => x.id === id ? { ...x, status } : x))
-    } catch (e) {
-      alert(e.message)
-    }
+    } catch (e) { alert(e.message) }
   }
 
   const filtered = projects.filter((p) => {
-    const matchSearch = !search || p.name?.toLowerCase().includes(search.toLowerCase())
+    const projectName = p.name || p.title || ""
+    const matchSearch = !search || projectName.toLowerCase().includes(search.toLowerCase())
     const matchStatus = !filterStatus || p.status === filterStatus
     return matchSearch && matchStatus
   })
 
-  // Stats
-  const total    = projects.length
-  const active   = projects.filter((p) => p.status === "Active").length
-  const done     = projects.filter((p) => p.status === "Done").length
-  const onHold   = projects.filter((p) => p.status === "OnHold").length
+  const total  = projects.length
+  const active = projects.filter((p) => p.status === "Active").length
+  const done   = projects.filter((p) => p.status === "Done").length
+  const onHold = projects.filter((p) => p.status === "OnHold").length
 
   return (
     <div style={S.wrap}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
         .pm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
         .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
         @media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(2,1fr); } }
-        @media (max-width: 600px) {
-          .stat-grid { grid-template-columns: repeat(2,1fr); }
-          .pm-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 600px) { .stat-grid { grid-template-columns: repeat(2,1fr); } .pm-grid { grid-template-columns: 1fr; } }
       `}</style>
 
-      {/* ── Header ── */}
+      {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
         style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 14, marginBottom: 32 }}
       >
         <div>
@@ -563,13 +484,8 @@ export default function ProjectsList() {
         </button>
       </motion.div>
 
-      {/* ── Stats ── */}
-      <motion.div
-        className="stat-grid"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-      >
+      {/* Stats */}
+      <motion.div className="stat-grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
         {[
           { label: "إجمالي البروجكتات", value: total,  color: "#C9A96E", icon: <FolderKanban size={18} color="#C9A96E" /> },
           { label: "نشطة الآن",          value: active, color: "#34d399", icon: <TrendingUp   size={18} color="#34d399" /> },
@@ -585,22 +501,19 @@ export default function ProjectsList() {
               {s.icon}
             </div>
             <div style={{ fontSize: 26, fontWeight: 900, color: "#e8edf5", lineHeight: 1 }}>{s.value}</div>
-            <div style={{ fontSize: 11, color: "#6b7891", fontWeight: 700, marginTop: 5, letterSpacing: "0.3px" }}>{s.label}</div>
+            <div style={{ fontSize: 11, color: "#6b7891", fontWeight: 700, marginTop: 5 }}>{s.label}</div>
           </div>
         ))}
       </motion.div>
 
-      {/* ── Filters ── */}
+      {/* Filters */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.15 }}
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
         style={{
           ...S.card, padding: "14px 18px", marginBottom: 20,
           display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center",
         }}
       >
-        {/* Search */}
         <div style={{ flex: "1 1 220px", position: "relative" }}>
           <Search size={14} color="#6b7891" style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)" }} />
           <input
@@ -612,8 +525,6 @@ export default function ProjectsList() {
             onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.08)")}
           />
         </div>
-
-        {/* Status filter */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button
             onClick={() => setFilterStatus("")}
@@ -647,7 +558,6 @@ export default function ProjectsList() {
         </div>
       </motion.div>
 
-      {/* ── Error ── */}
       {error && (
         <div style={{
           padding: "14px 18px", borderRadius: 10, marginBottom: 20,
@@ -658,7 +568,6 @@ export default function ProjectsList() {
         </div>
       )}
 
-      {/* ── Loading ── */}
       {loading && (
         <div style={{ textAlign: "center", padding: 80, color: "#C9A96E" }}>
           <Loader2 size={32} style={{ animation: "spin 1s linear infinite", margin: "0 auto 14px", display: "block" }} />
@@ -666,16 +575,10 @@ export default function ProjectsList() {
         </div>
       )}
 
-      {/* ── Grid ── */}
       {!loading && (
         <AnimatePresence mode="popLayout">
           {filtered.length === 0 ? (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{ textAlign: "center", padding: "80px 20px" }}
-            >
+            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: "center", padding: "80px 20px" }}>
               <div style={{
                 width: 60, height: 60, borderRadius: 16,
                 background: "#0d1420", border: "1px solid rgba(201,169,110,0.15)",
@@ -712,7 +615,6 @@ export default function ProjectsList() {
         </AnimatePresence>
       )}
 
-      {/* ── Create Modal ── */}
       <AnimatePresence>
         {showCreate && (
           <CreateModal

@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   X, MessageSquare, Clock, Paperclip, CheckSquare,
   Plus, Trash2, Edit3, Send, Play, Square, Timer,
-  Upload, Download, File, Image, ChevronDown,
-  AlertCircle, Calendar, User, Tag, Flag,
-  Loader2, Check, MoreHorizontal,
+  Upload, Download, File, Image, Calendar,
+  Loader2, Check, Flag,
 } from "lucide-react"
 import {
-  getTask, updateTask, getComments, addComment, updateComment, deleteComment,
+  getTask, updateTask,
+  getComments, addComment, updateComment, deleteComment,
   getTimelogs, startTimer, stopTimer, addManualTime, deleteTimelog,
   getAttachments, uploadAttachment, deleteAttachment,
   createTask, deleteTask as deleteTaskAPI,
@@ -25,18 +25,18 @@ const PRIORITY_CFG = {
 }
 
 const STATUS_CFG = {
-  Todo:       { label: "للتنفيذ",    color: "#94a3b8" },
+  Todo:       { label: "للتنفيذ",     color: "#94a3b8" },
   InProgress: { label: "قيد التنفيذ", color: "#6ea8fe" },
-  InReview:   { label: "مراجعة",     color: "#fbbf24" }, // تم التعديل لتطابق الباك إند
-  Done:       { label: "مكتمل",      color: "#34d399" },
+  InReview:   { label: "مراجعة",      color: "#fbbf24" },
+  Done:       { label: "مكتمل",       color: "#34d399" },
 }
 
 const TABS = [
-  { key: "details",     label: "التفاصيل",    Icon: Flag        },
-  { key: "comments",    label: "التعليقات",   Icon: MessageSquare },
-  { key: "time",        label: "الوقت",       Icon: Clock       },
-  { key: "attachments", label: "المرفقات",    Icon: Paperclip   },
-  { key: "subtasks",    label: "المهام الفرعية", Icon: CheckSquare },
+  { key: "details",     label: "التفاصيل",       Icon: Flag          },
+  { key: "comments",    label: "التعليقات",       Icon: MessageSquare },
+  { key: "time",        label: "الوقت",           Icon: Clock         },
+  { key: "attachments", label: "المرفقات",        Icon: Paperclip     },
+  { key: "subtasks",    label: "المهام الفرعية",  Icon: CheckSquare   },
 ]
 
 // ─────────────────────────────────────────────
@@ -54,10 +54,12 @@ const fmtMinutes = (mins) => {
 const fmtDateTime = (d) => {
   if (!d) return "—"
   const dateStr = typeof d === "string" && !d.endsWith("Z") && !d.includes("+") ? `${d}Z` : d
-  return new Date(dateStr).toLocaleString("ar-EG", {
-    timeZone: "Africa/Cairo", day: "numeric", month: "short",
-    hour: "2-digit", minute: "2-digit",
-  })
+  try {
+    return new Date(dateStr).toLocaleString("ar-EG", {
+      timeZone: "Africa/Cairo", day: "numeric", month: "short",
+      hour: "2-digit", minute: "2-digit",
+    })
+  } catch { return d }
 }
 
 const getFileIcon = (name) => {
@@ -93,26 +95,21 @@ const S = {
     outline: "none", cursor: "pointer", appearance: "none",
   },
   lbl: { fontSize: 10, color: "#6b7891", fontWeight: 700, display: "block", marginBottom: 5, letterSpacing: "0.5px" },
-  card: {
-    background: "#0a1020", border: "1px solid rgba(255,255,255,0.06)",
-    borderRadius: 10,
-  },
+  card: { background: "#0a1020", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10 },
   btnGold: {
     height: 36, padding: "0 16px", borderRadius: 8, border: "none",
     background: "linear-gradient(135deg,#d4a855,#C9A96E)",
     color: "#080d16", fontSize: 12, fontWeight: 800,
     cursor: "pointer", fontFamily: "'Cairo',sans-serif",
     display: "flex", alignItems: "center", gap: 6,
-    transition: "opacity .2s",
-    whiteSpace: "nowrap"
+    transition: "opacity .2s", whiteSpace: "nowrap",
   },
   btnGhost: {
     height: 32, padding: "0 12px", borderRadius: 7,
     border: "1px solid rgba(255,255,255,0.08)", background: "transparent",
     color: "#6b7891", fontSize: 11, cursor: "pointer",
     fontFamily: "'Cairo',sans-serif",
-    display: "flex", alignItems: "center", gap: 5,
-    whiteSpace: "nowrap"
+    display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap",
   },
 }
 
@@ -124,12 +121,12 @@ const blurNorm  = (e) => (e.target.style.borderColor = "rgba(255,255,255,0.08)")
 // ─────────────────────────────────────────────
 function DetailsTab({ task, projectId, onUpdated }) {
   const [editing, setEditing] = useState(false)
-  const [form, setForm]       = useState({
+  const [form, setForm] = useState({
     title:       task.title       || "",
     description: task.description || "",
     priority:    task.priority    || "Medium",
     status:      task.status      || "Todo",
-    dueDate:     task.dueDate     ? task.dueDate.split("T")[0] : "",
+    dueDate:     task.dueDate ? task.dueDate.split("T")[0] : "",
   })
   const [saving, setSaving] = useState(false)
 
@@ -138,8 +135,8 @@ function DetailsTab({ task, projectId, onUpdated }) {
   const save = async () => {
     setSaving(true)
     try {
-      const res = await updateTask(projectId, task.id, form)
-      onUpdated(res?.data || res || { ...task, ...form })
+      await updateTask(projectId, task.id, form)
+      onUpdated({ ...task, ...form })
       setEditing(false)
     } catch (e) { alert(e.message) }
     finally { setSaving(false) }
@@ -175,11 +172,8 @@ function DetailsTab({ task, projectId, onUpdated }) {
               <Edit3 size={12} /> تعديل
             </button>
           </div>
-
           {task.description ? (
-            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
-              {task.description}
-            </p>
+            <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{task.description}</p>
           ) : (
             <p style={{ fontSize: 13, color: "#6b7891", fontStyle: "italic" }}>لا يوجد وصف للمهمة.</p>
           )}
@@ -194,7 +188,6 @@ function DetailsTab({ task, projectId, onUpdated }) {
             <label style={S.lbl}>الوصف</label>
             <textarea style={{ ...S.textarea, minHeight: 100 }} value={form.description} onChange={(e) => set("description", e.target.value)} onFocus={focusGold} onBlur={blurNorm} />
           </div>
-          {/* استخدام كلاس responsive-grid لضبط العرض على الموبايل */}
           <div className="responsive-grid">
             <div>
               <label style={S.lbl}>الأولوية</label>
@@ -242,7 +235,7 @@ function CommentsTab({ taskId }) {
     getComments(taskId).then((d) => {
       setComments(Array.isArray(d) ? d : d?.data || [])
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [taskId])
 
   useEffect(() => {
@@ -299,26 +292,20 @@ function CommentsTab({ taskId }) {
                   display: "flex", alignItems: "center", justifyContent: "center",
                   color: "#C9A96E", fontWeight: 800, fontSize: 12,
                 }}>
-                  {(c.author?.fullName || c.authorName || "؟")[0]}
+                  {(c.authorName || c.author?.fullName || "؟")[0]}
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#e8edf5", wordBreak: "break-word" }}>
-                    {c.author?.fullName || c.authorName || "مجهول"}
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#e8edf5" }}>
+                    {c.authorName || c.author?.fullName || `مستخدم #${c.createdByUserId}`}
                   </div>
                   <div style={{ fontSize: 10, color: "#6b7891" }}>{fmtDateTime(c.createdAt)}</div>
                 </div>
               </div>
               <div style={{ display: "flex", gap: 4 }}>
-                <button
-                  onClick={() => { setEditingId(c.id); setEditText(c.content) }}
-                  style={{ ...S.btnGhost, height: 26, padding: "0 7px" }}
-                >
+                <button onClick={() => { setEditingId(c.id); setEditText(c.content) }} style={{ ...S.btnGhost, height: 26, padding: "0 7px" }}>
                   <Edit3 size={11} />
                 </button>
-                <button
-                  onClick={() => remove(c.id)}
-                  style={{ ...S.btnGhost, height: 26, padding: "0 7px", color: "#f8717170" }}
-                >
+                <button onClick={() => remove(c.id)} style={{ ...S.btnGhost, height: 26, padding: "0 7px", color: "#f8717170" }}>
                   <Trash2 size={11} />
                 </button>
               </div>
@@ -356,9 +343,7 @@ function CommentsTab({ taskId }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onFocus={focusGold} onBlur={blurNorm}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) send()
-          }}
+          onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) send() }}
         />
         <button onClick={send} disabled={sending || !text.trim()} style={{ ...S.btnGold, height: 60, flexShrink: 0, opacity: !text.trim() ? 0.4 : 1 }}>
           {sending ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={14} />}
@@ -370,30 +355,30 @@ function CommentsTab({ taskId }) {
 }
 
 // ─────────────────────────────────────────────
-// Time Tracking Tab
+// Time Tab
 // ─────────────────────────────────────────────
 function TimeTab({ taskId }) {
-  const [logs, setLogs]         = useState([])
-  const [loading, setLoading]   = useState(true)
+  const [logs, setLogs]           = useState([])
+  const [loading, setLoading]     = useState(true)
   const [activeLog, setActiveLog] = useState(null)
-  const [elapsed, setElapsed]   = useState(0)
+  const [elapsed, setElapsed]     = useState(0)
   const [manualOpen, setManualOpen] = useState(false)
-  const [manual, setManual]     = useState({ description: "", minutes: "" })
-  const [saving, setSaving]     = useState(false)
+  const [manual, setManual]       = useState({ description: "", minutes: "" })
+  const [saving, setSaving]       = useState(false)
   const intervalRef = useRef(null)
 
   useEffect(() => {
     getTimelogs(taskId).then((d) => {
       const data = Array.isArray(d) ? d : d?.data || []
       setLogs(data)
-      const running = data.find((l) => l.isRunning || (!l.endTime && l.startTime))
+      const running = data.find((l) => l.isRunning)
       if (running) {
         setActiveLog(running)
         const start = new Date(running.startTime.endsWith("Z") ? running.startTime : running.startTime + "Z")
         setElapsed(Math.floor((Date.now() - start.getTime()) / 1000))
       }
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [taskId])
 
   useEffect(() => {
@@ -409,7 +394,7 @@ function TimeTab({ taskId }) {
     const h = Math.floor(s / 3600)
     const m = Math.floor((s % 3600) / 60)
     const sec = s % 60
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+    return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`
   }
 
   const handleStart = async () => {
@@ -435,7 +420,7 @@ function TimeTab({ taskId }) {
     if (!manual.minutes) return
     setSaving(true)
     try {
-      const res = await addManualTime(taskId, { ...manual, minutes: parseInt(manual.minutes) })
+      const res = await addManualTime(taskId, manual)
       setLogs((l) => [res?.data || res, ...l])
       setManual({ description: "", minutes: "" }); setManualOpen(false)
     } catch (e) { alert(e.message) }
@@ -449,18 +434,16 @@ function TimeTab({ taskId }) {
     } catch (e) { alert(e.message) }
   }
 
-  const totalMins = logs.reduce((acc, l) => acc + (l.durationMinutes || l.duration || 0), 0)
+  const totalMins = logs.reduce((acc, l) => acc + (l.durationMinutes || 0), 0)
 
   if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#C9A96E" }}><Loader2 size={24} style={{ animation: "spin 1s linear infinite" }} /></div>
 
   return (
     <div>
-      {/* Timer widget */}
       <div style={{ ...S.card, padding: "20px", marginBottom: 16, textAlign: "center", borderTop: `2px solid ${activeLog ? "#34d399" : "#C9A96E"}` }}>
         <div style={{
           fontSize: 36, fontWeight: 900, color: activeLog ? "#34d399" : "#e8edf5",
           fontVariantNumeric: "tabular-nums", letterSpacing: 2, marginBottom: 12,
-          fontFamily: "'Cairo',monospace",
         }}>
           {fmtElapsed(elapsed)}
         </div>
@@ -470,27 +453,19 @@ function TimeTab({ taskId }) {
               <Play size={14} /> بدء التتبع
             </button>
           ) : (
-            <button
-              onClick={handleStop}
-              style={{ ...S.btnGold, background: "rgba(248,113,113,.2)", color: "#f87171" }}
-            >
+            <button onClick={handleStop} style={{ ...S.btnGold, background: "rgba(248,113,113,.2)", color: "#f87171" }}>
               <Square size={14} /> إيقاف
             </button>
           )}
-          <button
-            onClick={() => setManualOpen((v) => !v)}
-            style={{ ...S.btnGhost, height: 36 }}
-          >
+          <button onClick={() => setManualOpen((v) => !v)} style={{ ...S.btnGhost, height: 36 }}>
             <Timer size={14} /> إضافة يدوي
           </button>
         </div>
-
         <div style={{ marginTop: 14, fontSize: 12, color: "#6b7891" }}>
           إجمالي الوقت المسجل: <span style={{ color: "#C9A96E", fontWeight: 800 }}>{fmtMinutes(totalMins)}</span>
         </div>
       </div>
 
-      {/* Manual entry */}
       <AnimatePresence>
         {manualOpen && (
           <motion.div
@@ -498,7 +473,7 @@ function TimeTab({ taskId }) {
             exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden", marginBottom: 14 }}
           >
             <div style={{ ...S.card, padding: 16 }}>
-              <div className="responsive-grid-manual" style={{ marginBottom: 10 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 10, marginBottom: 10 }}>
                 <div>
                   <label style={S.lbl}>وصف الوقت (اختياري)</label>
                   <input
@@ -530,38 +505,29 @@ function TimeTab({ taskId }) {
         )}
       </AnimatePresence>
 
-      {/* Logs list */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {logs.filter((l) => !l.isRunning && (l.durationMinutes || l.duration)).map((log, i) => (
+        {logs.filter((l) => !l.isRunning && l.durationMinutes > 0).map((log, i) => (
           <motion.div
             key={log.id || i}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ delay: i * 0.04 }}
-            style={{
-              ...S.card, padding: "10px 14px",
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-            }}
+            style={{ ...S.card, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}
           >
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#e8edf5", marginBottom: 2, wordBreak: "break-word" }}>
-                {log.description || "وقت عمل"}
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#e8edf5", marginBottom: 2 }}>
+                {log.description || log.note || "وقت عمل"}
               </div>
               <div style={{ fontSize: 10, color: "#6b7891" }}>{fmtDateTime(log.startTime || log.createdAt)}</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-              <span style={{ fontSize: 13, color: "#C9A96E", fontWeight: 800 }}>
-                {fmtMinutes(log.durationMinutes || log.duration)}
-              </span>
-              <button
-                onClick={() => handleDelete(log.id)}
-                style={{ ...S.btnGhost, height: 28, padding: "0 7px", color: "#f8717160" }}
-              >
+              <span style={{ fontSize: 13, color: "#C9A96E", fontWeight: 800 }}>{fmtMinutes(log.durationMinutes)}</span>
+              <button onClick={() => handleDelete(log.id)} style={{ ...S.btnGhost, height: 28, padding: "0 7px", color: "#f8717160" }}>
                 <Trash2 size={11} />
               </button>
             </div>
           </motion.div>
         ))}
-        {logs.length === 0 && (
+        {logs.filter((l) => !l.isRunning).length === 0 && (
           <div style={{ textAlign: "center", padding: 30, color: "#6b7891", fontSize: 13 }}>
             لم يتم تسجيل أي وقت بعد
           </div>
@@ -575,8 +541,8 @@ function TimeTab({ taskId }) {
 // Attachments Tab
 // ─────────────────────────────────────────────
 function AttachmentsTab({ taskId }) {
-  const [files, setFiles]     = useState([])
-  const [loading, setLoading] = useState(true)
+  const [files, setFiles]         = useState([])
+  const [loading, setLoading]     = useState(true)
   const [uploading, setUploading] = useState(false)
   const inputRef = useRef(null)
 
@@ -584,7 +550,7 @@ function AttachmentsTab({ taskId }) {
     getAttachments(taskId).then((d) => {
       setFiles(Array.isArray(d) ? d : d?.data || [])
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [taskId])
 
   const handleUpload = async (e) => {
@@ -618,24 +584,15 @@ function AttachmentsTab({ taskId }) {
 
   return (
     <div>
-      {/* Upload zone */}
       <div
         onClick={() => !uploading && inputRef.current?.click()}
         style={{
-          border: "1px dashed rgba(201,169,110,0.3)",
-          borderRadius: 12, padding: "24px 20px",
+          border: "1px dashed rgba(201,169,110,0.3)", borderRadius: 12, padding: "24px 20px",
           textAlign: "center", cursor: uploading ? "wait" : "pointer",
-          background: "rgba(201,169,110,0.03)",
-          marginBottom: 16, transition: "border-color .2s, background .2s",
+          background: "rgba(201,169,110,0.03)", marginBottom: 16, transition: "border-color .2s, background .2s",
         }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = "rgba(201,169,110,0.6)"
-          e.currentTarget.style.background = "rgba(201,169,110,0.06)"
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = "rgba(201,169,110,0.3)"
-          e.currentTarget.style.background = "rgba(201,169,110,0.03)"
-        }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(201,169,110,0.6)"; e.currentTarget.style.background = "rgba(201,169,110,0.06)" }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(201,169,110,0.3)"; e.currentTarget.style.background = "rgba(201,169,110,0.03)" }}
       >
         <input ref={inputRef} type="file" style={{ display: "none" }} onChange={handleUpload} />
         {uploading ? (
@@ -646,29 +603,21 @@ function AttachmentsTab({ taskId }) {
         ) : (
           <>
             <Upload size={22} color="#C9A96E" style={{ margin: "0 auto 8px", display: "block" }} />
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#e8edf5", marginBottom: 4 }}>
-              اضغط لرفع ملف
-            </div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#e8edf5", marginBottom: 4 }}>اضغط لرفع ملف</div>
             <div style={{ fontSize: 11, color: "#6b7891" }}>الحد الأقصى 20 ميجابايت</div>
           </>
         )}
       </div>
 
-      {/* Files list */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {files.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 30, color: "#6b7891", fontSize: 13 }}>
-            لا توجد مرفقات بعد
-          </div>
+          <div style={{ textAlign: "center", padding: 30, color: "#6b7891", fontSize: 13 }}>لا توجد مرفقات بعد</div>
         ) : files.map((f, i) => (
           <motion.div
             key={f.id || i}
             initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
-            style={{
-              ...S.card, padding: "12px 14px",
-              display: "flex", alignItems: "center", gap: 12,
-            }}
+            style={{ ...S.card, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}
           >
             <div style={{
               width: 36, height: 36, borderRadius: 8, flexShrink: 0,
@@ -687,19 +636,12 @@ function AttachmentsTab({ taskId }) {
             </div>
             <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
               {(f.url || f.fileUrl) && (
-                <a
-                  href={f.url || f.fileUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ ...S.btnGhost, height: 30, padding: "0 8px", textDecoration: "none" }}
-                >
+                <a href={f.url || f.fileUrl} target="_blank" rel="noreferrer"
+                  style={{ ...S.btnGhost, height: 30, padding: "0 8px", textDecoration: "none" }}>
                   <Download size={12} />
                 </a>
               )}
-              <button
-                onClick={() => handleDelete(f.id)}
-                style={{ ...S.btnGhost, height: 30, padding: "0 8px", color: "#f8717160" }}
-              >
+              <button onClick={() => handleDelete(f.id)} style={{ ...S.btnGhost, height: 30, padding: "0 8px", color: "#f8717160" }}>
                 <Trash2 size={12} />
               </button>
             </div>
@@ -714,7 +656,7 @@ function AttachmentsTab({ taskId }) {
 // Subtasks Tab
 // ─────────────────────────────────────────────
 function SubtasksTab({ task, projectId }) {
-  const [subtasks, setSubtasks] = useState(task.subtasks || [])
+  const [subtasks, setSubtasks] = useState(task.subTasks || task.subtasks || [])
   const [newTitle, setNewTitle] = useState("")
   const [adding, setAdding]     = useState(false)
 
@@ -723,17 +665,14 @@ function SubtasksTab({ task, projectId }) {
     setAdding(true)
     try {
       const res = await createTask(projectId, {
-        title: newTitle,                     // تم التعديل
+        title:        newTitle,
         parentTaskId: task.id,
-        boardColumnId: task.boardColumnId,
-        priority: 2 // تم التعديل لتجنب التثبيت
-      })     
+        boardColumnId: task.boardColumnId || task.boardId,
+        priority:     task.priority || "Medium",
+      })
       setSubtasks((s) => [...s, res?.data || res])
       setNewTitle("")
-    } catch (e) {
-        console.error("❌ API Error:", e.response?.data || e.message);
-        alert(e.response?.data?.title || e.message)
-     }
+    } catch (e) { alert(e.message) }
     finally { setAdding(false) }
   }
 
@@ -747,7 +686,11 @@ function SubtasksTab({ task, projectId }) {
   const toggleDone = async (sub) => {
     const newStatus = sub.status === "Done" ? "Todo" : "Done"
     try {
-      await updateTask(projectId, sub.id, { status: newStatus })
+      await updateTask(projectId, sub.id, {
+        title:    sub.title,
+        priority: sub.priority || "Medium",
+        status:   newStatus,
+      })
       setSubtasks((s) => s.map((x) => x.id === sub.id ? { ...x, status: newStatus } : x))
     } catch (e) { alert(e.message) }
   }
@@ -758,7 +701,6 @@ function SubtasksTab({ task, projectId }) {
 
   return (
     <div>
-      {/* Progress */}
       {total > 0 && (
         <div style={{ marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -767,15 +709,13 @@ function SubtasksTab({ task, projectId }) {
           </div>
           <div style={{ height: 5, background: "#0a1020", borderRadius: 3, overflow: "hidden" }}>
             <motion.div
-              animate={{ width: `${pct}%` }}
-              transition={{ duration: 0.5 }}
+              animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }}
               style={{ height: "100%", background: pct === 100 ? "#34d399" : "linear-gradient(90deg,#f0c98a,#C9A96E)", borderRadius: 3 }}
             />
           </div>
         </div>
       )}
 
-      {/* Add subtask */}
       <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
         <input
           style={{ ...S.input, flex: 1 }}
@@ -790,7 +730,6 @@ function SubtasksTab({ task, projectId }) {
         </button>
       </div>
 
-      {/* List */}
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <AnimatePresence>
           {subtasks.length === 0 ? (
@@ -801,12 +740,8 @@ function SubtasksTab({ task, projectId }) {
             <motion.div
               key={s.id || i}
               initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 8 }}
-              transition={{ delay: i * 0.04 }}
-              style={{
-                ...S.card, padding: "10px 14px",
-                display: "flex", alignItems: "center", gap: 10,
-              }}
+              exit={{ opacity: 0, x: 8 }} transition={{ delay: i * 0.04 }}
+              style={{ ...S.card, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}
             >
               <button
                 onClick={() => toggleDone(s)}
@@ -814,8 +749,7 @@ function SubtasksTab({ task, projectId }) {
                   width: 20, height: 20, borderRadius: 5, flexShrink: 0,
                   border: `1px solid ${s.status === "Done" ? "#34d399" : "rgba(255,255,255,0.2)"}`,
                   background: s.status === "Done" ? "rgba(52,211,153,0.15)" : "transparent",
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                  padding: 0,
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
                 }}
               >
                 {s.status === "Done" && <Check size={12} color="#34d399" />}
@@ -823,7 +757,7 @@ function SubtasksTab({ task, projectId }) {
               <span style={{
                 flex: 1, fontSize: 13, color: s.status === "Done" ? "#6b7891" : "#e8edf5",
                 textDecoration: s.status === "Done" ? "line-through" : "none",
-                transition: "all .2s", wordBreak: "break-word"
+                transition: "all .2s", wordBreak: "break-word",
               }}>
                 {s.title}
               </span>
@@ -831,15 +765,12 @@ function SubtasksTab({ task, projectId }) {
                 <span style={{
                   fontSize: 10, color: PRIORITY_CFG[s.priority].color,
                   background: `${PRIORITY_CFG[s.priority].color}14`,
-                  padding: "2px 7px", borderRadius: 5, fontWeight: 700, flexShrink: 0
+                  padding: "2px 7px", borderRadius: 5, fontWeight: 700, flexShrink: 0,
                 }}>
                   {PRIORITY_CFG[s.priority].label}
                 </span>
               )}
-              <button
-                onClick={() => handleDelete(s.id)}
-                style={{ ...S.btnGhost, height: 26, padding: "0 7px", color: "#f8717160", flexShrink: 0 }}
-              >
+              <button onClick={() => handleDelete(s.id)} style={{ ...S.btnGhost, height: 26, padding: "0 7px", color: "#f8717160", flexShrink: 0 }}>
                 <Trash2 size={11} />
               </button>
             </motion.div>
@@ -854,15 +785,15 @@ function SubtasksTab({ task, projectId }) {
 // Main Modal
 // ─────────────────────────────────────────────
 export default function TaskModal({ taskId, projectId, onClose, onUpdated }) {
-  const [task, setTask]       = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [task, setTask]           = useState(null)
+  const [loading, setLoading]     = useState(true)
   const [activeTab, setActiveTab] = useState("details")
 
   useEffect(() => {
     getTask(projectId, taskId).then((d) => {
       setTask(d?.data || d)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [taskId, projectId])
 
   const handleUpdated = (updated) => {
@@ -870,10 +801,9 @@ export default function TaskModal({ taskId, projectId, onClose, onUpdated }) {
     onUpdated?.(updated)
   }
 
-  // tab counts
   const commentCount    = task?.commentsCount    ?? task?.comments?.length    ?? 0
   const attachmentCount = task?.attachmentsCount ?? task?.attachments?.length ?? 0
-  const subtaskCount    = task?.subtasks?.length ?? 0
+  const subtaskCount    = (task?.subTasks || task?.subtasks)?.length ?? 0
 
   const tabLabel = (tab) => {
     if (tab.key === "comments"    && commentCount)    return `${tab.label} (${commentCount})`
@@ -891,34 +821,16 @@ export default function TaskModal({ taskId, projectId, onClose, onUpdated }) {
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(201,169,110,.2); border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,169,110,.5); }
         ::-webkit-calendar-picker-indicator { filter: invert(0.8); }
-
-        /* Mobile Adjustments */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-        
-        .responsive-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
-        }
-
-        .responsive-grid-manual {
-          display: grid;
-          grid-template-columns: 1fr 100px;
-          gap: 10px;
-        }
-
+        .responsive-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         @media (max-width: 600px) {
           .modal-overlay { padding: 0 !important; }
-          .modal-content { 
-            width: 100% !important; 
-            max-height: 100dvh !important; 
-            height: 100dvh !important;
-            border-radius: 0 !important;
-            border: none !important;
+          .modal-content {
+            width: 100% !important; max-height: 100dvh !important;
+            height: 100dvh !important; border-radius: 0 !important; border: none !important;
           }
           .responsive-grid { grid-template-columns: 1fr !important; gap: 14px; }
-          .responsive-grid-manual { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -938,17 +850,12 @@ export default function TaskModal({ taskId, projectId, onClose, onUpdated }) {
           initial={{ scale: 0.9, y: 24 }} animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 24 }} transition={{ type: "spring", damping: 22 }}
           style={{
-            background: "#0d1420",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 16,
-            width: "100%", maxWidth: 700,
-            maxHeight: "92vh",
-            display: "flex", flexDirection: "column",
-            overflow: "hidden", position: "relative",
+            background: "#0d1420", border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 16, width: "100%", maxWidth: 700, maxHeight: "92vh",
+            display: "flex", flexDirection: "column", overflow: "hidden", position: "relative",
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Gold top bar */}
           <div style={{
             position: "absolute", top: 0, right: 0, left: 0, height: 3,
             background: "linear-gradient(90deg,#C9A96E,#d4a855,transparent)",
@@ -968,9 +875,7 @@ export default function TaskModal({ taskId, projectId, onClose, onUpdated }) {
               <div style={{ padding: "22px 24px 0", flexShrink: 0 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
                   <div style={{ flex: 1, minWidth: 0, paddingLeft: 12 }}>
-                    <div style={{ fontSize: 11, color: "#6b7891", marginBottom: 6 }}>
-                      تاسك #{task.id}
-                    </div>
+                    <div style={{ fontSize: 11, color: "#6b7891", marginBottom: 6 }}>تاسك #{task.id}</div>
                     <h2 style={{ fontSize: 18, fontWeight: 900, color: "#e8edf5", margin: 0, lineHeight: 1.4, wordBreak: "break-word" }}>
                       {task.title}
                     </h2>
@@ -1003,11 +908,8 @@ export default function TaskModal({ taskId, projectId, onClose, onUpdated }) {
                 </div>
               </div>
 
-              {/* Tab body */}
-              <div
-                style={{ flex: 1, overflowY: "auto", padding: "20px 24px 24px", background: "#080d16" }}
-                className="custom-scroll"
-              >
+              {/* Body */}
+              <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px 24px", background: "#080d16" }} className="custom-scroll">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeTab}
