@@ -6,17 +6,14 @@ import {
   Plus, MoreHorizontal, Edit3, Trash2, Loader2,
   CheckCircle2, Circle, PauseCircle, XCircle, TrendingUp,
   Clock, AlertCircle, ChevronDown, UserPlus, Play, Flag,
-  Tag, Calendar, Activity,
+  Tag, Calendar, Activity, Menu, X,
 } from "lucide-react"
 import {
   getProject, getBoards, getTasks, getMembers, getSprints,
   getProjectStats, createBoard, updateBoard, deleteBoard,
-  createTask, moveTask,deleteTask, deleteSprint, startSprint, completeSprint,
+  createTask, moveTask, deleteTask, deleteSprint, startSprint, completeSprint,
   createSprint, updateProjectStatus, addMember, removeMember,
 } from "../../services/projectService"
-
-// ⚠️ تأكد من عمل استيراد للـ TaskModal هنا بناءً على مسار الملف عندك
-// import TaskModal from "./TaskModal" 
 
 // ─────────────────────────────────────────────
 // Constants
@@ -37,10 +34,10 @@ const PRIORITY_CFG = {
 }
 
 const TABS = [
-  { key: "kanban",  label: "لوحة المهام",  Icon: Kanban },
-  { key: "members", label: "الأعضاء",      Icon: Users        },
-  { key: "sprints", label: "السبرينتات",   Icon: Zap          },
-  { key: "stats",   label: "الإحصائيات",   Icon: BarChart2    },
+  { key: "kanban",  label: "المهام",      Icon: Kanban   },
+  { key: "members", label: "الأعضاء",     Icon: Users    },
+  { key: "sprints", label: "السبرينتات",  Icon: Zap      },
+  { key: "stats",   label: "الإحصائيات",  Icon: BarChart2},
 ]
 
 // ─────────────────────────────────────────────
@@ -95,14 +92,14 @@ function Modal({ onClose, children, maxWidth = 460 }) {
         position: "fixed", inset: 0, zIndex: 200,
         background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 20, direction: "rtl",
+        padding: 16, direction: "rtl",
       }}
       onClick={onClose}
     >
       <motion.div
         initial={{ scale: 0.9, y: 18 }} animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 18 }} transition={{ type: "spring", damping: 20 }}
-        style={{ ...S.card, padding: 26, width: "100%", maxWidth, position: "relative" }}
+        style={{ ...S.card, padding: 22, width: "100%", maxWidth, position: "relative" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{
@@ -122,7 +119,7 @@ function Modal({ onClose, children, maxWidth = 460 }) {
 function TaskCard({ task, boards, projectId, onMove, onDelete, onClick }) {
   const [menu, setMenu] = useState(false)
   const p = PRIORITY_CFG[task.priority]
-  
+
   return (
     <motion.div
       layout
@@ -138,7 +135,6 @@ function TaskCard({ task, boards, projectId, onMove, onDelete, onClick }) {
       }}
       whileHover={{ borderColor: "rgba(201,169,110,0.2)" }}
     >
-      {/* Priority dot */}
       {p && (
         <div style={{
           position: "absolute", top: 10, left: 10,
@@ -162,7 +158,7 @@ function TaskCard({ task, boards, projectId, onMove, onDelete, onClick }) {
       )}
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {p && (
             <span style={{
               fontSize: 10, background: `${p.color}14`, color: p.color,
@@ -172,16 +168,12 @@ function TaskCard({ task, boards, projectId, onMove, onDelete, onClick }) {
             </span>
           )}
           {task.dueDate && (
-            <span style={{
-              fontSize: 10, color: "#6b7891",
-              display: "flex", alignItems: "center", gap: 4,
-            }}>
+            <span style={{ fontSize: 10, color: "#6b7891", display: "flex", alignItems: "center", gap: 4 }}>
               <Calendar size={10} /> {new Date(task.dueDate).toLocaleDateString("ar-EG")}
             </span>
           )}
         </div>
 
-        {/* move menu */}
         <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => setMenu((v) => !v)}
@@ -244,7 +236,7 @@ function TaskCard({ task, boards, projectId, onMove, onDelete, onClick }) {
 // ─────────────────────────────────────────────
 // Kanban Column
 // ─────────────────────────────────────────────
-function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTask, onAddTask, onDeleteBoard, onTaskClick }) {
+function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTask, onAddTask, onDeleteBoard, onTaskClick, isMobile }) {
   const [addOpen, setAddOpen] = useState(false)
   const [title, setTitle] = useState("")
   const [priority, setPriority] = useState("Medium")
@@ -254,10 +246,14 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
   const handleAdd = async () => {
     if (!title.trim()) return
     setSaving(true)
-    const priorityMap = { Low: 1, Medium: 2, High: 3, Critical: 4 };
+    const priorityMap = { Low: 1, Medium: 2, High: 3, Critical: 4 }
     try {
-      await onAddTask({ title, priority: priorityMap[priority], boardId: board.id })
-
+      // ✅ FIX: parseInt to ensure boardColumnId is always an integer
+      await onAddTask({
+        title,
+        priority: priorityMap[priority],
+        boardColumnId: parseInt(board.id, 10),
+      })
       setTitle(""); setPriority("Medium"); setAddOpen(false)
     } finally {
       setSaving(false)
@@ -267,8 +263,11 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
   return (
     <div style={{
       ...S.card,
-      minWidth: 280, width: 280, flexShrink: 0,
-      display: "flex", flexDirection: "column", maxHeight: "calc(100vh - 280px)",
+      minWidth: isMobile ? "85vw" : 280,
+      width: isMobile ? "85vw" : 280,
+      flexShrink: 0,
+      display: "flex", flexDirection: "column",
+      maxHeight: isMobile ? "calc(100vh - 320px)" : "calc(100vh - 280px)",
     }}>
       {/* Column header */}
       <div style={{
@@ -409,10 +408,10 @@ function MembersTab({ projectId, currentUserRole }) {
   }
 
   const ROLE_CFG = {
-    Owner:   { label: "مالك",   color: "#C9A96E" },
-    Manager: { label: "مدير",   color: "#6ea8fe" },
-    Member:  { label: "عضو",    color: "#34d399" },
-    Viewer:  { label: "مشاهد",  color: "#94a3b8" },
+    Owner:   { label: "مالك",  color: "#C9A96E" },
+    Manager: { label: "مدير",  color: "#6ea8fe" },
+    Member:  { label: "عضو",   color: "#34d399" },
+    Viewer:  { label: "مشاهد", color: "#94a3b8" },
   }
 
   if (loading) return (
@@ -423,7 +422,7 @@ function MembersTab({ projectId, currentUserRole }) {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div style={{ fontSize: 14, fontWeight: 800, color: "#e8edf5" }}>
           الأعضاء ({members.length})
         </div>
@@ -442,7 +441,7 @@ function MembersTab({ projectId, currentUserRole }) {
             style={{ overflow: "hidden", marginBottom: 16 }}
           >
             <div style={{ ...S.card, padding: 18 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 140px", gap: 10, marginBottom: 10 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 10 }}>
                 <div>
                   <label style={S.lbl}>البريد الإلكتروني</label>
                   <input
@@ -485,25 +484,27 @@ function MembersTab({ projectId, currentUserRole }) {
               initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.04 }}
               style={{
-                ...S.card, padding: "14px 18px",
-                display: "flex", alignItems: "center", gap: 14,
+                ...S.card, padding: "14px 16px",
+                display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
               }}
             >
               <div style={{
-                width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
+                width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
                 background: `${rc.color}18`, border: `1px solid ${rc.color}30`,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                color: rc.color, fontWeight: 900, fontSize: 16,
+                color: rc.color, fontWeight: 900, fontSize: 15,
               }}>
                 {(m.fullName || m.name || "?")[0]}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#e8edf5" }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#e8edf5" }}>
                   {m.fullName || m.name}
                 </div>
-                <div style={{ fontSize: 11, color: "#6b7891" }}>{m.email}</div>
+                <div style={{ fontSize: 11, color: "#6b7891", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {m.email}
+                </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <span style={{
                   fontSize: 11, background: `${rc.color}14`, color: rc.color,
                   padding: "3px 10px", borderRadius: 6, fontWeight: 700,
@@ -511,9 +512,7 @@ function MembersTab({ projectId, currentUserRole }) {
                   {rc.label}
                 </span>
                 {m.tasksCount !== undefined && (
-                  <span style={{ fontSize: 11, color: "#6b7891" }}>
-                    {m.tasksCount} تاسك
-                  </span>
+                  <span style={{ fontSize: 11, color: "#6b7891" }}>{m.tasksCount} تاسك</span>
                 )}
                 {currentUserRole === "Owner" && m.role !== "Owner" && (
                   <button
@@ -583,9 +582,9 @@ function SprintsTab({ projectId }) {
   }
 
   const SPRINT_CFG = {
-    Planned:   { label: "مخطط",   color: "#6ea8fe", bg: "rgba(110,168,254,.12)" },
-    Active:    { label: "نشط",    color: "#34d399", bg: "rgba(52,211,153,.12)"  },
-    Completed: { label: "مكتمل",  color: "#C9A96E", bg: "rgba(201,169,110,.12)" },
+    Planned:   { label: "مخطط",  color: "#6ea8fe", bg: "rgba(110,168,254,.12)" },
+    Active:    { label: "نشط",   color: "#34d399", bg: "rgba(52,211,153,.12)"  },
+    Completed: { label: "مكتمل", color: "#C9A96E", bg: "rgba(201,169,110,.12)" },
   }
 
   if (loading) return (
@@ -596,7 +595,7 @@ function SprintsTab({ projectId }) {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <div style={{ fontSize: 14, fontWeight: 800, color: "#e8edf5" }}>السبرينتات ({sprints.length})</div>
         <button onClick={() => setAddOpen((v) => !v)} style={S.btnGold}>
           <Plus size={14} /> سبرينت جديد
@@ -610,8 +609,8 @@ function SprintsTab({ projectId }) {
             exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden", marginBottom: 16 }}
           >
             <div style={{ ...S.card, padding: 18 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 }}>
-                <div style={{ gridColumn: "span 3" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 12 }}>
+                <div>
                   <label style={S.lbl}>اسم السبرينت</label>
                   <input
                     style={S.input}
@@ -622,15 +621,17 @@ function SprintsTab({ projectId }) {
                     onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.08)")}
                   />
                 </div>
-                <div>
-                  <label style={S.lbl}>تاريخ البداية</label>
-                  <input type="date" style={S.input} value={form.startDate}
-                    onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} />
-                </div>
-                <div>
-                  <label style={S.lbl}>تاريخ النهاية</label>
-                  <input type="date" style={S.input} value={form.endDate}
-                    onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label style={S.lbl}>تاريخ البداية</label>
+                    <input type="date" style={S.input} value={form.startDate}
+                      onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label style={S.lbl}>تاريخ النهاية</label>
+                    <input type="date" style={S.input} value={form.endDate}
+                      onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} />
+                  </div>
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
@@ -658,11 +659,11 @@ function SprintsTab({ projectId }) {
               key={sp.id}
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              style={{ ...S.card, padding: "18px 20px", borderRight: `3px solid ${sc.color}` }}
+              style={{ ...S.card, padding: "16px 18px", borderRight: `3px solid ${sc.color}` }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12, gap: 10, flexWrap: "wrap" }}>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: "#e8edf5", marginBottom: 4 }}>{sp.name}</div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: "#e8edf5", marginBottom: 4 }}>{sp.name}</div>
                   <span style={{
                     fontSize: 11, background: sc.bg, color: sc.color,
                     padding: "2px 10px", borderRadius: 6, fontWeight: 700,
@@ -670,7 +671,7 @@ function SprintsTab({ projectId }) {
                     {sc.label}
                   </span>
                 </div>
-                <div style={{ display: "flex", gap: 6 }}>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {sp.status === "Planned" && (
                     <button onClick={() => handleStart(sp.id)} style={{ ...S.btnGold, height: 32, fontSize: 11 }}>
                       <Play size={12} /> بدء
@@ -690,7 +691,7 @@ function SprintsTab({ projectId }) {
               </div>
 
               {(sp.startDate || sp.endDate) && (
-                <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
+                <div style={{ display: "flex", gap: 16, marginBottom: 12, flexWrap: "wrap" }}>
                   {sp.startDate && (
                     <span style={{ fontSize: 11, color: "#6b7891", display: "flex", alignItems: "center", gap: 4 }}>
                       <Calendar size={11} color="#C9A96E" />
@@ -751,17 +752,17 @@ function StatsTab({ projectId }) {
   if (!stats) return <div style={{ textAlign: "center", padding: 60, color: "#6b7891" }}>لا توجد بيانات</div>
 
   const cards = [
-    { label: "إجمالي المهام",   value: stats.totalTasks   ?? 0, color: "#C9A96E" },
-    { label: "مكتملة",          value: stats.doneTasks    ?? 0, color: "#34d399" },
-    { label: "متأخرة",          value: stats.overdueTasks ?? 0, color: "#f87171" },
-    { label: "قيد التنفيذ",     value: stats.inProgress   ?? 0, color: "#6ea8fe" },
-    { label: "نسبة الإنجاز",    value: `${stats.progressPercent ?? 0}%`, color: "#a78bfa" },
-    { label: "ساعات مسجلة",     value: stats.totalTimeLogged ? `${Math.round(stats.totalTimeLogged / 60)}س` : "0س", color: "#fbbf24" },
+    { label: "إجمالي المهام",  value: stats.totalTasks   ?? 0, color: "#C9A96E" },
+    { label: "مكتملة",         value: stats.doneTasks    ?? 0, color: "#34d399" },
+    { label: "متأخرة",         value: stats.overdueTasks ?? 0, color: "#f87171" },
+    { label: "قيد التنفيذ",    value: stats.inProgress   ?? 0, color: "#6ea8fe" },
+    { label: "نسبة الإنجاز",   value: `${stats.progressPercent ?? 0}%`, color: "#a78bfa" },
+    { label: "ساعات مسجلة",    value: stats.totalTimeLogged ? `${Math.round(stats.totalTimeLogged / 60)}س` : "0س", color: "#fbbf24" },
   ]
 
   return (
     <div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: 12, marginBottom: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))", gap: 12, marginBottom: 24 }}>
         {cards.map((c, i) => (
           <motion.div
             key={c.label}
@@ -770,13 +771,12 @@ function StatsTab({ projectId }) {
             style={{ ...S.card, padding: "16px", position: "relative", overflow: "hidden" }}
           >
             <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: c.color, opacity: 0.35 }} />
-            <div style={{ fontSize: 26, fontWeight: 900, color: "#e8edf5", marginBottom: 6 }}>{c.value}</div>
+            <div style={{ fontSize: 24, fontWeight: 900, color: "#e8edf5", marginBottom: 6 }}>{c.value}</div>
             <div style={{ fontSize: 11, color: "#6b7891", fontWeight: 700 }}>{c.label}</div>
           </motion.div>
         ))}
       </div>
 
-      {/* Top members */}
       {stats.topMembers?.length > 0 && (
         <div style={{ ...S.card, padding: "18px 20px" }}>
           <div style={{ fontSize: 13, fontWeight: 800, color: "#C9A96E", marginBottom: 14, display: "flex", alignItems: "center", gap: 7 }}>
@@ -788,14 +788,14 @@ function StatsTab({ projectId }) {
                 <span style={{ fontSize: 11, color: "#6b7891", width: 18 }}>#{i + 1}</span>
                 <div style={{
                   width: 32, height: 32, borderRadius: "50%",
-                  background: "rgba(201,169,110,0.12)",
+                  background: "rgba(201,169,110,0.12)", flexShrink: 0,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   color: "#C9A96E", fontWeight: 800, fontSize: 13,
                 }}>
                   {(m.name || "?")[0]}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#e8edf5", marginBottom: 4 }}>{m.name}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#e8edf5", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name}</div>
                   <div style={{ height: 3, background: "#080d16", borderRadius: 2 }}>
                     <div style={{
                       height: "100%", borderRadius: 2,
@@ -804,7 +804,7 @@ function StatsTab({ projectId }) {
                     }} />
                   </div>
                 </div>
-                <span style={{ fontSize: 12, color: "#C9A96E", fontWeight: 700 }}>{m.tasksCompleted}</span>
+                <span style={{ fontSize: 12, color: "#C9A96E", fontWeight: 700, flexShrink: 0 }}>{m.tasksCompleted}</span>
               </div>
             ))}
           </div>
@@ -815,23 +815,37 @@ function StatsTab({ projectId }) {
 }
 
 // ─────────────────────────────────────────────
+// useIsMobile hook
+// ─────────────────────────────────────────────
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < breakpoint)
+    window.addEventListener("resize", handler)
+    return () => window.removeEventListener("resize", handler)
+  }, [breakpoint])
+  return isMobile
+}
+
+// ─────────────────────────────────────────────
 // Main Page
 // ─────────────────────────────────────────────
 export default function ProjectDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
 
-  const [project, setProject]   = useState(null)
-  const [boards, setBoards]     = useState([])
-  const [tasks, setTasks]       = useState([])
-  const [loading, setLoading]   = useState(true)
+  const [project, setProject]     = useState(null)
+  const [boards, setBoards]       = useState([])
+  const [tasks, setTasks]         = useState([])
+  const [loading, setLoading]     = useState(true)
   const [activeTab, setActiveTab] = useState("kanban")
   const [addColOpen, setAddColOpen] = useState(false)
   const [newColName, setNewColName] = useState("")
   const [newColColor, setNewColColor] = useState("#C9A96E")
   const [statusMenu, setStatusMenu] = useState(false)
-  
-  const [openTaskId, setOpenTaskId] = useState(null) 
+  const [mobileTabOpen, setMobileTabOpen] = useState(false)
+  const [openTaskId, setOpenTaskId] = useState(null)
 
   useEffect(() => {
     ;(async () => {
@@ -869,8 +883,12 @@ export default function ProjectDetails() {
     } catch (e) { alert(e.message) }
   }
 
+  // ✅ FIX: parseInt boardColumnId before sending to API
   const handleAddTask = async (body) => {
-    const res = await createTask(id, body)
+    const res = await createTask(id, {
+      ...body,
+      boardColumnId: parseInt(body.boardColumnId, 10),
+    })
     const newTask = res?.data || res
     setTasks((t) => [...t, newTask])
   }
@@ -916,6 +934,8 @@ export default function ProjectDetails() {
   const tasksDone  = tasks.filter((t) => t.status === "Done" || t.boardId === boards.find((b) => b.name?.toLowerCase().includes("done"))?.id).length
   const progress   = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0
 
+  const activeTabCfg = TABS.find(t => t.key === activeTab)
+
   return (
     <div style={{
       background: "#080d16", minHeight: "100vh",
@@ -924,52 +944,91 @@ export default function ProjectDetails() {
     }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .kanban-scroll { display: flex; gap: 16px; overflow-x: auto; padding: 20px 28px 28px; }
+
+        /* Kanban scroll */
+        .kanban-scroll {
+          display: flex;
+          gap: 16px;
+          overflow-x: auto;
+          padding: 16px 16px 24px;
+        }
+        @media (min-width: 640px) {
+          .kanban-scroll { padding: 20px 28px 28px; }
+        }
         .kanban-scroll::-webkit-scrollbar { height: 6px; }
         .kanban-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,.02); border-radius: 10px; }
         .kanban-scroll::-webkit-scrollbar-thumb { background: rgba(201,169,110,.2); border-radius: 10px; }
         .kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,169,110,.5); }
+
         ::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+
+        /* Mobile tab sheet */
+        .mobile-tab-sheet {
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          z-index: 150;
+          background: #0d1420;
+          border-top: 1px solid rgba(255,255,255,0.08);
+          border-radius: 18px 18px 0 0;
+          padding: 12px 0 env(safe-area-inset-bottom, 12px);
+        }
+
+        /* Bottom nav bar for mobile */
+        .bottom-nav {
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          z-index: 100;
+          background: #0a1018;
+          border-top: 1px solid rgba(255,255,255,0.07);
+          display: flex;
+          height: 60px;
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
       `}</style>
 
-      {/* ── Top header ── */}
+      {/* ── Top Header ── */}
       <div style={{
-        padding: "24px 28px 0",
+        padding: isMobile ? "16px 16px 0" : "24px 28px 0",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
       }}>
+
         {/* Breadcrumb */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: isMobile ? 12 : 18 }}>
           <button
             onClick={() => navigate("/dashboard/projects")}
             style={{ ...S.btnGhost, height: 30, fontSize: 11, padding: "0 10px" }}
           >
             <ArrowRight size={13} style={{ transform: "rotate(180deg)" }} />
-            البروجكتات
+            {!isMobile && "البروجكتات"}
           </button>
           <span style={{ color: "#6b7891", fontSize: 12 }}>/</span>
-          <span style={{ fontSize: 12, color: "#C9A96E", fontWeight: 700 }}>{project.name}</span>
+          <span style={{ fontSize: 12, color: "#C9A96E", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: isMobile ? 160 : 300 }}>{project.name}</span>
         </div>
 
         {/* Project title row */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 14, marginBottom: 20 }}>
-          <div>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: "#e8edf5", margin: "0 0 8px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: isMobile ? 14 : 20 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h1 style={{ fontSize: isMobile ? 18 : 24, fontWeight: 900, color: "#e8edf5", margin: "0 0 6px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {project.name}
             </h1>
-            {project.description && (
+            {project.description && !isMobile && (
               <p style={{ fontSize: 12, color: "#6b7891", margin: 0, maxWidth: 500 }}>{project.description}</p>
             )}
           </div>
 
           {/* Status + progress */}
-          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             {/* progress mini */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#0d1420", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 9, padding: "8px 14px" }}>
-              <div style={{ width: 60, height: 4, background: "#080d16", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              background: "#0d1420", border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: 9, padding: "6px 12px",
+            }}>
+              <div style={{ width: isMobile ? 44 : 60, height: 4, background: "#080d16", borderRadius: 2, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg,#f0c98a,#C9A96E)", borderRadius: 2, transition: "width .5s" }} />
               </div>
               <span style={{ fontSize: 12, color: "#C9A96E", fontWeight: 800 }}>{progress}%</span>
-              <span style={{ fontSize: 11, color: "#6b7891" }}>{tasksTotal} تاسك</span>
+              {!isMobile && <span style={{ fontSize: 11, color: "#6b7891" }}>{tasksTotal} تاسك</span>}
             </div>
 
             {/* status dropdown */}
@@ -977,8 +1036,10 @@ export default function ProjectDetails() {
               <button
                 onClick={() => setStatusMenu((v) => !v)}
                 style={{
-                  ...S.btnGhost, height: 36,
+                  ...S.btnGhost, height: 34,
                   background: st.bg, color: st.color, borderColor: `${st.color}30`,
+                  fontSize: isMobile ? 11 : 12,
+                  padding: isMobile ? "0 10px" : "0 12px",
                 }}
               >
                 <st.Icon size={13} /> {st.label} <ChevronDown size={12} />
@@ -989,7 +1050,7 @@ export default function ProjectDetails() {
                     initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.92 }}
                     style={{
-                      position: "absolute", top: 40, left: 0, zIndex: 50,
+                      position: "absolute", top: 38, left: 0, zIndex: 50,
                       background: "#131b2a", border: "1px solid rgba(255,255,255,0.1)",
                       borderRadius: 10, padding: 6, minWidth: 150,
                       boxShadow: "0 8px 30px rgba(0,0,0,0.5)",
@@ -1014,28 +1075,42 @@ export default function ProjectDetails() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: 4 }}>
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                display: "flex", alignItems: "center", gap: 7,
-                padding: "10px 16px", borderRadius: "9px 9px 0 0",
-                border: "none", cursor: "pointer",
-                background: activeTab === tab.key ? "#0d1420" : "transparent",
-                color: activeTab === tab.key ? "#C9A96E" : "#6b7891",
-                fontSize: 13, fontWeight: 700,
-                fontFamily: "'Cairo',sans-serif",
-                borderBottom: activeTab === tab.key ? "2px solid #C9A96E" : "2px solid transparent",
-                transition: "all .2s",
-              }}
-            >
-              <tab.Icon size={14} /> {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* ── Tabs: Desktop = inline, Mobile = hidden (bottom nav) ── */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 4 }}>
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 7,
+                  padding: "10px 16px", borderRadius: "9px 9px 0 0",
+                  border: "none", cursor: "pointer",
+                  background: activeTab === tab.key ? "#0d1420" : "transparent",
+                  color: activeTab === tab.key ? "#C9A96E" : "#6b7891",
+                  fontSize: 13, fontWeight: 700,
+                  fontFamily: "'Cairo',sans-serif",
+                  borderBottom: activeTab === tab.key ? "2px solid #C9A96E" : "2px solid transparent",
+                  transition: "all .2s",
+                }}
+              >
+                <tab.Icon size={14} /> {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Mobile: show current tab name as pill */}
+        {isMobile && (
+          <div style={{ paddingBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+            {activeTabCfg && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#C9A96E", fontSize: 13, fontWeight: 800 }}>
+                <activeTabCfg.Icon size={14} />
+                {activeTabCfg.label}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Tab Content ── */}
@@ -1046,6 +1121,7 @@ export default function ProjectDetails() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18 }}
+          style={{ paddingBottom: isMobile ? 72 : 0 }}
         >
           {/* KANBAN */}
           {activeTab === "kanban" && (
@@ -1062,12 +1138,13 @@ export default function ProjectDetails() {
                     onDeleteTask={handleDeleteTask}
                     onAddTask={handleAddTask}
                     onDeleteBoard={handleDeleteBoard}
-                    onTaskClick={setOpenTaskId} // ← تمرير الدالة هنا للـ Column
+                    onTaskClick={setOpenTaskId}
+                    isMobile={isMobile}
                   />
                 ))}
 
                 {/* Add column */}
-                <div style={{ minWidth: 260, flexShrink: 0 }}>
+                <div style={{ minWidth: isMobile ? 220 : 260, flexShrink: 0 }}>
                   {!addColOpen ? (
                     <button
                       onClick={() => setAddColOpen(true)}
@@ -1129,35 +1206,72 @@ export default function ProjectDetails() {
 
           {/* MEMBERS */}
           {activeTab === "members" && (
-            <div style={{ padding: "24px 28px" }}>
+            <div style={{ padding: isMobile ? "16px" : "24px 28px" }}>
               <MembersTab projectId={id} currentUserRole={project.myRole || "Member"} />
             </div>
           )}
 
           {/* SPRINTS */}
           {activeTab === "sprints" && (
-            <div style={{ padding: "24px 28px" }}>
+            <div style={{ padding: isMobile ? "16px" : "24px 28px" }}>
               <SprintsTab projectId={id} />
             </div>
           )}
 
           {/* STATS */}
           {activeTab === "stats" && (
-            <div style={{ padding: "24px 28px" }}>
+            <div style={{ padding: isMobile ? "16px" : "24px 28px" }}>
               <StatsTab projectId={id} />
             </div>
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* ← الـ Modal تم وضعه هنا في الصفحة الرئيسية عشان يغطي الشاشة كلها */}
+      {/* ── Mobile Bottom Navigation ── */}
+      {isMobile && (
+        <nav className="bottom-nav">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.key
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  flex: 1, display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center", gap: 4,
+                  background: "none", border: "none", cursor: "pointer",
+                  color: isActive ? "#C9A96E" : "#4a5568",
+                  fontFamily: "'Cairo',sans-serif",
+                  transition: "color .2s",
+                  position: "relative",
+                }}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="tab-indicator"
+                    style={{
+                      position: "absolute", top: 0, left: "20%", right: "20%",
+                      height: 2, background: "#C9A96E", borderRadius: "0 0 4px 4px",
+                    }}
+                    transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                  />
+                )}
+                <tab.Icon size={18} />
+                <span style={{ fontSize: 9, fontWeight: isActive ? 800 : 600 }}>{tab.label}</span>
+              </button>
+            )
+          })}
+        </nav>
+      )}
+
+      {/* Task Modal */}
       <AnimatePresence>
         {openTaskId && (
-          <TaskModal // ← تأكد إن الـ TaskModal معموله import فوق
+          <TaskModal
             taskId={openTaskId}
             projectId={id}
             onClose={() => setOpenTaskId(null)}
-            onUpdated={(updated) => setTasks(t => t.map(x => x.id === updated.id ? {...x,...updated} : x))}
+            onUpdated={(updated) => setTasks(t => t.map(x => x.id === updated.id ? { ...x, ...updated } : x))}
           />
         )}
       </AnimatePresence>
