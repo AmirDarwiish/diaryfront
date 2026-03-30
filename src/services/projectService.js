@@ -11,7 +11,9 @@ const headers = () => ({
 // ─── Projects ────────────────────────────────────────────────────────────────
 
 export async function getProjects() {
-  const res = await fetch(`${BASE}/api/projects`, { headers: headers() });
+  const res = await fetch(`${BASE}/api/projects`, { headers: headers() 
+    ,credentials: "include" // جرب ضيف السطر ده
+  });
   if (!res.ok) throw new Error(`getProjects: ${res.status}`);
   return res.json();
 }

@@ -1639,6 +1639,12 @@ export default function Dashboard() {
           <button onClick={() => setShowCreate(true)} style={{ ...btnPrim, height:36, padding:'0 14px', fontSize:13, display:'flex', alignItems:'center', gap:6 }}>
             <IconAdd /> ليد جديد
           </button>
+          <button 
+    onClick={() => navigate('/dashboard/projects')} 
+    style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13, color: '#C9A96E', borderColor: 'rgba(201,169,110,0.3)' }}
+  >
+    إدارة البروجكتات
+  </button>
           <button onClick={loadLeads} style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13 }}>تحديث</button>
           <button onClick={exportCSV} style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13 }}>CSV</button>
           <button onClick={exportExcel} style={{ ...btnSec, height:36, padding:'0 12px', fontSize:13 }}>Excel</button>
