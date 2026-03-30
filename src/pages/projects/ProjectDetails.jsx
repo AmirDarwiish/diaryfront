@@ -11,7 +11,7 @@ import {
 import {
   getProject, getBoards, getTasks, getMembers, getSprints,
   getProjectStats, createBoard, updateBoard, deleteBoard,
-  createTask, moveTask, deleteSprint, startSprint, completeSprint,
+  createTask, moveTask,deleteTask, deleteSprint, startSprint, completeSprint,
   createSprint, updateProjectStatus, addMember, removeMember,
 } from "../../services/projectService"
 
@@ -883,7 +883,6 @@ export default function ProjectDetails() {
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm("حذف التاسك؟")) return
     try {
-      const { deleteTask } = await import("../../services/projectService")
       await deleteTask(id, taskId)
       setTasks((t) => t.filter((x) => x.id !== taskId))
     } catch (e) { alert(e.message) }
