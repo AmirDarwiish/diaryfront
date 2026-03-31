@@ -81,7 +81,15 @@ const S = {
     display: "flex", alignItems: "center", gap: 6,
   },
 }
+// Integer → String maps (الباك بيبعت أرقام)
+const PRIORITY_INT_MAP = { 1: "Low", 2: "Medium", 3: "High", 4: "Critical" }
+const PROJECT_STATUS_INT_MAP = { 1: "Planning", 2: "Active", 3: "OnHold", 4: "Done", 5: "Cancelled" }
+const TASK_STATUS_INT_MAP = { 1: "Todo", 2: "InProgress", 3: "InReview", 4: "Done" }
 
+// Helper يقبل رقم أو string
+const normPriority    = (v) => typeof v === "number" ? PRIORITY_INT_MAP[v]    : v
+const normProjectStatus = (v) => typeof v === "number" ? PROJECT_STATUS_INT_MAP[v] : v
+const normTaskStatus  = (v) => typeof v === "number" ? TASK_STATUS_INT_MAP[v]  : v
 // ─────────────────────────────────────────────
 // useIsMobile
 // ─────────────────────────────────────────────
@@ -100,7 +108,8 @@ function useIsMobile(breakpoint = 640) {
 // ─────────────────────────────────────────────
 function TaskCard({ task, boards, onMove, onDelete, onClick }) {
   const [menu, setMenu] = useState(false)
-  const p = PRIORITY_CFG[task.priority]
+const p = PRIORITY_CFG[normPriority(task.priority)]
+const s = STATUS_CFG[normTaskStatus(task.status)]
 
   return (
     <motion.div
@@ -855,16 +864,31 @@ export default function ProjectDetails() {
     setTasks((t) => [...t, newTask])
   }
 
-  const handleMoveTask = async (taskId, boardId) => {
-    try {
-      await moveTask(id, taskId, boardId)
-      setTasks((t) => t.map((x) => x.id === taskId
-        ? { ...x, boardColumnId: boardId, boardId }
-        : x
-      ))
-    } catch (e) { alert(e.message) }
-  }
+const handleMoveTask = async (taskId, boardId) => {
+  try {
+    await moveTask(id, taskId, boardId)
+    
+    // الباك بيعمل auto-map من اسم الكولومن للـ status
+    // عشان الـ UI يتحدث صح، نحتاج نعرف اسم الكولومن
+    const targetBoard = boards.find((b) => b.id === boardId)
+    const statusMap = {
+      "To Do":       1,  // أو "Todo" لو الباك بيرجع string
+      "In Progress": 2,
+      "In Review":   3,
+      "Done":        4,
+    }
+    const newStatus = statusMap[targetBoard?.name] ?? undefined
 
+    setTasks((t) => t.map((x) => x.id === taskId
+      ? { 
+          ...x, 
+          boardColumnId: boardId,
+          ...(newStatus !== undefined && { status: newStatus })
+        }
+      : x
+    ))
+  } catch (e) { alert(e.message) }
+}
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm("حذف التاسك؟")) return
     try {
@@ -896,7 +920,7 @@ export default function ProjectDetails() {
 
   const st = STATUS_CFG[project.status] || STATUS_CFG.Planning
   const tasksTotal = tasks.length
-  const tasksDone  = tasks.filter((t) => t.status === "Done").length
+const tasksDone = tasks.filter((t) => normTaskStatus(t.status) === "Done").length
   const progress   = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0
   const activeTabCfg = TABS.find((t) => t.key === activeTab)
 

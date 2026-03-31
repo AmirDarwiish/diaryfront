@@ -97,7 +97,7 @@ const S = {
 // ─────────────────────────────────────────────
 function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const st = STATUS_CONFIG[project.status] || STATUS_CONFIG.Planning
+  const st = STATUS_CONFIG[normProjectStatus(project.status)] || STATUS_CONFIG.Planning
   const StatusIcon = st.Icon
   const tasksTotal   = project.tasksCount   ?? project.tasks?.length  ?? 0
   const tasksDone    = project.doneTasksCount ?? 0
@@ -221,9 +221,9 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
         }}>
           <StatusIcon size={11} /> {st.label}
         </span>
-        {project.priority && PRIORITY_CONFIG[project.priority] && (
+    {project.priority && PRIORITY_CONFIG[normPriority(project.priority)] && (
           <span style={{
-            background: `${PRIORITY_CONFIG[project.priority].color}14`,
+            background: `${PRIORITY_CONFIG[normPriority(project.priority)].label},{PRIORITY_CONFIG[project.priority].color}14`,
             color: PRIORITY_CONFIG[project.priority].color,
             padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
           }}>
@@ -441,14 +441,14 @@ export default function ProjectsList() {
   const filtered = projects.filter((p) => {
     const projectName = p.name || p.title || ""
     const matchSearch = !search || projectName.toLowerCase().includes(search.toLowerCase())
-    const matchStatus = !filterStatus || p.status === filterStatus
+    const matchStatus = !filterStatus || normProjectStatus(p.status) === filterStatus
     return matchSearch && matchStatus
   })
 
   const total  = projects.length
-  const active = projects.filter((p) => p.status === "Active").length
-  const done   = projects.filter((p) => p.status === "Done").length
-  const onHold = projects.filter((p) => p.status === "OnHold").length
+const active = projects.filter((p) => normProjectStatus(p.status) === "Active").length
+const done   = projects.filter((p) => normProjectStatus(p.status) === "Done").length
+const onHold = projects.filter((p) => normProjectStatus(p.status) === "OnHold").length
 
   return (
     <div style={S.wrap}>

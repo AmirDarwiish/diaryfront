@@ -124,8 +124,8 @@ function DetailsTab({ task, projectId, onUpdated }) {
   const [form, setForm] = useState({
     title:       task.title       || "",
     description: task.description || "",
-    priority:    task.priority    || "Medium",
-    status:      task.status      || "Todo",
+    priority:    normPriority(task.priority)   || "Medium",  // ← هنا
+    status:      normTaskStatus(task.status)   || "Todo",    // ← وهنا
     dueDate:     task.dueDate ? task.dueDate.split("T")[0] : "",
   })
   const [saving, setSaving] = useState(false)
@@ -142,7 +142,7 @@ function DetailsTab({ task, projectId, onUpdated }) {
     finally { setSaving(false) }
   }
 
-  const p = PRIORITY_CFG[task.priority]
+const p = PRIORITY_CFG[normPriority(task.priority)]
   const s = STATUS_CFG[task.status]
 
   return (
@@ -679,12 +679,12 @@ function SubtasksTab({ task, projectId }) {
   const handleDelete = async (id) => {
     try {
       await deleteTaskAPI(projectId, id)
-      setSubtasks((s) => s.filter((x) => x.id !== id))
+setSubtasks((s) => s.map((x) => x.id === sub.id ? { ...x, status: newStatus } : x))
     } catch (e) { alert(e.message) }
   }
 
   const toggleDone = async (sub) => {
-    const newStatus = sub.status === "Done" ? "Todo" : "Done"
+const newStatus = normTaskStatus(sub.status) === "Done" ? "Todo" : "Done"
     try {
       await updateTask(projectId, sub.id, {
         title:    sub.title,
@@ -695,7 +695,7 @@ function SubtasksTab({ task, projectId }) {
     } catch (e) { alert(e.message) }
   }
 
-  const done  = subtasks.filter((s) => s.status === "Done").length
+const done  = subtasks.filter((s) => normTaskStatus(s.status) === "Done").length
   const total = subtasks.length
   const pct   = total > 0 ? Math.round((done / total) * 100) : 0
 
