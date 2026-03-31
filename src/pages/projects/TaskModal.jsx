@@ -40,6 +40,40 @@ const TABS = [
 ]
 
 // ─────────────────────────────────────────────
+// ✅ FIX 1: تعريف normPriority و normTaskStatus
+// ─────────────────────────────────────────────
+const PRIORITY_MAP = {
+  0: "Low", 1: "Low",
+  2: "Medium", 3: "Medium",
+  4: "High", 5: "High",
+  6: "Critical", 7: "Critical",
+  low: "Low", medium: "Medium", high: "High", critical: "Critical",
+}
+
+const STATUS_MAP = {
+  0: "Todo", 1: "Todo",
+  2: "InProgress", 3: "InProgress",
+  4: "InReview", 5: "InReview",
+  6: "Done", 7: "Done",
+  todo: "Todo", inprogress: "InProgress",
+  inreview: "InReview", done: "Done",
+}
+
+const normPriority = (val) => {
+  if (!val && val !== 0) return "Medium"
+  if (typeof val === "string" && PRIORITY_CFG[val]) return val
+  const key = typeof val === "string" ? val.toLowerCase() : val
+  return PRIORITY_MAP[key] || "Medium"
+}
+
+const normTaskStatus = (val) => {
+  if (!val && val !== 0) return "Todo"
+  if (typeof val === "string" && STATUS_CFG[val]) return val
+  const key = typeof val === "string" ? val.toLowerCase().replace(/[_\s]/g, "") : val
+  return STATUS_MAP[key] || "Todo"
+}
+
+// ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
 const fmtMinutes = (mins) => {
@@ -124,8 +158,8 @@ function DetailsTab({ task, projectId, onUpdated }) {
   const [form, setForm] = useState({
     title:       task.title       || "",
     description: task.description || "",
-    priority:    normPriority(task.priority)   || "Medium",  // ← هنا
-    status:      normTaskStatus(task.status)   || "Todo",    // ← وهنا
+    priority:    normPriority(task.priority)   || "Medium",
+    status:      normTaskStatus(task.status)   || "Todo",
     dueDate:     task.dueDate ? task.dueDate.split("T")[0] : "",
   })
   const [saving, setSaving] = useState(false)
@@ -142,8 +176,8 @@ function DetailsTab({ task, projectId, onUpdated }) {
     finally { setSaving(false) }
   }
 
-const p = PRIORITY_CFG[normPriority(task.priority)]
-  const s = STATUS_CFG[task.status]
+  const p = PRIORITY_CFG[normPriority(task.priority)]
+  const s = STATUS_CFG[normTaskStatus(task.status)]
 
   return (
     <div>
@@ -358,13 +392,13 @@ function CommentsTab({ taskId }) {
 // Time Tab
 // ─────────────────────────────────────────────
 function TimeTab({ taskId }) {
-  const [logs, setLogs]           = useState([])
-  const [loading, setLoading]     = useState(true)
-  const [activeLog, setActiveLog] = useState(null)
-  const [elapsed, setElapsed]     = useState(0)
+  const [logs, setLogs]             = useState([])
+  const [loading, setLoading]       = useState(true)
+  const [activeLog, setActiveLog]   = useState(null)
+  const [elapsed, setElapsed]       = useState(0)
   const [manualOpen, setManualOpen] = useState(false)
-  const [manual, setManual]       = useState({ description: "", minutes: "" })
-  const [saving, setSaving]       = useState(false)
+  const [manual, setManual]         = useState({ description: "", minutes: "" })
+  const [saving, setSaving]         = useState(false)
   const intervalRef = useRef(null)
 
   useEffect(() => {
@@ -668,7 +702,7 @@ function SubtasksTab({ task, projectId }) {
         title:        newTitle,
         parentTaskId: task.id,
         boardColumnId: task.boardColumnId || task.boardId,
-        priority:     task.priority || "Medium",
+        priority:     normPriority(task.priority) || "Medium",
       })
       setSubtasks((s) => [...s, res?.data || res])
       setNewTitle("")
@@ -676,26 +710,29 @@ function SubtasksTab({ task, projectId }) {
     finally { setAdding(false) }
   }
 
+  // ✅ FIX 2: كان بيعمل setSubtasks بالـ map بدل filter
   const handleDelete = async (id) => {
     try {
       await deleteTaskAPI(projectId, id)
-setSubtasks((s) => s.map((x) => x.id === sub.id ? { ...x, status: newStatus } : x))
+      setSubtasks((s) => s.filter((x) => x.id !== id))
     } catch (e) { alert(e.message) }
   }
 
+  // ✅ FIX 3: استخدام normTaskStatus بشكل صحيح
   const toggleDone = async (sub) => {
-const newStatus = normTaskStatus(sub.status) === "Done" ? "Todo" : "Done"
+    const currentStatus = normTaskStatus(sub.status)
+    const newStatus = currentStatus === "Done" ? "Todo" : "Done"
     try {
       await updateTask(projectId, sub.id, {
         title:    sub.title,
-        priority: sub.priority || "Medium",
+        priority: normPriority(sub.priority) || "Medium",
         status:   newStatus,
       })
       setSubtasks((s) => s.map((x) => x.id === sub.id ? { ...x, status: newStatus } : x))
     } catch (e) { alert(e.message) }
   }
 
-const done  = subtasks.filter((s) => normTaskStatus(s.status) === "Done").length
+  const done  = subtasks.filter((s) => normTaskStatus(s.status) === "Done").length
   const total = subtasks.length
   const pct   = total > 0 ? Math.round((done / total) * 100) : 0
 
@@ -736,45 +773,49 @@ const done  = subtasks.filter((s) => normTaskStatus(s.status) === "Done").length
             <div style={{ textAlign: "center", padding: 30, color: "#6b7891", fontSize: 13 }}>
               لا توجد مهام فرعية بعد
             </div>
-          ) : subtasks.map((s, i) => (
-            <motion.div
-              key={s.id || i}
-              initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 8 }} transition={{ delay: i * 0.04 }}
-              style={{ ...S.card, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}
-            >
-              <button
-                onClick={() => toggleDone(s)}
-                style={{
-                  width: 20, height: 20, borderRadius: 5, flexShrink: 0,
-                  border: `1px solid ${s.status === "Done" ? "#34d399" : "rgba(255,255,255,0.2)"}`,
-                  background: s.status === "Done" ? "rgba(52,211,153,0.15)" : "transparent",
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
-                }}
+          ) : subtasks.map((s, i) => {
+            const isDone = normTaskStatus(s.status) === "Done"
+            return (
+              <motion.div
+                key={s.id || i}
+                initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 8 }} transition={{ delay: i * 0.04 }}
+                style={{ ...S.card, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}
               >
-                {s.status === "Done" && <Check size={12} color="#34d399" />}
-              </button>
-              <span style={{
-                flex: 1, fontSize: 13, color: s.status === "Done" ? "#6b7891" : "#e8edf5",
-                textDecoration: s.status === "Done" ? "line-through" : "none",
-                transition: "all .2s", wordBreak: "break-word",
-              }}>
-                {s.title}
-              </span>
-              {s.priority && PRIORITY_CFG[s.priority] && (
+                <button
+                  onClick={() => toggleDone(s)}
+                  style={{
+                    width: 20, height: 20, borderRadius: 5, flexShrink: 0,
+                    border: `1px solid ${isDone ? "#34d399" : "rgba(255,255,255,0.2)"}`,
+                    background: isDone ? "rgba(52,211,153,0.15)" : "transparent",
+                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+                  }}
+                >
+                  {isDone && <Check size={12} color="#34d399" />}
+                </button>
                 <span style={{
-                  fontSize: 10, color: PRIORITY_CFG[s.priority].color,
-                  background: `${PRIORITY_CFG[s.priority].color}14`,
-                  padding: "2px 7px", borderRadius: 5, fontWeight: 700, flexShrink: 0,
+                  flex: 1, fontSize: 13, color: isDone ? "#6b7891" : "#e8edf5",
+                  textDecoration: isDone ? "line-through" : "none",
+                  transition: "all .2s", wordBreak: "break-word",
                 }}>
-                  {PRIORITY_CFG[s.priority].label}
+                  {s.title}
                 </span>
-              )}
-              <button onClick={() => handleDelete(s.id)} style={{ ...S.btnGhost, height: 26, padding: "0 7px", color: "#f8717160", flexShrink: 0 }}>
-                <Trash2 size={11} />
-              </button>
-            </motion.div>
-          ))}
+                {s.priority && PRIORITY_CFG[normPriority(s.priority)] && (
+                  <span style={{
+                    fontSize: 10,
+                    color: PRIORITY_CFG[normPriority(s.priority)].color,
+                    background: `${PRIORITY_CFG[normPriority(s.priority)].color}14`,
+                    padding: "2px 7px", borderRadius: 5, fontWeight: 700, flexShrink: 0,
+                  }}>
+                    {PRIORITY_CFG[normPriority(s.priority)].label}
+                  </span>
+                )}
+                <button onClick={() => handleDelete(s.id)} style={{ ...S.btnGhost, height: 26, padding: "0 7px", color: "#f8717160", flexShrink: 0 }}>
+                  <Trash2 size={11} />
+                </button>
+              </motion.div>
+            )
+          })}
         </AnimatePresence>
       </div>
     </div>
