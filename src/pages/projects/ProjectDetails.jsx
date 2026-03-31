@@ -81,15 +81,7 @@ const S = {
     display: "flex", alignItems: "center", gap: 6,
   },
 }
-// Integer → String maps (الباك بيبعت أرقام)
-const PRIORITY_INT_MAP = { 1: "Low", 2: "Medium", 3: "High", 4: "Critical" }
-const PROJECT_STATUS_INT_MAP = { 1: "Planning", 2: "Active", 3: "OnHold", 4: "Done", 5: "Cancelled" }
-const TASK_STATUS_INT_MAP = { 1: "Todo", 2: "InProgress", 3: "InReview", 4: "Done" }
 
-// Helper يقبل رقم أو string
-const normPriority    = (v) => typeof v === "number" ? PRIORITY_INT_MAP[v]    : v
-const normProjectStatus = (v) => typeof v === "number" ? PROJECT_STATUS_INT_MAP[v] : v
-const normTaskStatus  = (v) => typeof v === "number" ? TASK_STATUS_INT_MAP[v]  : v
 // ─────────────────────────────────────────────
 // useIsMobile
 // ─────────────────────────────────────────────
@@ -108,8 +100,7 @@ function useIsMobile(breakpoint = 640) {
 // ─────────────────────────────────────────────
 function TaskCard({ task, boards, onMove, onDelete, onClick }) {
   const [menu, setMenu] = useState(false)
-const p = PRIORITY_CFG[normPriority(task.priority)]
-const s = STATUS_CFG[normTaskStatus(task.status)]
+  const p = PRIORITY_CFG[task.priority]
 
   return (
     <motion.div
@@ -185,7 +176,11 @@ const s = STATUS_CFG[normTaskStatus(task.status)]
                 onMouseLeave={() => setMenu(false)}
               >
                 <div style={{ fontSize: 10, color: "#6b7891", padding: "4px 8px", fontWeight: 700 }}>نقل إلى</div>
-                {boards.filter((b) => b.id !== task.boardColumnId && b.id !== task.boardId).map((b) => (
+                {boards.filter((b) => {
+                    // compare as string to handle int vs string mismatch
+                    const taskCol = String(task.boardColumnId ?? task.boardId ?? '')
+                    return String(b.id) !== taskCol
+                  }).map((b) => (
                   <button
                     key={b.id}
                     onClick={() => { onMove(task.id, b.id); setMenu(false) }}
@@ -233,7 +228,8 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
   const [saving, setSaving] = useState(false)
 
   // tasks matching this board — support both boardColumnId and boardId
-  const colTasks = tasks.filter((t) => (t.boardColumnId ?? t.boardId) === board.id)
+  // compare as strings to handle int vs string mismatch from backend
+  const colTasks = tasks.filter((t) => String(t.boardColumnId ?? t.boardId ?? "") === String(board.id))
 
   const handleAdd = async () => {
     if (!title.trim()) return
@@ -864,31 +860,18 @@ export default function ProjectDetails() {
     setTasks((t) => [...t, newTask])
   }
 
-const handleMoveTask = async (taskId, boardId) => {
-  try {
-    await moveTask(id, taskId, boardId)
-    
-    // الباك بيعمل auto-map من اسم الكولومن للـ status
-    // عشان الـ UI يتحدث صح، نحتاج نعرف اسم الكولومن
-    const targetBoard = boards.find((b) => b.id === boardId)
-    const statusMap = {
-      "To Do":       1,  // أو "Todo" لو الباك بيرجع string
-      "In Progress": 2,
-      "In Review":   3,
-      "Done":        4,
-    }
-    const newStatus = statusMap[targetBoard?.name] ?? undefined
+  const handleMoveTask = async (taskId, boardId) => {
+    try {
+      await moveTask(id, taskId, boardId)
+      // store as same type as board.id to keep filter comparisons consistent
+      const numericBoardId = typeof boards[0]?.id === 'number' ? Number(boardId) : boardId
+      setTasks((t) => t.map((x) => x.id === taskId
+        ? { ...x, boardColumnId: numericBoardId, boardId: numericBoardId }
+        : x
+      ))
+    } catch (e) { alert(e.message) }
+  }
 
-    setTasks((t) => t.map((x) => x.id === taskId
-      ? { 
-          ...x, 
-          boardColumnId: boardId,
-          ...(newStatus !== undefined && { status: newStatus })
-        }
-      : x
-    ))
-  } catch (e) { alert(e.message) }
-}
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm("حذف التاسك؟")) return
     try {
@@ -918,9 +901,9 @@ const handleMoveTask = async (taskId, boardId) => {
     </div>
   )
 
-const st = STATUS_CFG[normProjectStatus(project.status)] || STATUS_CFG.Planning
+  const st = STATUS_CFG[project.status] || STATUS_CFG.Planning
   const tasksTotal = tasks.length
-const tasksDone = tasks.filter((t) => normTaskStatus(t.status) === "Done").length
+  const tasksDone  = tasks.filter((t) => t.status === "Done").length
   const progress   = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0
   const activeTabCfg = TABS.find((t) => t.key === activeTab)
 
@@ -1021,8 +1004,8 @@ const tasksDone = tasks.filter((t) => normTaskStatus(t.status) === "Done").lengt
                       <button key={k} onClick={() => handleStatusChange(k)} style={{
                         display: "flex", alignItems: "center", gap: 8,
                         width: "100%", padding: "8px 10px", borderRadius: 7,
-                        background: normProjectStatus(project.status) === k ? `${v.color}15` : "transparent",
-                        border: "none", color: normProjectStatus(project.status) === k ? v.color : "#94a3b8", 
+                        background: project.status === k ? `${v.color}15` : "transparent",
+                        border: "none", color: project.status === k ? v.color : "#94a3b8",
                         fontSize: 12, cursor: "pointer", fontFamily: "'Cairo',sans-serif", textAlign: "right",
                       }}>
                         <v.Icon size={13} color={v.color} /> {v.label}
