@@ -9,19 +9,14 @@ const headers = () => ({
 
 // ─── helper: unwrap { success, data, errorCode, message } wrapper ────────────
 function unwrapResponse(parsed, httpStatus) {
-  // Backend wrapper pattern: { success: bool, data: any, errorCode, message }
   if (parsed && typeof parsed === "object" && "success" in parsed) {
     if (parsed.success === false) {
       const errMsg = parsed.message || parsed.errorCode || parsed.data || `HTTP ${httpStatus}`
       throw new Error(String(errMsg))
     }
-    // success: true — but data might be an error string (e.g. "already have active session")
-    // detect: if data is a string that looks like an error message, throw it
     if (typeof parsed.data === "string" && parsed.data.length > 0 && !parsed.message) {
-      // Return as-is — let caller decide (some success responses have string data)
       return parsed.data
     }
-    // Return the inner data (or full object if no data key)
     return parsed.data !== undefined ? parsed.data : parsed
   }
   return parsed
@@ -33,7 +28,6 @@ async function handleResponse(res) {
   try { parsed = text ? JSON.parse(text) : {} } catch { parsed = text || {} }
 
   if (!res.ok) {
-    // HTTP error — extract message
     let msg = `HTTP ${res.status}`
     if (typeof parsed === "string") {
       msg = parsed || msg
@@ -55,7 +49,6 @@ export async function getProjects() {
     credentials: "include",
   });
   const data = await handleResponse(res);
-  // normalize: backend returns "title" but frontend uses "name"
   const arr = Array.isArray(data) ? data : data?.data || [];
   return arr.map(normalizeProject);
 }
@@ -68,14 +61,12 @@ export async function getProject(id) {
 }
 
 export async function createProject(body) {
-  // body already uses { title, description, priority }
   const res = await fetch(`${BASE}/api/projects`, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify(body),
   });
   const data = await handleResponse(res);
-  // backend returns { message, projectId } — fetch the full project
   const projectId = data?.projectId || data?.data?.projectId;
   if (projectId) {
     return getProject(projectId);
@@ -93,19 +84,13 @@ export async function updateProject(id, body) {
 }
 
 export async function updateProjectStatus(id, status) {
-  // status is a string like "Planning","Active","OnHold","Done","Cancelled"
-  // Try sending as string first (ASP.NET can deserialize enum from string name)
-  // If your backend uses [JsonConverter(typeof(JsonStringEnumConverter))] this works directly
-  // Otherwise map to int
   const statusIntMap = { Planning: 0, Active: 1, OnHold: 2, Done: 3, Cancelled: 4 };
-  // Send BOTH so backend can pick whichever it prefers
   const statusValue = statusIntMap[status] ?? 0;
   const res = await fetch(`${BASE}/api/projects/${id}/status`, {
     method: "PUT",
     headers: headers(),
     body: JSON.stringify({ status: statusValue }),
   });
-  // If that fails, retry with string enum
   if (!res.ok) {
     const res2 = await fetch(`${BASE}/api/projects/${id}/status`, {
       method: "PUT",
@@ -130,20 +115,18 @@ export async function getProjectStats(id) {
   return handleResponse(res);
 }
 
-// normalize backend project shape → frontend shape
 function normalizeProject(p) {
   if (!p) return p;
   return {
     ...p,
-    name:   p.name   || p.title  || "",   // frontend uses "name"
-    title:  p.title  || p.name   || "",
-    status: normalizeStatus(p.status),
+    name:     p.name     || p.title || "",
+    title:    p.title    || p.name  || "",
+    status:   normalizeStatus(p.status),
     priority: normalizePriority(p.priority),
-    myRole: p.myRole || p.currentUserRole || inferRole(p),
+    myRole:   p.myRole   || p.currentUserRole || inferRole(p),
   };
 }
 
-// backend may return int enums — convert to string
 function normalizeStatus(s) {
   if (typeof s === "string") return s;
   const map = { 0: "Planning", 1: "Active", 2: "OnHold", 3: "Done", 4: "Cancelled" };
@@ -157,7 +140,6 @@ function normalizePriority(p) {
 }
 
 function inferRole(p) {
-  // if the current user is createdByUserId we can't know here — default Member
   return "Member";
 }
 
@@ -175,10 +157,8 @@ export async function createBoard(projectId, body) {
     body: JSON.stringify(body),
   });
   const data = await handleResponse(res);
-  // backend returns { message, boardId } — build the board object
   const boardId = data?.boardId || data?.data?.boardId;
   if (boardId) {
-    // re-fetch boards to get the new one with full data
     const boards = await getBoards(projectId);
     const arr = Array.isArray(boards) ? boards : boards?.data || [];
     const found = arr.find((b) => b.id === boardId);
@@ -222,7 +202,6 @@ export async function getTask(projectId, taskId) {
 }
 
 export async function createTask(projectId, body) {
-  // Ensure boardColumnId is int & priority is int enum
   const payload = {
     ...body,
     boardColumnId: parseInt(body.boardColumnId, 10),
@@ -244,7 +223,6 @@ export async function createTask(projectId, body) {
 }
 
 export async function updateTask(projectId, taskId, body) {
-  // map priority string → int if needed
   const payload = {
     ...body,
     priority: typeof body.priority === "string"
@@ -302,13 +280,15 @@ export async function getMembers(projectId) {
   const arr = Array.isArray(data) ? data : data?.data || [];
   return arr.map((m) => ({
     ...m,
-    role: normalizeMemberRole(m.role),
+    role:     normalizeMemberRole(m.role),
+    // ✅ دلوقتي بييجوا من الـ backend مباشرة بعد التعديل على MembersController
+    fullName: m.fullName || `مستخدم #${m.userId}`,
+    email:    m.email    || "",
   }));
 }
 
 export async function addMember(projectId, body) {
-  // body = { email, role }  — backend needs { userId, role }
-  // First resolve email → userId via search endpoint
+  // body = { email, role } — backend needs { userId, role }
   let userId = body.userId;
   if (!userId && body.email) {
     userId = await resolveUserIdByEmail(body.email);
@@ -323,6 +303,26 @@ export async function addMember(projectId, body) {
   return handleResponse(res);
 }
 
+export async function updateMemberRole(projectId, memberId, role) {
+  const roleMap = { Viewer: 0, Member: 1, Manager: 2, Owner: 3 };
+  const roleValue = typeof role === "string" ? (roleMap[role] ?? 1) : role;
+  const res = await fetch(`${BASE}/api/projects/${projectId}/members/${memberId}/role`, {
+    method: "PUT",
+    headers: headers(),
+    body: JSON.stringify({ role: roleValue }),
+  });
+  return handleResponse(res);
+}
+
+export async function transferOwnership(projectId, newOwnerUserId) {
+  const res = await fetch(`${BASE}/api/projects/${projectId}/members/transfer-ownership`, {
+    method: "PUT",
+    headers: headers(),
+    body: JSON.stringify({ newOwnerUserId }),
+  });
+  return handleResponse(res);
+}
+
 export async function removeMember(projectId, memberId) {
   const res = await fetch(`${BASE}/api/projects/${projectId}/members/${memberId}`, {
     method: "DELETE",
@@ -331,8 +331,8 @@ export async function removeMember(projectId, memberId) {
   return handleResponse(res);
 }
 
+// البحث عن يوزر بالـ email عشان نضيفه كعضو
 async function resolveUserIdByEmail(email) {
-  // Try to find user by email — use search endpoint if available
   try {
     const res = await fetch(`${BASE}/api/users/search?email=${encodeURIComponent(email)}`, {
       headers: headers(),
@@ -343,17 +343,6 @@ async function resolveUserIdByEmail(email) {
       if (user?.id) return user.id;
     }
   } catch { /* fallback */ }
-  // If no search endpoint, try direct lookup
-  try {
-    const res = await fetch(`${BASE}/api/users?email=${encodeURIComponent(email)}`, {
-      headers: headers(),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const user = Array.isArray(data) ? data[0] : data?.data?.[0] || data;
-      if (user?.id) return user.id;
-    }
-  } catch { /* ignore */ }
   throw new Error(`لم يتم العثور على مستخدم بهذا البريد: ${email}`);
 }
 
@@ -381,7 +370,7 @@ export async function createSprint(projectId, body) {
     headers: headers(),
     body: JSON.stringify({
       name:      body.name,
-      goal:      body.goal || null,
+      goal:      body.goal      || null,
       startDate: body.startDate || null,
       endDate:   body.endDate   || null,
     }),
@@ -422,7 +411,6 @@ export async function deleteSprint(sprintId) {
 
 function normalizeSprintStatus(s) {
   if (typeof s === "string") {
-    // backend uses Planning/Active/Completed, frontend uses Planned/Active/Completed
     if (s === "Planning") return "Planned";
     return s;
   }
@@ -438,7 +426,6 @@ export async function getComments(taskId) {
   const arr = Array.isArray(data) ? data : data?.data || [];
   return arr.map((c) => ({
     ...c,
-    // normalize author name from createdByUserId if fullName not present
     authorName: c.authorName || c.author?.fullName || c.createdByUserName || `مستخدم #${c.createdByUserId}`,
   }));
 }
@@ -479,17 +466,11 @@ export async function deleteComment(taskId, commentId) {
 export async function getTimelogs(taskId) {
   const res = await fetch(`${BASE}/api/tasks/${taskId}/timelogs`, { headers: headers() });
   const raw = await handleResponse(res);
-  // after unwrap: raw might be { logs, totalMinutes } or plain array
   let arr = []
-  if (Array.isArray(raw)) {
-    arr = raw
-  } else if (raw && Array.isArray(raw.logs)) {
-    arr = raw.logs
-  } else if (raw && Array.isArray(raw.data?.logs)) {
-    arr = raw.data.logs
-  } else if (raw && Array.isArray(raw.data)) {
-    arr = raw.data
-  }
+  if (Array.isArray(raw))                    arr = raw
+  else if (raw && Array.isArray(raw.logs))   arr = raw.logs
+  else if (raw && Array.isArray(raw.data?.logs)) arr = raw.data.logs
+  else if (raw && Array.isArray(raw.data))   arr = raw.data
   return arr.map((l) => ({
     ...l,
     startTime:       l.startTime       || l.startedAt,
@@ -505,7 +486,6 @@ export async function startTimer(taskId) {
     headers: headers(),
   });
 
-  // Special case: 400 "already have active session" — fetch existing active log
   if (res.status === 400) {
     const text = await res.text()
     let errMsg = ""
@@ -515,7 +495,6 @@ export async function startTimer(taskId) {
     } catch { errMsg = text }
 
     if (typeof errMsg === "string" && errMsg.toLowerCase().includes("active")) {
-      // Fetch existing logs and return the running one
       const logs = await getTimelogs(taskId)
       const running = logs.find(l => l.isRunning)
       if (running) return running
@@ -524,15 +503,14 @@ export async function startTimer(taskId) {
   }
 
   const data = await handleResponse(res);
-  // backend returns { message, logId } or wrapper { success, data: { logId } }
   const logId = data?.logId ?? data?.id
   const startedAt = new Date().toISOString();
   return {
-    id:        logId,
+    id:              logId,
     taskId,
-    startTime: startedAt,
-    startedAt: startedAt,
-    isRunning: true,
+    startTime:       startedAt,
+    startedAt:       startedAt,
+    isRunning:       true,
     durationMinutes: 0,
   };
 }
@@ -544,21 +522,19 @@ export async function stopTimer(taskId, logId) {
     body: JSON.stringify({ note: "" }),
   });
   const data = await handleResponse(res);
-  // backend returns { message, durationMinutes }
   return {
-    id: logId,
+    id:              logId,
     durationMinutes: data?.durationMinutes || data?.data?.durationMinutes || 0,
-    isRunning: false,
-    endTime: new Date().toISOString(),
-    endedAt: new Date().toISOString(),
+    isRunning:       false,
+    endTime:         new Date().toISOString(),
+    endedAt:         new Date().toISOString(),
   };
 }
 
 export async function addManualTime(taskId, body) {
-  // body = { description, minutes }
   const now = new Date();
   const startedAt = new Date(now.getTime() - body.minutes * 60 * 1000).toISOString();
-  const endedAt = now.toISOString();
+  const endedAt   = now.toISOString();
   const res = await fetch(`${BASE}/api/tasks/${taskId}/timelogs/manual`, {
     method: "POST",
     headers: headers(),
@@ -572,11 +548,11 @@ export async function addManualTime(taskId, body) {
   const data = await handleResponse(res);
   const logId = data?.logId || data?.data?.logId;
   return {
-    id: logId,
-    description: body.description,
+    id:              logId,
+    description:     body.description,
     durationMinutes: parseInt(body.minutes, 10),
-    startTime: startedAt,
-    isRunning: false,
+    startTime:       startedAt,
+    isRunning:       false,
   };
 }
 
@@ -597,12 +573,9 @@ export async function getAttachments(taskId) {
 }
 
 export async function uploadAttachment(taskId, file) {
-  // Backend expects { fileName, fileUrl, fileSize, mimeType }
-  // We upload the file first to get a URL, OR if there's a direct upload endpoint:
   const formData = new FormData();
   formData.append("file", file);
 
-  // Try multipart upload first
   const uploadRes = await fetch(`${BASE}/api/tasks/${taskId}/attachments/upload`, {
     method: "POST",
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -614,8 +587,6 @@ export async function uploadAttachment(taskId, file) {
     return data?.data || data;
   }
 
-  // Fallback: use JSON endpoint with a placeholder URL
-  // (In production you'd upload to S3/Cloudinary first)
   const fakeUrl = `${BASE}/files/${Date.now()}_${file.name}`;
   const res = await fetch(`${BASE}/api/tasks/${taskId}/attachments`, {
     method: "POST",
@@ -629,12 +600,12 @@ export async function uploadAttachment(taskId, file) {
   });
   const data = await handleResponse(res);
   return {
-    id:         data?.attachmentId || data?.data?.attachmentId,
-    fileName:   file.name,
-    fileUrl:    fakeUrl,
-    fileSize:   file.size,
-    mimeType:   file.type,
-    createdAt:  new Date().toISOString(),
+    id:        data?.attachmentId || data?.data?.attachmentId,
+    fileName:  file.name,
+    fileUrl:   fakeUrl,
+    fileSize:  file.size,
+    mimeType:  file.type,
+    createdAt: new Date().toISOString(),
   };
 }
 
