@@ -33,6 +33,15 @@ const PRIORITY_CONFIG = {
 }
 
 // ─────────────────────────────────────────────
+// Integer → String Maps
+// ─────────────────────────────────────────────
+const PRIORITY_INT_MAP       = { 1: "Low", 2: "Medium", 3: "High", 4: "Critical" }
+const PROJECT_STATUS_INT_MAP = { 1: "Planning", 2: "Active", 3: "OnHold", 4: "Done", 5: "Cancelled" }
+
+const normPriority      = (v) => typeof v === "number" ? PRIORITY_INT_MAP[v]       : v
+const normProjectStatus = (v) => typeof v === "number" ? PROJECT_STATUS_INT_MAP[v] : v
+
+// ─────────────────────────────────────────────
 // Shared Styles
 // ─────────────────────────────────────────────
 const S = {
@@ -97,12 +106,17 @@ const S = {
 // ─────────────────────────────────────────────
 function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const st = STATUS_CONFIG[normProjectStatus(project.status)] || STATUS_CONFIG.Planning
+
+  const statusKey   = normProjectStatus(project.status)
+  const priorityKey = normPriority(project.priority)
+
+  const st = STATUS_CONFIG[statusKey] || STATUS_CONFIG.Planning
   const StatusIcon = st.Icon
-  const tasksTotal   = project.tasksCount   ?? project.tasks?.length  ?? 0
+
+  const tasksTotal   = project.tasksCount    ?? project.tasks?.length  ?? 0
   const tasksDone    = project.doneTasksCount ?? 0
   const progress     = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0
-  const membersCount = project.membersCount ?? project.members?.length ?? 0
+  const membersCount = project.membersCount  ?? project.members?.length ?? 0
 
   return (
     <motion.div
@@ -173,8 +187,8 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
                     style={{
                       display: "flex", alignItems: "center", gap: 8,
                       width: "100%", padding: "8px 10px", borderRadius: 7,
-                      background: project.status === key ? "rgba(201,169,110,0.1)" : "transparent",
-                      border: "none", color: project.status === key ? "#C9A96E" : "#94a3b8",
+                      background: statusKey === key ? "rgba(201,169,110,0.1)" : "transparent",
+                      border: "none", color: statusKey === key ? "#C9A96E" : "#94a3b8",
                       fontSize: 12, cursor: "pointer", fontFamily: "'Cairo',sans-serif",
                       textAlign: "right",
                     }}
@@ -221,13 +235,13 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
         }}>
           <StatusIcon size={11} /> {st.label}
         </span>
-    {project.priority && PRIORITY_CONFIG[normPriority(project.priority)] && (
+        {priorityKey && PRIORITY_CONFIG[priorityKey] && (
           <span style={{
-            background: `${PRIORITY_CONFIG[normPriority(project.priority)].label},{PRIORITY_CONFIG[project.priority].color}14`,
-            color: PRIORITY_CONFIG[project.priority].color,
+            background: `${PRIORITY_CONFIG[priorityKey].color}14`,
+            color: PRIORITY_CONFIG[priorityKey].color,
             padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
           }}>
-            {PRIORITY_CONFIG[project.priority].label}
+            {PRIORITY_CONFIG[priorityKey].label}
           </span>
         )}
       </div>
@@ -446,9 +460,9 @@ export default function ProjectsList() {
   })
 
   const total  = projects.length
-const active = projects.filter((p) => normProjectStatus(p.status) === "Active").length
-const done   = projects.filter((p) => normProjectStatus(p.status) === "Done").length
-const onHold = projects.filter((p) => normProjectStatus(p.status) === "OnHold").length
+  const active = projects.filter((p) => normProjectStatus(p.status) === "Active").length
+  const done   = projects.filter((p) => normProjectStatus(p.status) === "Done").length
+  const onHold = projects.filter((p) => normProjectStatus(p.status) === "OnHold").length
 
   return (
     <div style={S.wrap}>
@@ -538,7 +552,7 @@ const onHold = projects.filter((p) => normProjectStatus(p.status) === "OnHold").
             الكل ({total})
           </button>
           {Object.entries(STATUS_CONFIG).map(([k, v]) => {
-            const count = projects.filter((p) => p.status === k).length
+            const count = projects.filter((p) => normProjectStatus(p.status) === k).length
             if (count === 0) return null
             return (
               <button

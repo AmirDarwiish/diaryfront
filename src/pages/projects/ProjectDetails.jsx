@@ -918,7 +918,7 @@ const handleMoveTask = async (taskId, boardId) => {
     </div>
   )
 
-  const st = STATUS_CFG[project.status] || STATUS_CFG.Planning
+const st = STATUS_CFG[normProjectStatus(project.status)] || STATUS_CFG.Planning
   const tasksTotal = tasks.length
 const tasksDone = tasks.filter((t) => normTaskStatus(t.status) === "Done").length
   const progress   = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0
@@ -1021,8 +1021,8 @@ const tasksDone = tasks.filter((t) => normTaskStatus(t.status) === "Done").lengt
                       <button key={k} onClick={() => handleStatusChange(k)} style={{
                         display: "flex", alignItems: "center", gap: 8,
                         width: "100%", padding: "8px 10px", borderRadius: 7,
-                        background: project.status === k ? `${v.color}15` : "transparent",
-                        border: "none", color: project.status === k ? v.color : "#94a3b8",
+                        background: normProjectStatus(project.status) === k ? `${v.color}15` : "transparent",
+                        border: "none", color: normProjectStatus(project.status) === k ? v.color : "#94a3b8", 
                         fontSize: 12, cursor: "pointer", fontFamily: "'Cairo',sans-serif", textAlign: "right",
                       }}>
                         <v.Icon size={13} color={v.color} /> {v.label}
