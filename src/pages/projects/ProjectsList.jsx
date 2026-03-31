@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -32,9 +33,6 @@ const PRIORITY_CONFIG = {
   Critical: { label: "حرجة",   color: "#e879f9" },
 }
 
-// ─────────────────────────────────────────────
-// Integer → String Maps
-// ─────────────────────────────────────────────
 const PRIORITY_INT_MAP       = { 1: "Low", 2: "Medium", 3: "High", 4: "Critical" }
 const PROJECT_STATUS_INT_MAP = { 1: "Planning", 2: "Active", 3: "OnHold", 4: "Done", 5: "Cancelled" }
 
@@ -102,10 +100,63 @@ const S = {
 }
 
 // ─────────────────────────────────────────────
+// Dropdown Portal — يتعرض برا الـ card frame
+// ─────────────────────────────────────────────
+function DropdownPortal({ anchorRef, open, onClose, children }) {
+  const [pos, setPos] = useState({ top: 0, left: 0 })
+
+  useEffect(() => {
+    if (!open || !anchorRef.current) return
+    const rect = anchorRef.current.getBoundingClientRect()
+    setPos({
+      top:  rect.bottom + window.scrollY + 6,
+      left: rect.left   + window.scrollX,
+    })
+  }, [open, anchorRef])
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return
+    const handler = (e) => {
+      if (!anchorRef.current?.contains(e.target)) onClose()
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [open, onClose, anchorRef])
+
+  if (!open) return null
+
+  return createPortal(
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: -6 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.92, y: -6 }}
+        transition={{ duration: 0.15 }}
+        style={{
+          position: "absolute",
+          top: pos.top, left: pos.left,
+          zIndex: 9999,
+          background: "#131b2a",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 10, padding: "6px", minWidth: 170,
+          boxShadow: "0 8px 30px rgba(0,0,0,0.6)",
+          direction: "rtl", fontFamily: "'Cairo', sans-serif",
+        }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>,
+    document.body
+  )
+}
+
+// ─────────────────────────────────────────────
 // Project Card
 // ─────────────────────────────────────────────
 function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const btnRef = useRef(null)
 
   const statusKey   = normProjectStatus(project.status)
   const priorityKey = normPriority(project.priority)
@@ -119,173 +170,163 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
   const membersCount = project.membersCount  ?? project.members?.length ?? 0
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ duration: 0.25 }}
-      style={{ ...S.card, padding: "20px", cursor: "pointer", position: "relative", overflow: "hidden" }}
-      onClick={() => onOpen(project.id)}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(201,169,110,0.25)" }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)" }}
-    >
-      {/* Top accent bar */}
-      <div style={{
-        position: "absolute", top: 0, right: 0, left: 0, height: 3,
-        background: `linear-gradient(90deg, ${st.color}80, transparent)`,
-        borderRadius: "14px 14px 0 0",
-      }} />
+    <>
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        transition={{ duration: 0.25 }}
+        style={{ ...S.card, padding: "20px", cursor: "pointer", position: "relative", overflow: "hidden" }}
+        onClick={() => onOpen(project.id)}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(201,169,110,0.25)" }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)" }}
+      >
+        {/* Top accent bar */}
+        <div style={{
+          position: "absolute", top: 0, right: 0, left: 0, height: 3,
+          background: `linear-gradient(90deg, ${st.color}80, transparent)`,
+          borderRadius: "14px 14px 0 0",
+        }} />
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-          <div style={{
-            width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-            background: `${st.color}18`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <FolderKanban size={18} color={st.color} />
-          </div>
-          <div style={{ minWidth: 0 }}>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
             <div style={{
-              fontSize: 15, fontWeight: 800, color: "#e8edf5",
-              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+              background: `${st.color}18`,
+              display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              {project.name || project.title}
+              <FolderKanban size={18} color={st.color} />
             </div>
-            <div style={{ fontSize: 11, color: "#6b7891", marginTop: 2 }}>#{project.id}</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{
+                fontSize: 15, fontWeight: 800, color: "#e8edf5",
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              }}>
+                {project.name || project.title}
+              </div>
+              <div style={{ fontSize: 11, color: "#6b7891", marginTop: 2 }}>#{project.id}</div>
+            </div>
+          </div>
+
+          {/* زرار الـ menu — بدون overflow hidden عليه */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <button
+              ref={btnRef}
+              onClick={() => setMenuOpen((v) => !v)}
+              style={{ ...S.btnGhost, height: 32, padding: "0 8px", borderRadius: 7 }}
+            >
+              <MoreHorizontal size={15} />
+            </button>
           </div>
         </div>
 
-        <div style={{ position: "relative", flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            style={{ ...S.btnGhost, height: 32, padding: "0 8px", borderRadius: 7 }}
-          >
-            <MoreHorizontal size={15} />
-          </button>
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.92, y: -6 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.92, y: -6 }}
-                transition={{ duration: 0.15 }}
-                style={{
-                  position: "absolute", top: 36, left: 0, zIndex: 50,
-                  background: "#131b2a", border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 10, padding: "6px", minWidth: 160,
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.5)",
-                }}
-                onMouseLeave={() => setMenuOpen(false)}
-              >
-                {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-                  <button
-                    key={key}
-                    onClick={() => { onStatusChange(project.id, key); setMenuOpen(false) }}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      width: "100%", padding: "8px 10px", borderRadius: 7,
-                      background: statusKey === key ? "rgba(201,169,110,0.1)" : "transparent",
-                      border: "none", color: statusKey === key ? "#C9A96E" : "#94a3b8",
-                      fontSize: 12, cursor: "pointer", fontFamily: "'Cairo',sans-serif",
-                      textAlign: "right",
-                    }}
-                  >
-                    <cfg.Icon size={13} color={cfg.color} /> {cfg.label}
-                  </button>
-                ))}
-                <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "6px 0" }} />
-                <button
-                  onClick={() => { onDelete(project.id); setMenuOpen(false) }}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 8,
-                    width: "100%", padding: "8px 10px", borderRadius: 7,
-                    background: "transparent", border: "none",
-                    color: "#f87171", fontSize: 12, cursor: "pointer",
-                    fontFamily: "'Cairo',sans-serif", textAlign: "right",
-                  }}
-                >
-                  <Trash2 size={13} /> حذف البروجكت
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Description */}
-      {project.description && (
-        <p style={{
-          fontSize: 12, color: "#6b7891", lineHeight: 1.7, marginBottom: 16,
-          overflow: "hidden", display: "-webkit-box",
-          WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-        }}>
-          {project.description}
-        </p>
-      )}
-
-      {/* Badges */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        <span style={{
-          background: st.bg, color: st.color,
-          padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-          display: "flex", alignItems: "center", gap: 5,
-        }}>
-          <StatusIcon size={11} /> {st.label}
-        </span>
-        {priorityKey && PRIORITY_CONFIG[priorityKey] && (
-          <span style={{
-            background: `${PRIORITY_CONFIG[priorityKey].color}14`,
-            color: PRIORITY_CONFIG[priorityKey].color,
-            padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
+        {/* Description */}
+        {project.description && (
+          <p style={{
+            fontSize: 12, color: "#6b7891", lineHeight: 1.7, marginBottom: 16,
+            overflow: "hidden", display: "-webkit-box",
+            WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
           }}>
-            {PRIORITY_CONFIG[priorityKey].label}
-          </span>
+            {project.description}
+          </p>
         )}
-      </div>
 
-      {/* Progress */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-          <span style={{ fontSize: 11, color: "#6b7891", fontWeight: 600 }}>التقدم</span>
-          <span style={{ fontSize: 11, color: "#C9A96E", fontWeight: 800 }}>{progress}%</span>
+        {/* Badges */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+          <span style={{
+            background: st.bg, color: st.color,
+            padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
+            display: "flex", alignItems: "center", gap: 5,
+          }}>
+            <StatusIcon size={11} /> {st.label}
+          </span>
+          {priorityKey && PRIORITY_CONFIG[priorityKey] && (
+            <span style={{
+              background: `${PRIORITY_CONFIG[priorityKey].color}14`,
+              color: PRIORITY_CONFIG[priorityKey].color,
+              padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
+            }}>
+              {PRIORITY_CONFIG[priorityKey].label}
+            </span>
+          )}
         </div>
-        <div style={{ height: 5, background: "#080d16", borderRadius: 3, overflow: "hidden" }}>
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+
+        {/* Progress */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+            <span style={{ fontSize: 11, color: "#6b7891", fontWeight: 600 }}>التقدم</span>
+            <span style={{ fontSize: 11, color: "#C9A96E", fontWeight: 800 }}>{progress}%</span>
+          </div>
+          <div style={{ height: 5, background: "#080d16", borderRadius: 3, overflow: "hidden" }}>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              style={{
+                height: "100%",
+                background: progress === 100
+                  ? "linear-gradient(90deg,#34d399,#10b981)"
+                  : "linear-gradient(90deg,#f0c98a,#C9A96E)",
+                borderRadius: 3,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.05)",
+        }}>
+          <div style={{ display: "flex", gap: 16 }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#6b7891" }}>
+              <LayoutGrid size={13} color="#C9A96E" />
+              <span style={{ color: "#e8edf5", fontWeight: 700 }}>{tasksTotal}</span> تاسك
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#6b7891" }}>
+              <Users size={13} color="#6ea8fe" />
+              <span style={{ color: "#e8edf5", fontWeight: 700 }}>{membersCount}</span> عضو
+            </span>
+          </div>
+          <ChevronRight size={16} color="#C9A96E" style={{ transform: "rotate(180deg)" }} />
+        </div>
+      </motion.div>
+
+      {/* ✅ الـ Dropdown برا الـ card تماماً عن طريق Portal */}
+      <DropdownPortal anchorRef={btnRef} open={menuOpen} onClose={() => setMenuOpen(false)}>
+        {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
+          <button
+            key={key}
+            onClick={() => { onStatusChange(project.id, key); setMenuOpen(false) }}
             style={{
-              height: "100%",
-              background: progress === 100
-                ? "linear-gradient(90deg,#34d399,#10b981)"
-                : "linear-gradient(90deg,#f0c98a,#C9A96E)",
-              borderRadius: 3,
+              display: "flex", alignItems: "center", gap: 8,
+              width: "100%", padding: "8px 10px", borderRadius: 7,
+              background: statusKey === key ? "rgba(201,169,110,0.1)" : "transparent",
+              border: "none", color: statusKey === key ? "#C9A96E" : "#94a3b8",
+              fontSize: 12, cursor: "pointer", fontFamily: "'Cairo',sans-serif",
+              textAlign: "right",
             }}
-          />
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.05)",
-      }}>
-        <div style={{ display: "flex", gap: 16 }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#6b7891" }}>
-            <LayoutGrid size={13} color="#C9A96E" />
-            <span style={{ color: "#e8edf5", fontWeight: 700 }}>{tasksTotal}</span> تاسك
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#6b7891" }}>
-            <Users size={13} color="#6ea8fe" />
-            <span style={{ color: "#e8edf5", fontWeight: 700 }}>{membersCount}</span> عضو
-          </span>
-        </div>
-        <ChevronRight size={16} color="#C9A96E" style={{ transform: "rotate(180deg)" }} />
-      </div>
-    </motion.div>
+          >
+            <cfg.Icon size={13} color={cfg.color} /> {cfg.label}
+          </button>
+        ))}
+        <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "6px 0" }} />
+        <button
+          onClick={() => { onDelete(project.id); setMenuOpen(false) }}
+          style={{
+            display: "flex", alignItems: "center", gap: 8,
+            width: "100%", padding: "8px 10px", borderRadius: 7,
+            background: "transparent", border: "none",
+            color: "#f87171", fontSize: 12, cursor: "pointer",
+            fontFamily: "'Cairo',sans-serif", textAlign: "right",
+          }}
+        >
+          <Trash2 size={13} /> حذف البروجكت
+        </button>
+      </DropdownPortal>
+    </>
   )
 }
 
@@ -417,10 +458,10 @@ function CreateModal({ onClose, onCreate }) {
 // ─────────────────────────────────────────────
 export default function ProjectsList() {
   const navigate = useNavigate()
-  const [projects, setProjects]   = useState([])
-  const [loading, setLoading]     = useState(true)
-  const [error, setError]         = useState("")
-  const [search, setSearch]       = useState("")
+  const [projects, setProjects]         = useState([])
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState("")
+  const [search, setSearch]             = useState("")
   const [filterStatus, setFilterStatus] = useState("")
   const [showCreate, setShowCreate]     = useState(false)
 

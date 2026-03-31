@@ -15,6 +15,7 @@ import {
   createSprint, updateProjectStatus, addMember, removeMember,
 } from "../../services/projectService"
 import TaskModal from "./TaskModal"
+import ProjectStats from "./ProjectStats"
 
 // ─────────────────────────────────────────────
 // Constants
@@ -177,7 +178,6 @@ function TaskCard({ task, boards, onMove, onDelete, onClick }) {
               >
                 <div style={{ fontSize: 10, color: "#6b7891", padding: "4px 8px", fontWeight: 700 }}>نقل إلى</div>
                 {boards.filter((b) => {
-                    // compare as string to handle int vs string mismatch
                     const taskCol = String(task.boardColumnId ?? task.boardId ?? '')
                     return String(b.id) !== taskCol
                   }).map((b) => (
@@ -227,8 +227,6 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
   const [priority, setPriority] = useState("Medium")
   const [saving, setSaving] = useState(false)
 
-  // tasks matching this board — support both boardColumnId and boardId
-  // compare as strings to handle int vs string mismatch from backend
   const colTasks = tasks.filter((t) => String(t.boardColumnId ?? t.boardId ?? "") === String(board.id))
 
   const handleAdd = async () => {
@@ -376,7 +374,6 @@ function MembersTab({ projectId, currentUserRole }) {
     setSaving(true); setError("")
     try {
       const res = await addMember(projectId, { email, role })
-      // re-fetch members to get full data
       const updated = await getMembers(projectId)
       setMembers(Array.isArray(updated) ? updated : updated?.data || [])
       setEmail(""); setAddOpen(false)
@@ -760,8 +757,10 @@ function StatsTab({ projectId }) {
         ))}
       </div>
 
+      <ProjectStats projectId={projectId} />
+
       {stats.topMembers?.length > 0 && (
-        <div style={{ ...S.card, padding: "18px 20px" }}>
+        <div style={{ ...S.card, padding: "18px 20px", marginTop: 24 }}>
           <div style={{ fontSize: 13, fontWeight: 800, color: "#C9A96E", marginBottom: 14, display: "flex", alignItems: "center", gap: 7 }}>
             <Activity size={14} /> أكثر الأعضاء نشاطاً
           </div>
@@ -863,7 +862,6 @@ export default function ProjectDetails() {
   const handleMoveTask = async (taskId, boardId) => {
     try {
       await moveTask(id, taskId, boardId)
-      // store as same type as board.id to keep filter comparisons consistent
       const numericBoardId = typeof boards[0]?.id === 'number' ? Number(boardId) : boardId
       setTasks((t) => t.map((x) => x.id === taskId
         ? { ...x, boardColumnId: numericBoardId, boardId: numericBoardId }
