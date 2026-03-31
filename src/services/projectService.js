@@ -7,19 +7,44 @@ const headers = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
-// ─── helper: throw with readable message ────────────────────────────────────
-async function handleResponse(res) {
-  if (res.ok) {
-    const text = await res.text();
-    try { return text ? JSON.parse(text) : {}; } catch { return {}; }
+// ─── helper: unwrap { success, data, errorCode, message } wrapper ────────────
+function unwrapResponse(parsed, httpStatus) {
+  // Backend wrapper pattern: { success: bool, data: any, errorCode, message }
+  if (parsed && typeof parsed === "object" && "success" in parsed) {
+    if (parsed.success === false) {
+      const errMsg = parsed.message || parsed.errorCode || parsed.data || `HTTP ${httpStatus}`
+      throw new Error(String(errMsg))
+    }
+    // success: true — but data might be an error string (e.g. "already have active session")
+    // detect: if data is a string that looks like an error message, throw it
+    if (typeof parsed.data === "string" && parsed.data.length > 0 && !parsed.message) {
+      // Return as-is — let caller decide (some success responses have string data)
+      return parsed.data
+    }
+    // Return the inner data (or full object if no data key)
+    return parsed.data !== undefined ? parsed.data : parsed
   }
-  let msg = `HTTP ${res.status}`;
-  try {
-    const body = await res.text();
-    const parsed = JSON.parse(body);
-    msg = parsed?.title || parsed?.message || parsed || msg;
-  } catch { /* ignore */ }
-  throw new Error(msg);
+  return parsed
+}
+
+async function handleResponse(res) {
+  const text = await res.text()
+  let parsed
+  try { parsed = text ? JSON.parse(text) : {} } catch { parsed = text || {} }
+
+  if (!res.ok) {
+    // HTTP error — extract message
+    let msg = `HTTP ${res.status}`
+    if (typeof parsed === "string") {
+      msg = parsed || msg
+    } else if (parsed && typeof parsed === "object") {
+      msg = parsed.message || parsed.title || parsed.detail || parsed.data || msg
+      if (typeof msg !== "string") msg = JSON.stringify(msg)
+    }
+    throw new Error(String(msg))
+  }
+
+  return unwrapResponse(parsed, res.status)
 }
 
 // ─── Projects ────────────────────────────────────────────────────────────────
@@ -69,14 +94,26 @@ export async function updateProject(id, body) {
 
 export async function updateProjectStatus(id, status) {
   // status is a string like "Planning","Active","OnHold","Done","Cancelled"
-  // Backend expects ProjectStatus enum — map string → int
-  const statusMap = { Planning: 0, Active: 1, OnHold: 2, Done: 3, Cancelled: 4 };
-  const statusValue = statusMap[status] ?? statusMap.Planning;
+  // Try sending as string first (ASP.NET can deserialize enum from string name)
+  // If your backend uses [JsonConverter(typeof(JsonStringEnumConverter))] this works directly
+  // Otherwise map to int
+  const statusIntMap = { Planning: 0, Active: 1, OnHold: 2, Done: 3, Cancelled: 4 };
+  // Send BOTH so backend can pick whichever it prefers
+  const statusValue = statusIntMap[status] ?? 0;
   const res = await fetch(`${BASE}/api/projects/${id}/status`, {
     method: "PUT",
     headers: headers(),
     body: JSON.stringify({ status: statusValue }),
   });
+  // If that fails, retry with string enum
+  if (!res.ok) {
+    const res2 = await fetch(`${BASE}/api/projects/${id}/status`, {
+      method: "PUT",
+      headers: headers(),
+      body: JSON.stringify({ status }),
+    });
+    return handleResponse(res2);
+  }
   return handleResponse(res);
 }
 
@@ -441,14 +478,24 @@ export async function deleteComment(taskId, commentId) {
 
 export async function getTimelogs(taskId) {
   const res = await fetch(`${BASE}/api/tasks/${taskId}/timelogs`, { headers: headers() });
-  const data = await handleResponse(res);
-  const arr = Array.isArray(data) ? data : data?.data || [];
+  const raw = await handleResponse(res);
+  // after unwrap: raw might be { logs, totalMinutes } or plain array
+  let arr = []
+  if (Array.isArray(raw)) {
+    arr = raw
+  } else if (raw && Array.isArray(raw.logs)) {
+    arr = raw.logs
+  } else if (raw && Array.isArray(raw.data?.logs)) {
+    arr = raw.data.logs
+  } else if (raw && Array.isArray(raw.data)) {
+    arr = raw.data
+  }
   return arr.map((l) => ({
     ...l,
     startTime:       l.startTime       || l.startedAt,
     endTime:         l.endTime         || l.endedAt,
-    durationMinutes: l.durationMinutes || l.duration || 0,
-    isRunning:       l.isRunning       || (!l.endedAt && !l.endTime && !!l.startedAt),
+    durationMinutes: l.durationMinutes ?? l.duration ?? 0,
+    isRunning:       l.isRunning || (!l.endedAt && !l.endTime && !!l.startedAt),
   }));
 }
 
@@ -457,12 +504,36 @@ export async function startTimer(taskId) {
     method: "POST",
     headers: headers(),
   });
+
+  // Special case: 400 "already have active session" — fetch existing active log
+  if (res.status === 400) {
+    const text = await res.text()
+    let errMsg = ""
+    try {
+      const parsed = JSON.parse(text)
+      errMsg = parsed?.data || parsed?.message || ""
+    } catch { errMsg = text }
+
+    if (typeof errMsg === "string" && errMsg.toLowerCase().includes("active")) {
+      // Fetch existing logs and return the running one
+      const logs = await getTimelogs(taskId)
+      const running = logs.find(l => l.isRunning)
+      if (running) return running
+    }
+    throw new Error(String(errMsg || "Failed to start timer"))
+  }
+
   const data = await handleResponse(res);
-  const log = data?.data || data;
+  // backend returns { message, logId } or wrapper { success, data: { logId } }
+  const logId = data?.logId ?? data?.id
+  const startedAt = new Date().toISOString();
   return {
-    ...log,
-    startTime: log.startTime || log.startedAt || new Date().toISOString(),
+    id:        logId,
+    taskId,
+    startTime: startedAt,
+    startedAt: startedAt,
     isRunning: true,
+    durationMinutes: 0,
   };
 }
 
@@ -473,7 +544,14 @@ export async function stopTimer(taskId, logId) {
     body: JSON.stringify({ note: "" }),
   });
   const data = await handleResponse(res);
-  return { ...(data?.data || data), isRunning: false };
+  // backend returns { message, durationMinutes }
+  return {
+    id: logId,
+    durationMinutes: data?.durationMinutes || data?.data?.durationMinutes || 0,
+    isRunning: false,
+    endTime: new Date().toISOString(),
+    endedAt: new Date().toISOString(),
+  };
 }
 
 export async function addManualTime(taskId, body) {
