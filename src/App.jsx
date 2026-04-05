@@ -1,27 +1,13 @@
 /**
  * src/App.jsx — ZEIIA Project
- * ─────────────────────────────────────────────────────────
- * الراوتس الكاملة:
- *   /dashboard/login          → public
- *   /dashboard/session-expired → public
- *   /dashboard                → PrivateRoute
- *   /dashboard/users          → PrivateRoute
- *   /dashboard/reports/activity → PrivateRoute
- *   /dashboard/projects       → PrivateRoute
- *   /dashboard/projects/:id   → PrivateRoute
- *   /dashboard/*              → 404
- *   /                         → public (مع Navbar+Footer+Intro)
- *   /services                 → public
- *   /why-us                   → public
- *   /contact                  → public
- *   /*                        → 404
- * ─────────────────────────────────────────────────────────
+ * أُضيف: ThemeProvider + PrivateRoute + NotFound + SessionExpired
  */
 
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { LangProvider, useLang } from './context/LangContext'
-import ScrollToTop from './components/ScrollToTop'
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { LangProvider, useLang }  from './context/LangContext'
+import { ThemeProvider }          from './context/ThemeContext'
+import ScrollToTop                from './components/ScrollToTop'
 
 // ── Layout ─────────────────────────────────────────────────
 import Navbar      from './Navbar'
@@ -44,29 +30,63 @@ import UserActivityReport from './pages/dashboard/Useractivityreport'
 import ProjectsList   from './pages/projects/ProjectsList'
 import ProjectDetails from './pages/projects/ProjectDetails'
 
-// ── Route Guards & Error Pages ──────────────────────────────
-import { PrivateRoute, NotFound, SessionExpired } from './routes/guards'
-
 import './index.css'
-import './styles/dashboard.css'
 
-/* ── WhatsApp Floating Button ──────────────────────────────── */
+/* ── isLoggedIn ────────────────────────────────────────────── */
+const isLoggedIn = () => !!localStorage.getItem('token')
+
+/* ── PrivateRoute ──────────────────────────────────────────── */
+function PrivateRoute({ children }) {
+  if (!isLoggedIn()) return <Navigate to="/dashboard/login" replace />
+  return children
+}
+
+/* ── 404 ───────────────────────────────────────────────────── */
+function NotFound() {
+  const navigate = useNavigate()
+  return (
+    <div style={{ minHeight:'100vh', background:'#080d16', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Cairo',sans-serif", direction:'rtl', padding:20 }}>
+      <div style={{ background:'#0d1420', border:'1px solid rgba(255,255,255,.06)', borderRadius:20, padding:'48px 40px', maxWidth:420, width:'100%', textAlign:'center', position:'relative', overflow:'hidden' }}>
+        <div style={{ position:'absolute', top:0, right:0, left:0, height:3, background:'linear-gradient(90deg,#C9A96E,#d4a855,transparent)', borderRadius:'20px 20px 0 0' }} />
+        <div style={{ fontSize:72, fontWeight:900, lineHeight:1, background:'linear-gradient(135deg,#C9A96E,#d4a855)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', marginBottom:12 }}>404</div>
+        <div style={{ fontSize:20, fontWeight:800, color:'#e8edf5', marginBottom:10 }}>الصفحة غير موجودة</div>
+        <div style={{ fontSize:13, color:'#6b7891', lineHeight:1.8, marginBottom:28 }}>الصفحة دي مش موجودة. تأكد من الرابط وحاول مجدداً.</div>
+        <div style={{ display:'flex', gap:10, justifyContent:'center' }}>
+          <button onClick={() => navigate(-1)} style={{ height:38, padding:'0 16px', borderRadius:9, border:'1px solid rgba(255,255,255,.1)', background:'transparent', color:'#94a3b8', fontSize:13, cursor:'pointer', fontFamily:"'Cairo',sans-serif" }}>← رجوع</button>
+          <button onClick={() => navigate('/dashboard')} style={{ height:38, padding:'0 16px', borderRadius:9, border:'none', background:'linear-gradient(135deg,#d4a855,#C9A96E)', color:'#080d16', fontSize:13, fontWeight:800, cursor:'pointer', fontFamily:"'Cairo',sans-serif" }}>الداشبورد</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Session Expired ───────────────────────────────────────── */
+function SessionExpired() {
+  const navigate = useNavigate()
+  return (
+    <div style={{ minHeight:'100vh', background:'#080d16', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Cairo',sans-serif", direction:'rtl', padding:20 }}>
+      <div style={{ background:'#0d1420', border:'1px solid rgba(255,255,255,.06)', borderRadius:20, padding:'48px 40px', maxWidth:420, width:'100%', textAlign:'center', position:'relative', overflow:'hidden' }}>
+        <div style={{ position:'absolute', top:0, right:0, left:0, height:3, background:'linear-gradient(90deg,#fbbf24,transparent)', borderRadius:'20px 20px 0 0' }} />
+        <div style={{ fontSize:72, fontWeight:900, lineHeight:1, background:'linear-gradient(135deg,#fbbf24,#f59e0b)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', marginBottom:12 }}>401</div>
+        <div style={{ fontSize:20, fontWeight:800, color:'#e8edf5', marginBottom:10 }}>انتهت الجلسة</div>
+        <div style={{ fontSize:13, color:'#6b7891', lineHeight:1.8, marginBottom:28 }}>انتهت مدة جلستك. سجّل الدخول مجدداً للمتابعة.</div>
+        <button onClick={() => { localStorage.removeItem('token'); navigate('/dashboard/login') }}
+          style={{ height:38, padding:'0 20px', borderRadius:9, border:'none', background:'linear-gradient(135deg,#d4a855,#C9A96E)', color:'#080d16', fontSize:13, fontWeight:800, cursor:'pointer', fontFamily:"'Cairo',sans-serif" }}>
+          تسجيل الدخول
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ── WhatsApp btn ──────────────────────────────────────────── */
 const WhatsAppBtn = () => {
   const { isRtl } = useLang()
   return (
-    <a
-      href="https://wa.me/201207715484"
-      target="_blank" rel="noopener noreferrer"
-      style={{
-        position: 'fixed', bottom: 32,
-        left: isRtl ? 32 : 'auto', right: isRtl ? 'auto' : 32,
-        zIndex: 999, width: 56, height: 56, borderRadius: '50%',
-        background: '#25d366', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 8px 24px rgba(37,211,102,.4)', transition: 'transform .2s, box-shadow .2s',
-        textDecoration: 'none',
-      }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(37,211,102,.5)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)';   e.currentTarget.style.boxShadow = '0 8px 24px rgba(37,211,102,.4)' }}
+    <a href="https://wa.me/201207715484" target="_blank" rel="noopener noreferrer"
+      style={{ position:'fixed', bottom:32, left:isRtl?32:'auto', right:isRtl?'auto':32, zIndex:999, width:56, height:56, borderRadius:'50%', background:'#25d366', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 8px 24px rgba(37,211,102,.4)', transition:'transform .2s', textDecoration:'none' }}
+      onMouseEnter={e => e.currentTarget.style.transform='scale(1.1)'}
+      onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
     >
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
         <path d="M14 2C7.373 2 2 7.373 2 14c0 2.15.57 4.17 1.57 5.91L2 26l6.26-1.54A11.94 11.94 0 0014 26c6.627 0 12-5.373 12-12S20.627 2 14 2z" fill="white"/>
@@ -80,10 +100,7 @@ const WhatsAppBtn = () => {
 const PublicLayout = ({ children }) => {
   const { isRtl } = useLang()
   return (
-    <div
-      dir={isRtl ? 'rtl' : 'ltr'}
-      style={{ minHeight: '100vh', background: '#fff', color: '#0f172a', overflowX: 'hidden' }}
-    >
+    <div dir={isRtl ? 'rtl' : 'ltr'} style={{ minHeight:'100vh', background:'#fff', color:'#0f172a', overflowX:'hidden' }}>
       <Navbar />
       <main>{children}</main>
       <Footer />
@@ -92,17 +109,15 @@ const PublicLayout = ({ children }) => {
   )
 }
 
-/* ── Public Routes (مع Intro Animation) ───────────────────── */
+/* ── Public Routes with Intro ──────────────────────────────── */
 const PublicRoutes = () => {
   const [showIntro,  setShowIntro]  = useState(true)
   const [introLeave, setIntroLeave] = useState(false)
-
   useEffect(() => {
-    const t1 = setTimeout(() => setIntroLeave(true),  2800)
-    const t2 = setTimeout(() => setShowIntro(false),  4400)
+    const t1 = setTimeout(() => setIntroLeave(true), 2800)
+    const t2 = setTimeout(() => setShowIntro(false), 4400)
     return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [])
-
   return (
     <>
       {showIntro && <IntroScreen leaving={introLeave} />}
@@ -119,48 +134,33 @@ const PublicRoutes = () => {
   )
 }
 
-/* ── Root App ──────────────────────────────────────────────── */
+/* ── Root ──────────────────────────────────────────────────── */
 const App = () => (
-  <Router>
-    <ScrollToTop />
+  <ThemeProvider>
     <LangProvider>
-      <Routes>
+      <Router>
+        <ScrollToTop />
+        <Routes>
+          {/* Public dashboard auth routes */}
+          <Route path="/dashboard/login"           element={<DashboardLogin />} />
+          <Route path="/dashboard/session-expired" element={<SessionExpired />} />
 
-        {/* ── Dashboard — Public (no auth needed) ── */}
-        <Route path="/dashboard/login"           element={<DashboardLogin />} />
-        <Route path="/dashboard/session-expired" element={<SessionExpired />} />
+          {/* Protected dashboard routes */}
+          <Route path="/dashboard"                    element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/dashboard/users"              element={<PrivateRoute><UsersPage /></PrivateRoute>} />
+          <Route path="/dashboard/reports/activity"   element={<PrivateRoute><UserActivityReport /></PrivateRoute>} />
+          <Route path="/dashboard/projects"           element={<PrivateRoute><ProjectsList /></PrivateRoute>} />
+          <Route path="/dashboard/projects/:id"       element={<PrivateRoute><ProjectDetails /></PrivateRoute>} />
 
-        {/* ── Dashboard — Protected (PrivateRoute) ── */}
-        <Route
-          path="/dashboard"
-          element={<PrivateRoute><Dashboard /></PrivateRoute>}
-        />
-        <Route
-          path="/dashboard/users"
-          element={<PrivateRoute><UsersPage /></PrivateRoute>}
-        />
-        <Route
-          path="/dashboard/reports/activity"
-          element={<PrivateRoute><UserActivityReport /></PrivateRoute>}
-        />
-        <Route
-          path="/dashboard/projects"
-          element={<PrivateRoute><ProjectsList /></PrivateRoute>}
-        />
-        <Route
-          path="/dashboard/projects/:id"
-          element={<PrivateRoute><ProjectDetails /></PrivateRoute>}
-        />
+          {/* Unknown dashboard routes → 404 */}
+          <Route path="/dashboard/*"                  element={<NotFound />} />
 
-        {/* ── أي رابط /dashboard تاني → 404 ── */}
-        <Route path="/dashboard/*" element={<NotFound />} />
-
-        {/* ── الموقع العام ── */}
-        <Route path="/*" element={<PublicRoutes />} />
-
-      </Routes>
+          {/* Public website */}
+          <Route path="/*" element={<PublicRoutes />} />
+        </Routes>
+      </Router>
     </LangProvider>
-  </Router>
+  </ThemeProvider>
 )
 
 export default App
