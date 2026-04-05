@@ -14,6 +14,7 @@ import {
   updateProjectStatus,
   deleteProject,
 } from "../../services/projectService"
+import '../../styles/dashboard.css'
 
 // ─────────────────────────────────────────────
 // Constants

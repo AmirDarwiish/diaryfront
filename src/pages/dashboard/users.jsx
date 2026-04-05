@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react"
 import { useNavigate } from 'react-router-dom'
 import API_BASE_URL from '../../config'
+import DashboardLayout from './DashboardLayout'
+import '../../styles/dashboard.css'
 
 const authHeaders = () => ({
   'Content-Type': 'application/json',
@@ -117,17 +119,17 @@ const moduleName = mod  => MODULE_NAMES[mod]   || mod
    STYLES
 ═══════════════════════════════ */
 const S = {
-  wrap:     { background:'#0f172a', minHeight:'100vh', padding:'20px 16px', direction:'rtl', color:'#f1f5f9', fontFamily:"'Cairo',sans-serif", boxSizing:'border-box' },
-  card:     { background:'#1e293b', border:'1px solid #334155', borderRadius:12, overflow:'hidden' },
-  row:      { padding:'11px 16px', borderBottom:'1px solid rgba(51,65,85,.4)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:8, flexWrap:'wrap', transition:'background .12s' },
-  lbl:      { fontSize:11, color:'#94a3b8', fontWeight:600, display:'block', marginBottom:5 },
-  inp:      { width:'100%', boxSizing:'border-box', height:38, background:'#0f172a', border:'1px solid #334155', borderRadius:8, color:'#f1f5f9', fontSize:13, padding:'0 11px', fontFamily:"'Cairo',sans-serif", outline:'none' },
-  sel:      { width:'100%', boxSizing:'border-box', height:38, background:'#0f172a', border:'1px solid #334155', borderRadius:8, color:'#f1f5f9', fontSize:13, padding:'0 11px', fontFamily:"'Cairo',sans-serif", outline:'none', cursor:'pointer' },
-  btnGold:  { height:36, padding:'0 16px', borderRadius:8, border:'none', background:'#C9A96E', color:'#0f172a', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:"'Cairo',sans-serif", whiteSpace:'nowrap' },
-  btnGhost: { height:32, padding:'0 12px', borderRadius:7, border:'1px solid #334155', background:'transparent', color:'#94a3b8', fontSize:12, cursor:'pointer', fontFamily:"'Cairo',sans-serif", whiteSpace:'nowrap' },
-  btnBack:  { height:34, padding:'0 12px', borderRadius:8, border:'1px solid #334155', background:'transparent', color:'#94a3b8', fontSize:13, cursor:'pointer', fontFamily:"'Cairo',sans-serif", display:'flex', alignItems:'center', gap:6 },
-  tag:      (color='#C9A96E') => ({ display:'inline-block', padding:'2px 8px', borderRadius:12, fontSize:10, fontWeight:700, background:`${color}22`, color, whiteSpace:'nowrap' }),
-  err:      { color:'#f87171', fontSize:12, padding:'7px 10px', background:'rgba(248,113,113,.08)', borderRadius:7 },
+  wrap:     { background:'var(--bg-base)', minHeight:'100vh', padding:'20px 16px', direction:'rtl', color:'var(--text)', fontFamily:"'Cairo',sans-serif", boxSizing:'border-box' },
+  card:     { background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:12, overflow:'hidden' },
+  row:      { padding:'11px 16px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:8, flexWrap:'wrap', transition:'background .12s' },
+  lbl:      { fontSize:11, color:'var(--text-muted)', fontWeight:600, display:'block', marginBottom:5 },
+  inp:      { width:'100%', boxSizing:'border-box', height:38, background:'var(--bg-base)', border:'1px solid var(--border-md)', borderRadius:8, color:'var(--text)', fontSize:13, padding:'0 11px', fontFamily:"'Cairo',sans-serif", outline:'none' },
+  sel:      { width:'100%', boxSizing:'border-box', height:38, background:'var(--bg-base)', border:'1px solid var(--border-md)', borderRadius:8, color:'var(--text)', fontSize:13, padding:'0 11px', fontFamily:"'Cairo',sans-serif", outline:'none', cursor:'pointer' },
+  btnGold:  { height:36, padding:'0 16px', borderRadius:8, border:'none', background:'linear-gradient(135deg,#d4a855,var(--gold))', color:'#080d16', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:"'Cairo',sans-serif", whiteSpace:'nowrap', display:'inline-flex', alignItems:'center', gap:6 },
+  btnGhost: { height:32, padding:'0 12px', borderRadius:7, border:'1px solid var(--border-md)', background:'transparent', color:'var(--text-muted)', fontSize:12, cursor:'pointer', fontFamily:"'Cairo',sans-serif", whiteSpace:'nowrap', display:'inline-flex', alignItems:'center', gap:6 },
+  btnBack:  { height:34, padding:'0 12px', borderRadius:8, border:'1px solid var(--border-md)', background:'transparent', color:'var(--text-muted)', fontSize:13, cursor:'pointer', fontFamily:"'Cairo',sans-serif", display:'flex', alignItems:'center', gap:6 },
+  tag:      (color='var(--gold)') => ({ display:'inline-block', padding:'2px 8px', borderRadius:12, fontSize:10, fontWeight:700, background:`${color}22`, color, whiteSpace:'nowrap' }),
+  err:      { color:'var(--red)', fontSize:12, padding:'7px 10px', background:'var(--red-bg)', borderRadius:7 },
 }
 
 /* ═══════════════════════════════
@@ -658,41 +660,30 @@ export default function UsersRolesPage() {
   ]
 
   return (
-    <div style={S.wrap}>
-      <Toast toast={toast} />
+    <DashboardLayout title="إدارة المستخدمين والأدوار" breadcrumb="الإدارة">
+      <div style={{ ...S.wrap, padding:0 }}>
+        <Toast toast={toast} />
 
-      {/* Header */}
-      <div style={{ marginBottom:20, display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
-        <div>
-          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
-            <div style={{ width:8, height:8, borderRadius:'50%', background:'#C9A96E' }} />
-            <span style={{ fontSize:11, fontWeight:700, color:'#C9A96E', letterSpacing:2 }}>ZEIIA CRM</span>
+        <div style={{ padding:'0 24px 24px', direction:'rtl' }}>
+          {/* Tabs */}
+          <div style={{ display:'flex', gap:4, marginBottom:20, borderBottom:'1px solid var(--border)', paddingBottom:1, overflowX:'auto' }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)} style={{
+                height:38, padding:'0 20px', border:'none', cursor:'pointer', whiteSpace:'nowrap',
+                background:'transparent', fontFamily:"'Cairo',sans-serif", fontSize:14,
+                color:        tab === t.id ? 'var(--gold)' : 'var(--text-muted)',
+                fontWeight:   tab === t.id ? 800 : 400,
+                borderBottom: tab === t.id ? '2px solid var(--gold)' : '2px solid transparent',
+                marginBottom: -1, transition:'all .15s',
+              }}>{t.label}</button>
+            ))}
           </div>
-          <div style={{ fontSize:20, fontWeight:800 }}>إدارة المستخدمين والأدوار</div>
-          <div style={{ width:36, height:2, background:'#C9A96E', borderRadius:2, margin:'5px 0' }} />
+
+          {/* Content */}
+          {tab === 'users' && <UsersTab showToast={showToast} />}
+          {tab === 'roles' && <RolesTab showToast={showToast} />}
         </div>
-        <button onClick={() => navigate('/dashboard')} style={S.btnBack}>
-          ← العودة للداشبورد
-        </button>
       </div>
-
-      {/* Tabs */}
-      <div style={{ display:'flex', gap:4, marginBottom:20, borderBottom:'1px solid #334155', paddingBottom:1, overflowX:'auto' }}>
-        {tabs.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            height:38, padding:'0 20px', border:'none', cursor:'pointer', whiteSpace:'nowrap',
-            background:'transparent', fontFamily:"'Cairo',sans-serif", fontSize:14,
-            color:        tab === t.id ? '#C9A96E' : '#64748b',
-            fontWeight:   tab === t.id ? 800 : 400,
-            borderBottom: tab === t.id ? '2px solid #C9A96E' : '2px solid transparent',
-            marginBottom: -1, transition:'all .15s',
-          }}>{t.label}</button>
-        ))}
-      </div>
-
-      {/* Content */}
-      {tab === 'users' && <UsersTab showToast={showToast} />}
-      {tab === 'roles' && <RolesTab showToast={showToast} />}
-    </div>
+    </DashboardLayout>
   )
 }
