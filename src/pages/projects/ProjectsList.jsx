@@ -325,7 +325,7 @@ function ProjectCard({ project, onOpen, onDelete, onStatusChange }) {
             fontFamily: "'Cairo',sans-serif", textAlign: "right",
           }}
         >
-          <Trash2 size={13} /> حذف البروجكت
+          <Trash2 size={13} /> حذف المشروع
         </button>
       </DropdownPortal>
     </>
@@ -343,7 +343,7 @@ function CreateModal({ onClose, onCreate }) {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
 
   const submit = async () => {
-    if (!form.name.trim()) { setError("اسم البروجكت مطلوب"); return }
+    if (!form.name.trim()) { setError("اسم المشروع مطلوب"); return }
     setLoading(true); setError("")
     try {
       const priorityMap = { Low: 0, Medium: 1, High: 2, Critical: 3 }
@@ -385,7 +385,7 @@ function CreateModal({ onClose, onCreate }) {
         }} />
 
         <div style={{ fontSize: 18, fontWeight: 900, color: "var(--text)", marginBottom: 4 }}>
-          إنشاء بروجكت جديد
+          إنشاء مشروع جديد
         </div>
         <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 24 }}>
           سيتم إنشاء 4 كولومنات افتراضية تلقائياً
@@ -393,7 +393,7 @@ function CreateModal({ onClose, onCreate }) {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <label style={S.lbl}>اسم البروجكت *</label>
+            <label style={S.lbl}>اسم المشروع *</label>
             <input
               style={S.input}
               placeholder="مثال: تطوير منصة زيا..."
@@ -409,7 +409,7 @@ function CreateModal({ onClose, onCreate }) {
             <label style={S.lbl}>الوصف</label>
             <textarea
               style={S.textarea}
-              placeholder="اكتب وصفاً مختصراً للبروجكت..."
+              placeholder="اكتب وصفاً مختصراً للمشروع..."
               value={form.description}
               onChange={(e) => set("description", e.target.value)}
               onFocus={(e) => (e.target.style.borderColor = "rgba(201,169,110,0.5)")}
@@ -446,7 +446,7 @@ function CreateModal({ onClose, onCreate }) {
               ? <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} />
               : <Plus size={15} />
             }
-            {loading ? "جاري الإنشاء..." : "إنشاء البروجكت"}
+            {loading ? "جاري الإنشاء..." : "إنشاء المشروع"}
           </button>
           <button onClick={onClose} style={{ ...S.btnGhost, height: 42 }}>إلغاء</button>
         </div>
@@ -481,7 +481,7 @@ export default function ProjectsList() {
   }, [])
 
   const handleDelete = async (id) => {
-    if (!window.confirm("هل أنت متأكد من حذف هذا البروجكت؟")) return
+    if (!window.confirm("هل أنت متأكد من حذف هذا المشروع")) return
     try {
       await deleteProject(id)
       setProjects((p) => p.filter((x) => x.id !== id))
@@ -526,7 +526,7 @@ export default function ProjectsList() {
           onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
           onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
         >
-          <Plus size={16} /> إنشاء بروجكت
+          <Plus size={16} /> إنشاء مشروع
         </button>
       </div>
 
@@ -564,7 +564,7 @@ export default function ProjectsList() {
           <Search size={14} color="var(--text-muted)" style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)" }} />
           <input
             style={{ ...S.input, paddingRight: 34 }}
-            placeholder="ابحث باسم البروجكت..."
+            placeholder="ابحث باسم المشروع..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onFocus={(e) => (e.target.style.borderColor = "rgba(201,169,110,0.5)")}
@@ -634,14 +634,14 @@ export default function ProjectsList() {
                 <FolderKanban size={26} color="#C9A96E" />
               </div>
               <div style={{ fontSize: 17, fontWeight: 900, color: "var(--text)", marginBottom: 8 }}>
-                {search || filterStatus ? "لا توجد نتائج مطابقة" : "لا توجد بروجكتات بعد"}
+                {search || filterStatus ? "لا توجد نتائج مطابقة" : "لا توجد مشاريع بعد"}
               </div>
               <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>
-                {search || filterStatus ? "جرّب تغيير معايير البحث" : "ابدأ بإنشاء أول بروجكت لك الآن"}
+                {search || filterStatus ? "جرّب تغيير معايير البحث" : "ابدأ بإنشاء أول مشروع لك الآن"}
               </div>
               {!search && !filterStatus && (
                 <button onClick={() => setShowCreate(true)} style={{ ...S.btnGold, margin: "0 auto" }}>
-                  <Plus size={15} /> إنشاء بروجكت
+                  <Plus size={15} /> إنشاء مشروع
                 </button>
               )}
             </motion.div>

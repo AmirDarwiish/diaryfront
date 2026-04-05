@@ -226,7 +226,7 @@ export default function ProjectStats({ projectId }) {
             </div>
             {completion_percentage === 100 && (
               <div style={{ marginTop: 8, fontSize: 11, color: "#34d399", fontWeight: 700 }}>
-                🎉 البروجكت مكتمل!
+                🎉 المشروع مكتمل!
               </div>
             )}
           </div>

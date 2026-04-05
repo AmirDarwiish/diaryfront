@@ -936,7 +936,7 @@ export default function ProjectDetails() {
   }
 
   if (loading) return (
-    <DashboardLayout title="تفاصيل البروجكت" breadcrumb="البروجكتات">
+    <DashboardLayout title="تفاصيل المشروع" breadcrumb="المشاريع ">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "120px 0" }}>
         <Loader2 size={36} color="var(--gold)" style={{ animation: "spin 1s linear infinite" }} />
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -945,9 +945,9 @@ export default function ProjectDetails() {
   )
 
   if (!project) return (
-    <DashboardLayout title="البروجكتات" breadcrumb="البروجكتات">
+    <DashboardLayout title="المشاريع" breadcrumb="المشاريع">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "120px 0", color: "var(--red)", fontFamily: "'Cairo',sans-serif" }}>
-        البروجكت مش موجود
+        المشروع مش موجود
       </div>
     </DashboardLayout>
   )
@@ -959,7 +959,7 @@ export default function ProjectDetails() {
   const activeTabCfg = TABS.find((t) => t.key === activeTab)
 
   return (
-    <DashboardLayout title={project.name || project.title} breadcrumb="البروجكتات">
+    <DashboardLayout title={project.name || project.title} breadcrumb="المشاريع">
     <div style={{
       background: "var(--bg-base)", minHeight: "100vh",
       direction: "rtl", color: "var(--text)",
@@ -993,7 +993,7 @@ export default function ProjectDetails() {
             style={{ ...S.btnGhost, height: 30, fontSize: 11, padding: "0 10px" }}
           >
             <ArrowRight size={13} style={{ transform: "rotate(180deg)" }} />
-            {!isMobile && "البروجكتات"}
+            {!isMobile && "المشاريع"}
           </button>
           <span style={{ color: "#6b7891", fontSize: 12 }}>/</span>
           <span style={{ fontSize: 12, color: "#C9A96E", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: isMobile ? 160 : 300 }}>
