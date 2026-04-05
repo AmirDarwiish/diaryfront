@@ -508,7 +508,7 @@ export default function ProjectsList() {
   const onHold = projects.filter((p) => normProjectStatus(p.status) === "OnHold").length
 
   return (
-    <DashboardLayout title="إدارة البروجكتات" breadcrumb="البروجكتات">
+    <DashboardLayout title="إدارة المشاريع" breadcrumb="المشاريع">
     <div style={{ ...S.wrap, padding: '24px' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -533,7 +533,7 @@ export default function ProjectsList() {
       {/* Stats */}
       <motion.div className="stat-grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
         {[
-          { label: "إجمالي البروجكتات", value: total,  color: "#C9A96E", icon: <FolderKanban size={18} color="#C9A96E" /> },
+          { label: "إجمالي المشاريع", value: total,  color: "#C9A96E", icon: <FolderKanban size={18} color="#C9A96E" /> },
           { label: "نشطة الآن",          value: active, color: "#34d399", icon: <TrendingUp   size={18} color="#34d399" /> },
           { label: "مكتملة",             value: done,   color: "#6ea8fe", icon: <CheckCircle2 size={18} color="#6ea8fe" /> },
           { label: "متوقفة",             value: onHold, color: "#fbbf24", icon: <PauseCircle  size={18} color="#fbbf24" /> },
@@ -617,7 +617,7 @@ export default function ProjectsList() {
       {loading && (
         <div style={{ textAlign: "center", padding: 80, color: "#C9A96E" }}>
           <Loader2 size={32} style={{ animation: "spin 1s linear infinite", margin: "0 auto 14px", display: "block" }} />
-          <div style={{ fontSize: 14, fontWeight: 700 }}>جاري تحميل البروجكتات...</div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>جاري تحميل المشاريع...</div>
         </div>
       )}
 
