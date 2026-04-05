@@ -674,8 +674,8 @@ function DetailsDrawer({ lead, onClose }) {
     ;(async () => {
       try {
         const [dr, nr, fhr] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/leads/${lead.id}/details`,           { headers:authHeaders(), credentials:'include' }),
-          fetch(`${API_BASE_URL}/api/leads/${lead.id}/notes`,             { headers:authHeaders(), credentials:'include' }),
+          fetch(`${API_BASE_URL}/api/leads/${lead.id}/details`,            { headers:authHeaders(), credentials:'include' }),
+          fetch(`${API_BASE_URL}/api/leads/${lead.id}/notes`,              { headers:authHeaders(), credentials:'include' }),
           fetch(`${API_BASE_URL}/api/leads/${lead.id}/follow-up-history`, { headers:authHeaders(), credentials:'include' }),
         ])
         if (dr.ok) { const d = await dr.json(); setDetails(d?.data || d) }
@@ -910,8 +910,8 @@ function KanbanBoard({ onAction }) {
           })}
         </div>
       </div>
-      {modal?.type === 'note'     && <NoteModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-      {modal?.type === 'task'     && <TaskModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+      {modal?.type === 'note'     && <NoteModal      lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+      {modal?.type === 'task'     && <TaskModal      lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
       {modal?.type === 'followup' && <FollowUpModal lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
       {modal?.type === 'assign'   && <AssignModal   lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
     </>
@@ -1074,7 +1074,7 @@ export default function Dashboard() {
   }
 
   const stats = [
-    { label:'إجمالي الليدز', val: all.length,                                              sub:'كل السجلات' },
+    { label:'إجمالي الليدز', val: all.length,                                             sub:'كل السجلات' },
     { label:'جدد',           val: all.filter(l => resolveStatus(l.status) === 'New').length,        sub:'New' },
     { label:'مهتمين',        val: all.filter(l => resolveStatus(l.status) === 'Interested').length, sub:'Interested' },
     { label:'تم التحويل',    val: all.filter(l => resolveStatus(l.status) === 'Converted').length,  sub:'Converted' },
@@ -1121,8 +1121,7 @@ export default function Dashboard() {
     </div>
   )
 
-  const Ico_Refresh = () => <Ico size={13}><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></Ico>
-  const IconRefresh = Ico_Refresh
+  // ⚠️ تم حذف أسطر تعريف Ico_Refresh و IconRefresh المكررة من هنا لأنه تم تعريفها في أعلى الصفحة بالفعل
 
   if (loading) return (
     <DashboardLayout title="Leads Dashboard" breadcrumb="الداشبورد">
@@ -1296,12 +1295,12 @@ export default function Dashboard() {
 
         {/* ── Modals ── */}
         {showCreate                && <CreateLeadModal onClose={() => setShowCreate(false)} onSuccess={() => { setShowCreate(false); showToast('تم إضافة الليد'); loadLeads() }} />}
-        {modal?.type === 'status'  && <StatusModal   lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-        {modal?.type === 'assign'  && <AssignModal   lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-        {modal?.type === 'note'    && <NoteModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-        {modal?.type === 'task'    && <TaskModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'status'  && <StatusModal  lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'assign'  && <AssignModal  lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'note'    && <NoteModal    lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'task'    && <TaskModal    lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
         {modal?.type === 'followup'&& <FollowUpModal lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-        {modal?.type === 'edit'    && <EditModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'edit'    && <EditModal    lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
         {modal?.type === 'convert' && <ConvertModal  lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
         {modal?.type === 'archive' && <ArchiveModal  lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
         {drawer     && <DetailsDrawer lead={drawer} onClose={() => setDrawer(null)} />}
