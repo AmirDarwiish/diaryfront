@@ -286,7 +286,7 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
       width: isMobile ? "85vw" : 280,
       flexShrink: 0,
       display: "flex", flexDirection: "column",
-      maxHeight: isMobile ? "calc(100vh - 320px)" : "calc(100vh - 280px)",
+      maxHeight: isMobile ? "calc(100vh - 380px)" : "calc(100vh - 340px)",
     }}>
       {/* Header */}
       <div style={{
@@ -361,7 +361,7 @@ function KanbanColumn({ board, tasks, boards, projectId, onMoveTask, onDeleteTas
       </AnimatePresence>
 
       {/* Tasks */}
-      <div style={{ padding: "10px", overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+      <div className="kanban-col-tasks">
         <AnimatePresence>
           {colTasks.length === 0 ? (
             <div style={{ textAlign: "center", padding: "30px 10px", color: "#6b7891", fontSize: 12 }}>
@@ -936,7 +936,7 @@ export default function ProjectDetails() {
   }
 
   if (loading) return (
-    <DashboardLayout title="تفاصيل المشروع" breadcrumb="المشاريع ">
+    <DashboardLayout title="تفاصيل البروجكت" breadcrumb="البروجكتات">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "120px 0" }}>
         <Loader2 size={36} color="var(--gold)" style={{ animation: "spin 1s linear infinite" }} />
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -945,9 +945,9 @@ export default function ProjectDetails() {
   )
 
   if (!project) return (
-    <DashboardLayout title="المشاريع" breadcrumb="المشاريع">
+    <DashboardLayout title="البروجكتات" breadcrumb="البروجكتات">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "120px 0", color: "var(--red)", fontFamily: "'Cairo',sans-serif" }}>
-        المشروع مش موجود
+        البروجكت مش موجود
       </div>
     </DashboardLayout>
   )
@@ -959,7 +959,7 @@ export default function ProjectDetails() {
   const activeTabCfg = TABS.find((t) => t.key === activeTab)
 
   return (
-    <DashboardLayout title={project.name || project.title} breadcrumb="المشاريع">
+    <DashboardLayout title={project.name || project.title} breadcrumb="البروجكتات">
     <div style={{
       background: "var(--bg-base)", minHeight: "100vh",
       direction: "rtl", color: "var(--text)",
@@ -967,12 +967,7 @@ export default function ProjectDetails() {
     }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .kanban-scroll { display: flex; gap: 16px; overflow-x: auto; padding: 16px 16px 24px; }
-        @media (min-width: 640px) { .kanban-scroll { padding: 20px 28px 28px; } }
-        .kanban-scroll::-webkit-scrollbar { height: 6px; }
-        .kanban-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,.02); border-radius: 10px; }
-        .kanban-scroll::-webkit-scrollbar-thumb { background: rgba(201,169,110,.2); border-radius: 10px; }
-        .kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(201,169,110,.5); }
+        /* kanban styles moved to dashboard.css */
         ::-webkit-calendar-picker-indicator { filter: invert(0.8); }
         .bottom-nav {
           position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
@@ -993,7 +988,7 @@ export default function ProjectDetails() {
             style={{ ...S.btnGhost, height: 30, fontSize: 11, padding: "0 10px" }}
           >
             <ArrowRight size={13} style={{ transform: "rotate(180deg)" }} />
-            {!isMobile && "المشاريع"}
+            {!isMobile && "البروجكتات"}
           </button>
           <span style={{ color: "#6b7891", fontSize: 12 }}>/</span>
           <span style={{ fontSize: 12, color: "#C9A96E", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: isMobile ? 160 : 300 }}>

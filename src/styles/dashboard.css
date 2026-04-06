@@ -769,3 +769,69 @@ body { font-family: 'Cairo', sans-serif; }
   from { opacity:0; transform: translateY(12px); }
   to   { opacity:1; transform: translateY(0); }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   KANBAN FIXES — scroll + direction
+═══════════════════════════════════════════════════════════ */
+
+/* الـ kanban-scroll container لازم direction: ltr عشان الـ columns
+   تترتب من اليسار لليمين زي المعتاد في الـ kanban boards */
+.kanban-scroll {
+  direction: ltr !important;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 16px 16px 24px;
+  align-items: flex-start;
+}
+@media (min-width: 640px) {
+  .kanban-scroll { padding: 20px 28px 28px; }
+}
+
+/* Custom scrollbar للـ kanban scroll الأفقي */
+.kanban-scroll::-webkit-scrollbar        { height: 6px; }
+.kanban-scroll::-webkit-scrollbar-track  { background: var(--bg-base); border-radius: 10px; }
+.kanban-scroll::-webkit-scrollbar-thumb  { background: var(--gold-20); border-radius: 10px; }
+.kanban-scroll::-webkit-scrollbar-thumb:hover { background: var(--gold-35); }
+
+/* كل column لازم direction: rtl تاني عشان المحتوى داخلها يبقى عربي صح */
+.kanban-scroll > * {
+  direction: rtl;
+}
+
+/* الـ column اللي فيها tasks - الـ overflow-y بيتحكم فيه هنا */
+.kanban-col-tasks {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 80px;
+  /* مخفّي الـ scrollbar بشكل clean */
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-20) transparent;
+}
+.kanban-col-tasks::-webkit-scrollbar        { width: 4px; }
+.kanban-col-tasks::-webkit-scrollbar-track  { background: transparent; }
+.kanban-col-tasks::-webkit-scrollbar-thumb  { background: var(--gold-20); border-radius: 4px; }
+.kanban-col-tasks::-webkit-scrollbar-thumb:hover { background: var(--gold-35); }
+
+/* Fix kb-sc (leads kanban) direction */
+.kb-sc {
+  direction: ltr !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 12px;
+}
+.kb-sc > div {
+  direction: rtl;
+}
+
+/* Fix leads-tbl scrollbar */
+.leads-tbl::-webkit-scrollbar        { height: 5px; }
+.leads-tbl::-webkit-scrollbar-track  { background: var(--bg-base); }
+.leads-tbl::-webkit-scrollbar-thumb  { background: var(--bg-elevated); border-radius: 3px; }
+.leads-tbl::-webkit-scrollbar-thumb:hover { background: var(--gold); }
