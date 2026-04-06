@@ -821,7 +821,6 @@ body { font-family: 'Cairo', sans-serif; }
 
 /* Fix kb-sc (leads kanban) direction */
 .kb-sc {
-  direction: ltr !important;
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 12px;
