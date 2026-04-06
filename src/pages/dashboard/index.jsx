@@ -674,8 +674,8 @@ function DetailsDrawer({ lead, onClose }) {
     ;(async () => {
       try {
         const [dr, nr, fhr] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/leads/${lead.id}/details`,           { headers:authHeaders(), credentials:'include' }),
-          fetch(`${API_BASE_URL}/api/leads/${lead.id}/notes`,             { headers:authHeaders(), credentials:'include' }),
+          fetch(`${API_BASE_URL}/api/leads/${lead.id}/details`,            { headers:authHeaders(), credentials:'include' }),
+          fetch(`${API_BASE_URL}/api/leads/${lead.id}/notes`,              { headers:authHeaders(), credentials:'include' }),
           fetch(`${API_BASE_URL}/api/leads/${lead.id}/follow-up-history`, { headers:authHeaders(), credentials:'include' }),
         ])
         if (dr.ok) { const d = await dr.json(); setDetails(d?.data || d) }
@@ -888,8 +888,8 @@ function KanbanBoard({ onAction }) {
   return (
     <>
       {toast && <div style={{ position:'fixed', top:'calc(var(--header-h,60px) + 12px)', left:'50%', transform:'translateX(-50%)', zIndex:2000, background: toast.ok ? 'var(--green-bg)' : 'var(--red-bg)', border:`1px solid ${toast.ok ? 'rgba(52,211,153,.3)' : 'rgba(248,113,113,.3)'}`, color: toast.ok ? 'var(--green)' : 'var(--red)', borderRadius:10, padding:'9px 22px', fontSize:13, fontWeight:600, boxShadow:'var(--shadow-modal)', pointerEvents:'none', fontFamily:"'Cairo',sans-serif" }}>{toast.msg}</div>}
-      <div className="kb-scroll" style={{ overflowX:'auto', paddingBottom:12, direction:'ltr' }}>
-        <div style={{ display:'flex', gap:10, minWidth:'max-content', padding:'4px 2px 12px', alignItems:'flex-start', direction:'rtl' }}>
+      <div className="kb-scroll" style={{ overflowX:'auto', paddingBottom:12 }}>
+        <div style={{ display:'flex', gap:10, minWidth:'max-content', padding:'4px 2px 12px', alignItems:'flex-start' }}>
           {KANBAN_STATUSES.map(s => {
             const leads = getLeads(s.id); const isOver = dragOverCol === s.id
             return (
@@ -900,8 +900,8 @@ function KanbanBoard({ onAction }) {
                     <span style={{ fontSize:13, fontWeight:700, color:'var(--text)' }}>{s.label}</span>
                   </div>
                 </div>
-                <div className="kb-col kanban-col-tasks" onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; setDragOverCol(s.id) }} onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOverCol(null) }} onDrop={() => handleDrop(s.id)}
-                  style={{ flex:1, padding:8, display:'flex', flexDirection:'column', gap:7, minHeight:80, maxHeight:'calc(100vh - 360px)', background: isOver ? 'var(--gold-08)' : 'transparent', border: isOver ? '1.5px dashed var(--gold-35)' : '1.5px solid transparent', borderRadius: isOver ? 8 : 0, transition:'background .12s, border .12s' }}>
+                <div className="kb-col" onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; setDragOverCol(s.id) }} onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOverCol(null) }} onDrop={() => handleDrop(s.id)}
+                  style={{ flex:1, padding:8, display:'flex', flexDirection:'column', gap:7, minHeight:80, background: isOver ? 'var(--gold-08)' : 'transparent', border: isOver ? '1.5px dashed var(--gold-35)' : '1.5px solid transparent', borderRadius: isOver ? 8 : 0, transition:'background .12s, border .12s' }}>
                   {leads.length === 0 ? <div style={{ color:'var(--text-faint)', textAlign:'center', fontSize:12, padding:'18px 0', fontStyle:'italic' }}>لا يوجد</div>
                     : leads.map(l => <KanbanCard key={l.id} lead={l} onDragStart={() => { dragged.current = l; dragFromId.current = s.id }} onDragEnd={() => { dragged.current = null; dragFromId.current = null; setDragOverCol(null) }} onAction={handleCardAction} />)}
                 </div>
@@ -910,8 +910,8 @@ function KanbanBoard({ onAction }) {
           })}
         </div>
       </div>
-      {modal?.type === 'note'     && <NoteModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-      {modal?.type === 'task'     && <TaskModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+      {modal?.type === 'note'     && <NoteModal      lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+      {modal?.type === 'task'     && <TaskModal      lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
       {modal?.type === 'followup' && <FollowUpModal lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
       {modal?.type === 'assign'   && <AssignModal   lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
     </>
@@ -1074,7 +1074,7 @@ export default function Dashboard() {
   }
 
   const stats = [
-    { label:'إجمالي الليدز', val: all.length,                                              sub:'كل السجلات' },
+    { label:'إجمالي الليدز', val: all.length,                                             sub:'كل السجلات' },
     { label:'جدد',           val: all.filter(l => resolveStatus(l.status) === 'New').length,        sub:'New' },
     { label:'مهتمين',        val: all.filter(l => resolveStatus(l.status) === 'Interested').length, sub:'Interested' },
     { label:'تم التحويل',    val: all.filter(l => resolveStatus(l.status) === 'Converted').length,  sub:'Converted' },
@@ -1121,8 +1121,7 @@ export default function Dashboard() {
     </div>
   )
 
-  const Ico_Refresh = () => <Ico size={13}><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></Ico>
-  const IconRefresh = Ico_Refresh
+  // ⚠️ تم حذف أسطر تعريف Ico_Refresh و IconRefresh المكررة من هنا لأنه تم تعريفها في أعلى الصفحة بالفعل
 
   if (loading) return (
     <DashboardLayout title="Leads Dashboard" breadcrumb="الداشبورد">
@@ -1144,7 +1143,10 @@ export default function Dashboard() {
     >
       <div className="db-page" style={{ direction:'rtl' }}>
         <style>{`
-          /* leads-tbl scrollbar handled by dashboard.css */
+          .leads-tbl::-webkit-scrollbar{height:5px}
+          .leads-tbl::-webkit-scrollbar-track{background:var(--bg-base)}
+          .leads-tbl::-webkit-scrollbar-thumb{background:var(--bg-elevated);border-radius:3px}
+          .leads-tbl::-webkit-scrollbar-thumb:hover{background:var(--gold)}
         `}</style>
 
         <Toast toast={toast} />
@@ -1293,12 +1295,12 @@ export default function Dashboard() {
 
         {/* ── Modals ── */}
         {showCreate                && <CreateLeadModal onClose={() => setShowCreate(false)} onSuccess={() => { setShowCreate(false); showToast('تم إضافة الليد'); loadLeads() }} />}
-        {modal?.type === 'status'  && <StatusModal   lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-        {modal?.type === 'assign'  && <AssignModal   lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-        {modal?.type === 'note'    && <NoteModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-        {modal?.type === 'task'    && <TaskModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'status'  && <StatusModal  lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'assign'  && <AssignModal  lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'note'    && <NoteModal    lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'task'    && <TaskModal    lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
         {modal?.type === 'followup'&& <FollowUpModal lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
-        {modal?.type === 'edit'    && <EditModal     lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
+        {modal?.type === 'edit'    && <EditModal    lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
         {modal?.type === 'convert' && <ConvertModal  lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
         {modal?.type === 'archive' && <ArchiveModal  lead={modal.lead} onClose={() => setModal(null)} onSuccess={onModalSuccess} />}
         {drawer     && <DetailsDrawer lead={drawer} onClose={() => setDrawer(null)} />}
