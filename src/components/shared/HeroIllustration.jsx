@@ -5,48 +5,48 @@ import { useLang } from '../../context/LangContext';
 const SLIDES = [
   {
     // Web Development - كود بتصميم عصري ومظلم
-    image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1080&auto=format&fit=crop',
+    image: 'https://res.cloudinary.com/dsh6m0lko/image/upload/v1775811860/65b5bd00-77a1-4286-81b4-bafb8a9544cc_gepcg0.jpg',
     tag: { en: 'Web Development', ar: 'تطوير المواقع' },
     titleKey: 0,
   },
   {
     // Mobile Apps - هاتف ذكي في بيئة عمل حديثة
-    image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=1080&auto=format&fit=crop',
+    image: 'https://res.cloudinary.com/dsh6m0lko/image/upload/v1775812206/6537923e-32fd-4609-8dbe-e30c4be871d6_eurwcp.jpg',
     tag: { en: 'Mobile Apps', ar: 'تطبيقات الجوال' },
     titleKey: 1,
   },
   {
     // Custom Systems - سيرفرات أو شبكات معمارية
-    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1080&auto=format&fit=crop',
+    image: 'https://res.cloudinary.com/dsh6m0lko/image/upload/v1775812310/385ddff9-1e39-4db2-a71e-d94de0eff619_q8nwuw.jpg',
     tag: { en: 'Custom Systems', ar: 'أنظمة مخصصة' },
     title: { en: 'Fully Customized systems', ar: 'أنظمة مخصصة بالكامل' },  },
   {
     // WordPress - مكتب احترافي بسيط
-    image: 'https://images.unsplash.com/photo-1616469829581-73993eb86b02?q=80&w=1080&auto=format&fit=crop',
+    image: 'https://res.cloudinary.com/dsh6m0lko/image/upload/v1775812409/fc1c3bad-244f-4fb4-ae7c-9c1e0187f160_or1bxa.jpg',
     tag: { en: 'WordPress', ar: 'ووردبريس' },
     title: { en: 'WordPress Development', ar: 'تطوير ووردبريس' },
   },
   {
     // E-commerce - شاشة دفع وتسوق متطورة
-    image: 'https://images.unsplash.com/photo-1556742044-3c52d6e88c62?q=80&w=1080&auto=format&fit=crop',
+    image: 'https://res.cloudinary.com/dsh6m0lko/image/upload/v1775812524/476b16aa-5a08-4da7-a593-bc98959a9bd2_i38cid.jpg',
     tag: { en: 'E-commerce', ar: 'متاجر إلكترونية' },
     title: { en: 'E-commerce Solutions', ar: 'متاجر إلكترونية' },
   },
   {
     // SEO - إحصائيات وبيانات بشكل فني
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1080&auto=format&fit=crop',
+    image: 'https://res.cloudinary.com/dsh6m0lko/image/upload/v1775812637/a3701b66-21e0-4b13-b5af-934bd6d4f800_bztpir.jpg',
     tag: { en: 'SEO', ar: 'تحسين البحث' },
     title: { en: 'SEO Optimization', ar: 'تحسين محركات البحث' },
   },
   {
     // UI/UX - ألوان وتصميم واجهات
-    image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=1080&auto=format&fit=crop',
+    image: 'https://res.cloudinary.com/dsh6m0lko/image/upload/v1775812745/b0b592a0-5a92-4bfb-9237-2a9a78a37464_dujjn9.jpg',
     tag: { en: 'UI/UX Design', ar: 'تصميم UI/UX' },
     title: { en: 'UI/UX Design', ar: 'تصميم UI/UX' },
   },
   {
     // Shopify - مفهوم التسوق الحديث
-    image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1080&auto=format&fit=crop',
+    image: 'https://res.cloudinary.com/dsh6m0lko/image/upload/v1775812853/6adb64fe-9c8a-4cf5-8c0f-d2f2e6a39b1f_u72qfv.jpg',
     tag: { en: 'Shopify', ar: 'شوبيفاي' },
     title: { en: 'Shopify Stores', ar: 'متاجر Shopify' },
   },
