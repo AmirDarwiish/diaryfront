@@ -80,7 +80,6 @@ const HeroIllustration = () => {
     return () => clearInterval(autoRef.current);
   }, [resetTimer]);
 
-  // preload الصورة الجاية
   useEffect(() => {
     const nextIndex = (imageIndex + 1) % SLIDES.length;
     const img = new Image();
@@ -105,13 +104,15 @@ const HeroIllustration = () => {
     >
       <div style={{
         position: 'relative', zIndex: 2,
-        background: '#fff', borderRadius: 32, padding: 12,
-        boxShadow: '0 40px 100px rgba(15,23,42,0.08)',
-        border: '1px solid #f1f5f9',
+        background: 'linear-gradient(145deg, #ffffff, #fdfbf7)', // خلفية مضيئة وفخمة
+        borderRadius: 32, padding: 16, // مساحة أوسع قليلاً للفخامة
+        boxShadow: '0 30px 60px -12px rgba(212, 175, 55, 0.1), 0 18px 36px -18px rgba(0, 0, 0, 0.1)', // ظل يجمع بين الذهبي والأسود
+        border: '1px solid rgba(212, 175, 55, 0.15)', // إطار ذهبي خفيييف جداً
       }}>
         <div style={{
-          position: 'relative', height: 380, borderRadius: 24,
-          overflow: 'hidden', background: '#0f172a',
+          position: 'relative', height: 400, borderRadius: 24,
+          overflow: 'hidden', background: '#0a0a0a',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)', // انعكاس داخلي للصورة
         }}>
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
@@ -151,124 +152,91 @@ const HeroIllustration = () => {
                 />
               </motion.div>
 
+              {/* gradient overlay */}
               <div style={{
                 position: 'absolute', inset: 0,
-                background: 'linear-gradient(to top, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.4) 40%, transparent 100%)',
+                // تدرج لوني أعمق بيعطي مظهر سينمائي فخم
+                background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 45%, rgba(255,255,255,0.05) 100%)',
               }} />
 
+              {/* النصوص */}
               <div style={{
-                position: 'absolute', bottom: 30,
-                left: isRtl ? 'auto' : 24,
-                right: isRtl ? 24 : 'auto',
+                position: 'absolute', bottom: 60,
+                left: isRtl ? 'auto' : 28,
+                right: isRtl ? 28 : 'auto',
                 textAlign: isRtl ? 'right' : 'left',
               }}>
                 <span style={{
-                  display: 'inline-block', padding: '6px 14px',
-                  background: 'rgba(201,169,110,0.95)', color: '#fff',
-                  borderRadius: 50, fontSize: 11, fontWeight: 700,
-                  marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em',
-                  boxShadow: '0 4px 12px rgba(201,169,110,0.3)',
+                  display: 'inline-block', padding: '6px 16px',
+                  background: 'rgba(212, 175, 55, 0.1)', // ذهبي شفاف
+                  backdropFilter: 'blur(8px)', // تأثير الزجاج الفخم
+                  WebkitBackdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(212, 175, 55, 0.3)',
+                  color: '#E5C158',
+                  borderRadius: 30, fontSize: 11, fontWeight: 600,
+                  marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.15em',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 }}>
                   {isRtl ? slide.tag.ar : slide.tag.en}
                 </span>
                 <h4 style={{
-                  color: '#fff', fontSize: 24, fontWeight: 800,
-                  margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                  color: '#ffffff', fontSize: 26, fontWeight: 700,
+                  margin: 0, 
+                  // ظل نصي مزدوج عشان يبرز الكلمة بشكل أنيق
+                  textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(212, 175, 55, 0.15)',
+                  letterSpacing: isRtl ? 0 : '0.02em',
                 }}>
                   {title}
                 </h4>
               </div>
+
+              {/* النقط — premium */}
+              <div style={{
+                position: 'absolute', bottom: 24,
+                left: 0, right: 0,
+                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10,
+                zIndex: 10,
+              }}>
+                {SLIDES.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => goTo(i)}
+                    aria-label={`Go to slide ${i + 1}`}
+                    style={{
+                      width: 32, height: 32,
+                      border: 'none', background: 'none',
+                      cursor: 'pointer', padding: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                  >
+                    <span style={{
+                      display: 'block',
+                      width: i === imageIndex ? 32 : 5, // رفعنا التباين بين النقطة المختارة والغير مختارة
+                      height: 5,
+                      borderRadius: 4,
+                      background: i === imageIndex
+                        ? '#D4AF37'
+                        : 'rgba(255,255,255,0.4)',
+                      boxShadow: i === imageIndex ? '0 0 12px rgba(212, 175, 55, 0.7)' : 'none', // توهج خفيف للنقطة النشطة
+                      transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }} />
+                  </button>
+                ))}
+              </div>
+
             </motion.div>
           </AnimatePresence>
-
-          <div style={{
-            position: 'absolute', top: 20,
-            right: isRtl ? 'auto' : 20,
-            left: isRtl ? 20 : 'auto',
-            background: 'rgba(15,23,42,0.6)',
-            backdropFilter: 'blur(8px)',
-            padding: '4px 12px', borderRadius: 20,
-            color: '#fff', fontSize: 13, fontWeight: 700,
-            border: '1px solid rgba(255,255,255,0.1)',
-            zIndex: 10,
-          }}>
-            {imageIndex + 1} / {SLIDES.length}
-          </div>
-
-          {[
-            { dir: 'prev', side: isRtl ? 'right' : 'left', onClick: () => paginate(isRtl ? 1 : -1) },
-            { dir: 'next', side: isRtl ? 'left' : 'right', onClick: () => paginate(isRtl ? -1 : 1) },
-          ].map(({ dir, side, onClick }) => (
-            <button
-              key={dir}
-              onClick={onClick}
-              aria-label={`Go to ${dir} slide`}
-              style={{
-                position: 'absolute', top: '50%', [side]: 12,
-                transform: 'translateY(-50%)',
-                width: 40, height: 40, borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.2)',
-                background: 'rgba(15,23,42,0.5)',
-                backdropFilter: 'blur(10px)',
-                color: '#fff', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all .3s ease',
-                WebkitTapHighlightColor: 'transparent',
-                zIndex: 10,
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(201,169,110,0.9)';
-                e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(15,23,42,0.5)';
-                e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-                <path
-                  d={dir === 'next' ? 'M6 4l4 4-4 4' : 'M10 4L6 8l4 4'}
-                  stroke="currentColor" strokeWidth="2.5"
-                  strokeLinecap="round" strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          ))}
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
-        {SLIDES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goTo(i)}
-            aria-label={`Go to slide ${i + 1}`}
-            style={{
-              width: 44, height: 44,
-              border: 'none', background: 'none',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              WebkitTapHighlightColor: 'transparent',
-              padding: 0,
-            }}
-          >
-            <span style={{
-              width: i === imageIndex ? 32 : 8,
-              height: 8, borderRadius: 4,
-              background: i === imageIndex ? '#C9A96E' : '#cbd5e1',
-              display: 'block',
-              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            }} />
-          </button>
-        ))}
-      </div>
-
+      {/* ديكور */}
       <div style={{
-        position: 'absolute', top: -20, right: -20,
-        width: 120, height: 120,
-        background: 'linear-gradient(135deg, #F5EDD9 0%, transparent 100%)',
+        position: 'absolute', top: -40, right: -40,
+        width: 250, height: 250, // كبرنا الديكور وخليناه توهج بدل دائرة صلبة
+        background: 'radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%)',
         borderRadius: '50%',
-        zIndex: 0, opacity: 0.6,
+        zIndex: 0, filter: 'blur(20px)',
       }} />
     </div>
   );
