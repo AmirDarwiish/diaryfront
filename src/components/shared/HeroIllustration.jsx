@@ -11,7 +11,7 @@ const SLIDES = [
     titleKey: 0,
   },
   {
-    image: `${CDN}/v1775812206/6537923e-32fd-4609-8dbe-e30c4be871d6_eurwcp.jpg`,
+    image: `${CDN}/v17758112206/6537923e-32fd-4609-8dbe-e30c4be871d6_eurwcp.jpg`,
     tag: { en: 'Mobile Apps', ar: 'تطبيقات الجوال' },
     titleKey: 1,
   },
@@ -56,11 +56,30 @@ const variants = {
 const swipeConfidenceThreshold = 10000;
 const swipePower = (offset, velocity) => Math.abs(offset) * velocity;
 
+// **هوك بسيط لمعرفة عرض الشاشة**
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({ width: undefined });
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({ width: window.innerWidth });
+    }
+    window.addEventListener("resize", handleResize);
+    handleResize(); // تعيين العرض الأولي
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  return windowSize;
+};
+
 const HeroIllustration = () => {
   const { t, isRtl } = useLang();
   const [[page, direction], setPage] = useState([0, 0]);
   const autoRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
+  const { width } = useWindowSize(); // استخدام الهوك هنا
+
+  // **متغيرات التجاوب (Responsive Variables)**
+  const isMobile = width < 768; // أقل من حجم التابلت
+  const isSmallMobile = width < 480; // موبايل صغير
 
   const imageIndex = ((page % SLIDES.length) + SLIDES.length) % SLIDES.length;
 
@@ -98,21 +117,34 @@ const HeroIllustration = () => {
 
   return (
     <div
-      style={{ position: 'relative', width: '100%', maxWidth: 500, margin: '0 auto' }}
+      style={{ 
+        position: 'relative', 
+        width: '100%', 
+        // الموبايل يأخذ العرض كاملاً، الديسك توب محدد
+        maxWidth: isMobile ? '100%' : 500, 
+        margin: '0 auto',
+        padding: isMobile ? '0 10px' : '0' // مسافة جانبية بسيطة على الموبايل
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div style={{
         position: 'relative', zIndex: 2,
-        background: 'linear-gradient(145deg, #ffffff, #fdfbf7)', // خلفية مضيئة وفخمة
-        borderRadius: 32, padding: 16, // مساحة أوسع قليلاً للفخامة
-        boxShadow: '0 30px 60px -12px rgba(212, 175, 55, 0.1), 0 18px 36px -18px rgba(0, 0, 0, 0.1)', // ظل يجمع بين الذهبي والأسود
-        border: '1px solid rgba(212, 175, 55, 0.15)', // إطار ذهبي خفيييف جداً
+        background: 'linear-gradient(145deg, #ffffff, #fdfbf7)',
+        // حواف أصغر قليلاً للموبايل
+        borderRadius: isMobile ? 24 : 32, 
+        // حشو أصغر للموبايل
+        padding: isMobile ? 8 : 16, 
+        boxShadow: '0 30px 60px -12px rgba(212, 175, 55, 0.1), 0 18px 36px -18px rgba(0, 0, 0, 0.1)',
+        border: '1px solid rgba(212, 175, 55, 0.15)',
       }}>
         <div style={{
-          position: 'relative', height: 400, borderRadius: 24,
+          position: 'relative', 
+          // **أهم تغيير:** طول الصورة يتناقص على الموبايل
+          height: isSmallMobile ? 280 : isMobile ? 350 : 400, 
+          borderRadius: isMobile ? 20 : 24,
           overflow: 'hidden', background: '#0a0a0a',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)', // انعكاس داخلي للصورة
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)',
         }}>
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
@@ -155,36 +187,47 @@ const HeroIllustration = () => {
               {/* gradient overlay */}
               <div style={{
                 position: 'absolute', inset: 0,
-                // تدرج لوني أعمق بيعطي مظهر سينمائي فخم
-                background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 45%, rgba(255,255,255,0.05) 100%)',
+                background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.3) 50%, rgba(255,255,255,0.05) 100%)',
               }} />
 
               {/* النصوص */}
               <div style={{
-                position: 'absolute', bottom: 60,
-                left: isRtl ? 'auto' : 28,
-                right: isRtl ? 28 : 'auto',
+                position: 'absolute', 
+                // نرفع النص قليلاً على الموبايل لإفساح مجال للنقط
+                bottom: isSmallMobile ? 55 : isMobile ? 60 : 60,
+                left: isRtl ? 'auto' : (isMobile ? 16 : 28),
+                right: isRtl ? (isMobile ? 16 : 28) : 'auto',
                 textAlign: isRtl ? 'right' : 'left',
+                // نحدد أقصى عرض للنص على الموبايل
+                maxWidth: isMobile ? '80%' : '100%'
               }}>
                 <span style={{
-                  display: 'inline-block', padding: '6px 16px',
-                  background: 'rgba(212, 175, 55, 0.1)', // ذهبي شفاف
-                  backdropFilter: 'blur(8px)', // تأثير الزجاج الفخم
+                  display: 'inline-block', 
+                  // حجم أصغر وحشو أقل للموبايل
+                  padding: isMobile ? '4px 12px' : '6px 16px',
+                  background: 'rgba(212, 175, 55, 0.1)',
+                  backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
                   border: '1px solid rgba(212, 175, 55, 0.3)',
                   color: '#E5C158',
-                  borderRadius: 30, fontSize: 11, fontWeight: 600,
-                  marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.15em',
+                  borderRadius: 30, 
+                  fontSize: isSmallMobile ? 9 : 11, // تصغير الخط
+                  fontWeight: 600,
+                  marginBottom: isMobile ? 8 : 12, 
+                  textTransform: 'uppercase', letterSpacing: '0.15em',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 }}>
                   {isRtl ? slide.tag.ar : slide.tag.en}
                 </span>
                 <h4 style={{
-                  color: '#ffffff', fontSize: 26, fontWeight: 700,
+                  color: '#ffffff', 
+                  // تصغير حجم العنوان بشكل ملحوظ للموبايل ليتناسب مع المساحة
+                  fontSize: isSmallMobile ? 18 : isMobile ? 22 : 26, 
+                  fontWeight: 700,
                   margin: 0, 
-                  // ظل نصي مزدوج عشان يبرز الكلمة بشكل أنيق
                   textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(212, 175, 55, 0.15)',
                   letterSpacing: isRtl ? 0 : '0.02em',
+                  lineHeight: 1.2 // تحسين تباعد الأسطر
                 }}>
                   {title}
                 </h4>
@@ -192,9 +235,11 @@ const HeroIllustration = () => {
 
               {/* النقط — premium */}
               <div style={{
-                position: 'absolute', bottom: 24,
+                position: 'absolute', 
+                bottom: isSmallMobile ? 16 : isMobile ? 20 : 24, // تقريب النقط للحافة على الموبايل
                 left: 0, right: 0,
-                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10,
+                display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                gap: isMobile ? 6 : 10, // تقليل المسافة بين النقط
                 zIndex: 10,
               }}>
                 {SLIDES.map((_, i) => (
@@ -203,7 +248,9 @@ const HeroIllustration = () => {
                     onClick={() => goTo(i)}
                     aria-label={`Go to slide ${i + 1}`}
                     style={{
-                      width: 32, height: 32,
+                      // تصغير مساحة الضغط للموبايل قليلاً
+                      width: isMobile ? 24 : 32, 
+                      height: isMobile ? 24 : 32,
                       border: 'none', background: 'none',
                       cursor: 'pointer', padding: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -212,13 +259,14 @@ const HeroIllustration = () => {
                   >
                     <span style={{
                       display: 'block',
-                      width: i === imageIndex ? 32 : 5, // رفعنا التباين بين النقطة المختارة والغير مختارة
-                      height: 5,
+                      // تصغير حجم النقط نفسها
+                      width: i === imageIndex ? (isMobile ? 24 : 32) : (isMobile ? 4 : 5),
+                      height: isMobile ? 4 : 5,
                       borderRadius: 4,
                       background: i === imageIndex
                         ? '#D4AF37'
                         : 'rgba(255,255,255,0.4)',
-                      boxShadow: i === imageIndex ? '0 0 12px rgba(212, 175, 55, 0.7)' : 'none', // توهج خفيف للنقطة النشطة
+                      boxShadow: i === imageIndex ? '0 0 12px rgba(212, 175, 55, 0.7)' : 'none',
                       transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                     }} />
                   </button>
@@ -230,14 +278,19 @@ const HeroIllustration = () => {
         </div>
       </div>
 
-      {/* ديكور */}
-      <div style={{
-        position: 'absolute', top: -40, right: -40,
-        width: 250, height: 250, // كبرنا الديكور وخليناه توهج بدل دائرة صلبة
-        background: 'radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%)',
-        borderRadius: '50%',
-        zIndex: 0, filter: 'blur(20px)',
-      }} />
+      {/* ديكور الخلفية - نخفيه على الموبايل الصغير جداً لأنه قد يسبب مشاكل في العرض */}
+      {!isSmallMobile && (
+        <div style={{
+          position: 'absolute', 
+          top: isMobile ? -20 : -40, 
+          right: isMobile ? -20 : -40,
+          width: isMobile ? 150 : 250, 
+          height: isMobile ? 150 : 250,
+          background: 'radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%)',
+          borderRadius: '50%',
+          zIndex: 0, filter: 'blur(20px)',
+        }} />
+      )}
     </div>
   );
 };
