@@ -1,15 +1,11 @@
-/**
- * src/context/ThemeContext.jsx
- * Dark / Light mode context للـ Dashboard
- * استخدام: const { theme, toggleTheme } = useTheme()
- */
 import { createContext, useContext, useState, useEffect } from 'react'
 
 const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
+  // تم تغيير الديفولت لـ light هنا
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('db-theme') || 'dark'
+    return localStorage.getItem('db-theme') || 'light'
   })
 
   useEffect(() => {

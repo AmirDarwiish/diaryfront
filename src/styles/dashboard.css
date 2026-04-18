@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
-   ZEIIA DASHBOARD — Global Stylesheet v2
-   يشمل: Dark/Light theme + Sidebar layout + كل الـ components
+   ZEIIA DASHBOARD — Global Stylesheet v3
+   يشمل: Dark/Light theme + Sidebar layout + Mobile-First Responsive
 ═══════════════════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -95,19 +95,27 @@
   --shadow-sidebar: 4px 0 16px rgba(0,0,0,.12);
 }
 
+/* ─── Layout Tokens ─────────────────────────────────────── */
+:root {
+  --sidebar-w:         240px;
+  --sidebar-collapsed: 64px;
+  --header-h:          60px;
+  --mobile-nav-h:      60px; /* الـ bottom nav على الموبايل */
+}
+
 /* ─── Reset ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ─── Base ───────────────────────────────────────────────── */
-body { font-family: 'Cairo', sans-serif; }
+body {
+  font-family: 'Cairo', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
 ::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
 
 /* ═══════════════════════════════════════════════════════════
    DASHBOARD LAYOUT
 ═══════════════════════════════════════════════════════════ */
-
-/* Sidebar width token */
-:root { --sidebar-w: 240px; --sidebar-collapsed: 64px; --header-h: 60px; }
 
 /* ── Shell ─────────────────────────────────────────────── */
 .db-shell {
@@ -120,10 +128,13 @@ body { font-family: 'Cairo', sans-serif; }
   transition: background .3s, color .3s;
 }
 
-/* ── Sidebar ────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR — Desktop
+══════════════════════════════════════════════════════════ */
 .db-sidebar {
   position: fixed;
-  top: 0; right: 0;
+  top: 0;
+  right: 0;
   width: var(--sidebar-w);
   height: 100vh;
   background: var(--bg-sidebar);
@@ -138,6 +149,7 @@ body { font-family: 'Cairo', sans-serif; }
 
 .db-sidebar--collapsed { width: var(--sidebar-collapsed); }
 
+/* Logo */
 .db-sidebar__logo {
   display: flex;
   align-items: center;
@@ -147,9 +159,7 @@ body { font-family: 'Cairo', sans-serif; }
   border-bottom: 1px solid var(--border-sidebar);
   flex-shrink: 0;
 }
-
-.db-sidebar__logo-img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
-
+.db-sidebar__logo-img  { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
 .db-sidebar__logo-text {
   font-size: 15px;
   font-weight: 900;
@@ -205,17 +215,8 @@ body { font-family: 'Cairo', sans-serif; }
   width: 100%;
   text-align: right;
 }
-
-.db-nav-item:hover {
-  background: var(--bg-hover);
-  color: var(--text);
-}
-
-.db-nav-item--active {
-  background: var(--gold-12);
-  color: var(--gold);
-}
-
+.db-nav-item:hover              { background: var(--bg-hover); color: var(--text); }
+.db-nav-item--active            { background: var(--gold-12); color: var(--gold); }
 .db-nav-item--active::before {
   content: '';
   position: absolute;
@@ -225,20 +226,8 @@ body { font-family: 'Cairo', sans-serif; }
   border-radius: 0 3px 3px 0;
 }
 
-.db-nav-item__icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.db-nav-item__label {
-  flex: 1;
-  overflow: hidden;
-  transition: opacity .2s, width .2s;
-}
+.db-nav-item__icon  { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.db-nav-item__label { flex: 1; overflow: hidden; transition: opacity .2s, width .2s; }
 .db-sidebar--collapsed .db-nav-item__label { opacity: 0; width: 0; }
 
 .db-nav-item__badge {
@@ -260,7 +249,9 @@ body { font-family: 'Cairo', sans-serif; }
   flex-shrink: 0;
 }
 
-/* ── Header ──────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   HEADER — Desktop
+══════════════════════════════════════════════════════════ */
 .db-header {
   position: fixed;
   top: 0;
@@ -279,55 +270,38 @@ body { font-family: 'Cairo', sans-serif; }
   transition: right .25s ease, background .3s;
   gap: 12px;
 }
-
 .db-header--collapsed { right: var(--sidebar-collapsed); }
 
-.db-header__right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
+.db-header__right   { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.db-header__breadcrumb { font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db-header__title   { font-size: 16px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db-header__actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-.db-header__breadcrumb {
-  font-size: 13px;
+/* زرار الـ hamburger — مخفي على Desktop */
+.db-header__menu-btn {
+  display: none;
+  width: 36px; height: 36px;
+  align-items: center; justify-content: center;
+  border-radius: 9px;
+  border: 1px solid var(--border-md);
+  background: transparent;
   color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.db-header__title {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.db-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  cursor: pointer;
+  transition: all .15s;
   flex-shrink: 0;
 }
+.db-header__menu-btn:hover { color: var(--text); border-color: var(--border-active); background: var(--bg-hover); }
 
 /* User avatar */
 .db-avatar {
-  width: 34px;
-  height: 34px;
+  width: 34px; height: 34px;
   border-radius: 50%;
   background: var(--gold-12);
   border: 1px solid var(--gold-20);
   color: var(--gold);
-  font-size: 13px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
+  font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
   transition: background .15s;
 }
 .db-avatar:hover { background: var(--gold-20); }
@@ -337,47 +311,146 @@ body { font-family: 'Cairo', sans-serif; }
   margin-right: var(--sidebar-w);
   margin-top: var(--header-h);
   min-height: calc(100vh - var(--header-h));
-  transition: margin-right .25s ease;
+  transition: margin-right .25s ease, width .25s ease;
   overflow-x: hidden;
+  width: calc(100% - var(--sidebar-w));
 }
-
-.db-main--collapsed { margin-right: var(--sidebar-collapsed); }
+.db-main--collapsed { 
+  margin-right: var(--sidebar-collapsed); 
+  width: calc(100% - var(--sidebar-collapsed));
+}
 
 .db-page {
   padding: 24px;
   max-width: 1400px;
+  margin: 0 auto;
 }
 
-@media (max-width: 768px) {
-  .db-page { padding: 16px; }
-}
-
-/* ── Mobile Sidebar Overlay ──────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   MOBILE SIDEBAR OVERLAY
+══════════════════════════════════════════════════════════ */
 .db-sidebar-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.6);
+  background: rgba(0,0,0,.65);
   z-index: 199;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .25s ease;
+  pointer-events: none;
+}
+.db-sidebar-overlay--visible {
+  opacity: 1;
+  pointer-events: all;
 }
 
-@media (max-width: 768px) {
-  .db-sidebar {
-    transform: translateX(100%);
-    width: var(--sidebar-w) !important;
-  }
-  .db-sidebar--open {
-    transform: translateX(0);
-  }
-  .db-sidebar-overlay { display: block; }
-  .db-header { right: 0 !important; }
-  .db-main  { margin-right: 0 !important; }
-  .db-sidebar__logo-text,
-  .db-nav-item__label,
-  .db-nav-item__badge,
-  .db-nav-label { opacity: 1 !important; width: auto !important; }
+/* ══════════════════════════════════════════════════════════
+   MOBILE BOTTOM NAVIGATION BAR
+   بديل الـ sidebar على الموبايل — يظهر فقط على الموبايل
+══════════════════════════════════════════════════════════ */
+.db-mobile-nav {
+  display: none; /* مخفي على Desktop */
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--mobile-nav-h);
+  background: var(--bg-sidebar);
+  border-top: 1px solid var(--border-sidebar);
+  z-index: 200;
+  padding: 0 4px;
+  padding-bottom: env(safe-area-inset-bottom, 0px); /* iPhone notch support */
+  box-shadow: 0 -4px 20px rgba(0,0,0,.4);
 }
+
+.db-mobile-nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.db-mobile-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 52px;
+  border: none;
+  background: transparent;
+  font-family: 'Cairo', sans-serif;
+  position: relative;
+  text-decoration: none;
+}
+.db-mobile-nav__item:hover            { color: var(--text-sec); }
+.db-mobile-nav__item--active          { color: var(--gold); }
+.db-mobile-nav__item--active::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%; transform: translateX(-50%);
+  width: 20px; height: 2px;
+  background: var(--gold);
+  border-radius: 2px 2px 0 0;
+}
+
+.db-mobile-nav__icon {
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.db-mobile-nav__badge {
+  position: absolute;
+  top: 4px; left: 8px;
+  background: var(--red);
+  color: #fff;
+  font-size: 8px; font-weight: 800;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* زرار "المزيد" في الـ bottom nav — يفتح الـ sidebar كـ drawer */
+.db-mobile-nav__more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 52px;
+  border: none;
+  background: transparent;
+  font-family: 'Cairo', sans-serif;
+  transition: color .15s;
+}
+.db-mobile-nav__more:hover { color: var(--text-sec); }
+.db-mobile-nav__more-icon {
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE DRAWER (الـ sidebar على الموبايل)
+══════════════════════════════════════════════════════════ */
+/* على الموبايل الـ sidebar بيبقى مخفي ويطلع كـ drawer */
+
 
 /* ═══════════════════════════════════════════════════════════
    BUTTONS
@@ -399,6 +472,8 @@ body { font-family: 'Cairo', sans-serif; }
   border: none;
   outline: none;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .db-btn:disabled { opacity: .45; cursor: not-allowed; pointer-events: none; }
 
@@ -407,14 +482,16 @@ body { font-family: 'Cairo', sans-serif; }
   color: #080d16;
   font-weight: 800;
 }
-.db-btn--gold:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 4px 16px var(--gold-20); }
+.db-btn--gold:hover   { opacity: .88; transform: translateY(-1px); box-shadow: 0 4px 16px var(--gold-20); }
+.db-btn--gold:active  { transform: translateY(0); opacity: 1; }
 
 .db-btn--ghost {
   background: transparent;
   color: var(--text-muted);
   border: 1px solid var(--border-md);
 }
-.db-btn--ghost:hover { color: var(--text); border-color: var(--border-active); background: var(--bg-hover); }
+.db-btn--ghost:hover  { color: var(--text); border-color: var(--border-active); background: var(--bg-hover); }
+.db-btn--ghost:active { background: var(--gold-08); }
 
 .db-btn--danger {
   background: var(--red-bg);
@@ -424,24 +501,31 @@ body { font-family: 'Cairo', sans-serif; }
 .db-btn--danger:hover { background: rgba(248,113,113,.2); }
 
 .db-btn--icon {
-  width: 36px;
-  height: 36px;
+  width: 36px; height: 36px;
   padding: 0;
   border-radius: 9px;
   border: 1px solid var(--border-md);
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   transition: all .15s;
   font-family: 'Cairo', sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
-.db-btn--icon:hover { color: var(--text); border-color: var(--border-active); background: var(--bg-hover); }
+.db-btn--icon:hover  { color: var(--text); border-color: var(--border-active); background: var(--bg-hover); }
+.db-btn--icon:active { background: var(--gold-08); }
 
 .db-btn--sm { height: 30px; padding: 0 10px; font-size: 12px; border-radius: 7px; }
 .db-btn--lg { height: 42px; padding: 0 20px; font-size: 14px; border-radius: 10px; }
+
+/* موبايل: الأزرار أكبر شوية للـ touch */
+@media (max-width: 768px) {
+  .db-btn       { height: 40px; }
+  .db-btn--sm   { height: 34px; }
+  .db-btn--lg   { height: 46px; }
+  .db-btn--icon { width: 40px; height: 40px; }
+}
 
 /* ═══════════════════════════════════════════════════════════
    INPUTS
@@ -458,13 +542,22 @@ body { font-family: 'Cairo', sans-serif; }
   transition: border-color .2s, box-shadow .2s;
 }
 .db-input    { height: 40px; padding: 0 12px; }
-.db-select   { height: 40px; padding: 0 12px; cursor: pointer; appearance: none; }
+.db-select   { height: 40px; padding: 0 12px; cursor: pointer; appearance: none; -webkit-appearance: none; }
 .db-textarea { padding: 10px 12px; resize: vertical; min-height: 86px; line-height: 1.7; }
 .db-input:focus, .db-select:focus, .db-textarea:focus {
   border-color: var(--border-active);
   box-shadow: 0 0 0 3px var(--gold-08);
 }
 .db-input::placeholder, .db-textarea::placeholder { color: var(--text-faint); }
+
+/* موبايل: font-size 16px يمنع iOS من التكبير التلقائي */
+@media (max-width: 768px) {
+  .db-input, .db-select, .db-textarea {
+    font-size: 16px;
+    height: 44px;
+  }
+  .db-textarea { font-size: 16px; height: auto; }
+}
 
 .db-label {
   display: block;
@@ -519,6 +612,7 @@ body { font-family: 'Cairo', sans-serif; }
   z-index: 1000;
   background: rgba(0,0,0,.65);
   backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,6 +630,7 @@ body { font-family: 'Cairo', sans-serif; }
   box-shadow: var(--shadow-modal);
   position: relative;
   direction: rtl;
+  -webkit-overflow-scrolling: touch;
 }
 .db-modal__accent {
   position: absolute;
@@ -550,19 +645,46 @@ body { font-family: 'Cairo', sans-serif; }
   align-items: center;
   margin-bottom: 20px;
 }
-.db-modal__title { font-size: 16px; font-weight: 800; color: var(--text); }
-.db-modal__close {
-  background: none;
-  border: none;
+.db-modal__title  { font-size: 16px; font-weight: 800; color: var(--text); }
+.db-modal__close  {
+  background: none; border: none;
   color: var(--text-muted);
-  font-size: 22px;
-  cursor: pointer;
-  line-height: 1;
-  padding: 4px;
+  font-size: 22px; cursor: pointer;
+  line-height: 1; padding: 4px;
   transition: color .15s;
   font-family: 'Cairo', sans-serif;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
 }
-.db-modal__close:hover { color: var(--text); }
+.db-modal__close:hover { color: var(--text); background: var(--bg-hover); }
+
+/* موبايل: Modal يتحول لـ Bottom Sheet */
+@media (max-width: 640px) {
+  .db-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .db-modal {
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 88vh;
+    padding: 20px 16px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .db-modal__accent {
+    border-radius: 20px 20px 0 0;
+  }
+  /* Drag handle */
+  .db-modal::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px;
+    background: var(--border-md);
+    border-radius: 2px;
+    margin: -8px auto 16px;
+  }
+}
 
 /* ═══════════════════════════════════════════════════════════
    TOAST
@@ -589,6 +711,19 @@ body { font-family: 'Cairo', sans-serif; }
 @keyframes db-toast-in {
   from { opacity:0; transform: translateX(-50%) translateY(-8px); }
   to   { opacity:1; transform: translateX(-50%) translateY(0); }
+}
+
+/* على الموبايل الـ toast تظهر في الأسفل فوق الـ bottom nav */
+@media (max-width: 768px) {
+  .db-toast {
+    top: auto;
+    bottom: calc(var(--mobile-nav-h) + 16px);
+    font-size: 12px;
+    padding: 9px 18px;
+    max-width: calc(100vw - 32px);
+    white-space: normal;
+    text-align: center;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -633,9 +768,15 @@ body { font-family: 'Cairo', sans-serif; }
 /* ═══════════════════════════════════════════════════════════
    STATS GRID
 ═══════════════════════════════════════════════════════════ */
-.db-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
+.db-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
 @media (max-width: 1024px) { .db-stats { grid-template-columns: repeat(2,1fr); } }
-@media (max-width: 480px)  { .db-stats { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 480px)  { .db-stats { grid-template-columns: repeat(2,1fr); gap: 10px; } }
+@media (max-width: 320px)  { .db-stats { grid-template-columns: 1fr; } }
 
 .db-stat {
   background: var(--bg-card);
@@ -646,15 +787,40 @@ body { font-family: 'Cairo', sans-serif; }
   overflow: hidden;
   transition: background .3s, border-color .3s;
 }
+@media (max-width: 480px) {
+  .db-stat { padding: 14px 14px; border-radius: 10px; }
+}
+
 .db-stat__accent { position: absolute; top:0; right:0; width: 3px; height: 100%; border-radius: 0 12px 12px 0; }
 .db-stat__value  { font-size: 26px; font-weight: 900; color: var(--text); line-height: 1; margin-bottom: 4px; }
 .db-stat__label  { font-size: 11px; color: var(--text-muted); font-weight: 700; }
 .db-stat__sub    { font-size: 10px; margin-top: 4px; font-weight: 700; }
 
+@media (max-width: 480px) {
+  .db-stat__value { font-size: 22px; }
+  .db-stat__label { font-size: 10px; }
+}
+
 /* ═══════════════════════════════════════════════════════════
    TABS
 ═══════════════════════════════════════════════════════════ */
-.db-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.db-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+/* موبايل: scroll أفقي بدل wrap */
+@media (max-width: 640px) {
+  .db-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .db-tabs::-webkit-scrollbar { display: none; }
+}
+
 .db-tab {
   display: inline-flex;
   align-items: center;
@@ -670,9 +836,12 @@ body { font-family: 'Cairo', sans-serif; }
   background: transparent;
   color: var(--text-faint);
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
-.db-tab:hover { color: var(--text-sec); background: var(--bg-hover); border-color: var(--border-md); }
-.db-tab--active { color: var(--gold); background: var(--gold-12); border-color: var(--gold-20); font-weight: 700; }
+.db-tab:hover       { color: var(--text-sec); background: var(--bg-hover); border-color: var(--border-md); }
+.db-tab--active     { color: var(--gold); background: var(--gold-12); border-color: var(--gold-20); font-weight: 700; }
 
 /* ═══════════════════════════════════════════════════════════
    SCROLLBARS
@@ -682,11 +851,11 @@ body { font-family: 'Cairo', sans-serif; }
 .db-scroll::-webkit-scrollbar-thumb  { background: var(--bg-elevated); border-radius: 3px; }
 .db-scroll::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
-/* Kanban scrollbar */
 .kb-scroll::-webkit-scrollbar       { height: 5px; }
 .kb-scroll::-webkit-scrollbar-track { background: var(--bg-base); }
 .kb-scroll::-webkit-scrollbar-thumb { background: var(--bg-elevated); border-radius: 3px; }
 .kb-scroll::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
 .kb-col { scrollbar-width: none; -ms-overflow-style: none; }
 .kb-col::-webkit-scrollbar { display: none; }
 
@@ -695,37 +864,59 @@ body { font-family: 'Cairo', sans-serif; }
 ═══════════════════════════════════════════════════════════ */
 .db-drawer-overlay {
   position: fixed; inset: 0; z-index: 900;
-  background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
-  display: flex; justify-content: flex-end;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: flex-end;
 }
 .db-drawer {
-  width: 100%; max-width: 520px; height: 100%;
-  display: flex; flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-base);
   border-left: 1px solid var(--border);
   direction: rtl;
+}
+@media (max-width: 768px) {
+  .db-drawer { max-width: 100%; }
 }
 
 /* ═══════════════════════════════════════════════════════════
    PAGINATION
 ═══════════════════════════════════════════════════════════ */
 .db-pagination {
-  display: flex; align-items: center;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
   border-top: 1px solid var(--border);
-  flex-wrap: wrap; gap: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
+@media (max-width: 480px) {
+  .db-pagination {
+    justify-content: center;
+  }
+}
+
 .db-page-btn {
   height: 30px; min-width: 30px; padding: 0 9px;
   border-radius: 7px; border: 1px solid var(--border-md);
   background: transparent; color: var(--text-muted);
   font-size: 12px; cursor: pointer; font-family: 'Cairo', sans-serif;
   transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
 }
 .db-page-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
 .db-page-btn--active { background: var(--gold); color: #080d16; border-color: var(--gold); font-weight: 700; }
 .db-page-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+  .db-page-btn { height: 34px; min-width: 34px; }
+}
 
 /* ═══════════════════════════════════════════════════════════
    ERROR BOX / EMPTY / LOADING
@@ -750,32 +941,29 @@ body { font-family: 'Cairo', sans-serif; }
 ═══════════════════════════════════════════════════════════ */
 .db-projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
 }
-@media (max-width: 640px) { .db-projects-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .db-projects-grid { grid-template-columns: 1fr; gap: 12px; } }
 
 /* ═══════════════════════════════════════════════════════════
    UTILITIES
 ═══════════════════════════════════════════════════════════ */
-.db-divider { height: 1px; background: var(--border); margin: 12px 0; }
+.db-divider     { height: 1px; background: var(--border); margin: 12px 0; }
 .db-text-gold   { color: var(--gold); }
 .db-text-muted  { color: var(--text-muted); }
 .db-text-danger { color: var(--red); }
 .db-fw-800 { font-weight: 800; }
 .db-fw-900 { font-weight: 900; }
-.db-animate-in { animation: db-fade-in .3s ease both; }
+.db-animate-in  { animation: db-fade-in .3s ease both; }
 @keyframes db-fade-in {
   from { opacity:0; transform: translateY(12px); }
   to   { opacity:1; transform: translateY(0); }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   KANBAN FIXES — scroll + direction
+   KANBAN
 ═══════════════════════════════════════════════════════════ */
-
-/* الـ kanban-scroll container لازم direction: ltr عشان الـ columns
-   تترتب من اليسار لليمين زي المعتاد في الـ kanban boards */
 .kanban-scroll {
   display: flex;
   gap: 16px;
@@ -783,23 +971,26 @@ body { font-family: 'Cairo', sans-serif; }
   overflow-y: hidden;
   padding: 16px 16px 24px;
   align-items: flex-start;
+  -webkit-overflow-scrolling: touch;
 }
 @media (min-width: 640px) {
   .kanban-scroll { padding: 20px 28px 28px; }
 }
+@media (max-width: 768px) {
+  .kanban-scroll { gap: 12px; padding: 12px 12px 20px; }
+  .kanban-scroll > * {
+    min-width: 260px !important;
+    max-width: 260px !important;
+  }
+}
 
-/* Custom scrollbar للـ kanban scroll الأفقي */
 .kanban-scroll::-webkit-scrollbar        { height: 6px; }
 .kanban-scroll::-webkit-scrollbar-track  { background: var(--bg-base); border-radius: 10px; }
 .kanban-scroll::-webkit-scrollbar-thumb  { background: var(--gold-20); border-radius: 10px; }
 .kanban-scroll::-webkit-scrollbar-thumb:hover { background: var(--gold-35); }
 
-/* كل column لازم direction: rtl تاني عشان المحتوى داخلها يبقى عربي صح */
-.kanban-scroll > * {
-  direction: rtl;
-}
+.kanban-scroll > * { direction: rtl; }
 
-/* الـ column اللي فيها tasks - الـ overflow-y بيتحكم فيه هنا */
 .kanban-col-tasks {
   overflow-y: auto;
   overflow-x: hidden;
@@ -809,7 +1000,6 @@ body { font-family: 'Cairo', sans-serif; }
   flex-direction: column;
   gap: 8px;
   min-height: 80px;
-  /* مخفّي الـ scrollbar بشكل clean */
   scrollbar-width: thin;
   scrollbar-color: var(--gold-20) transparent;
 }
@@ -818,18 +1008,238 @@ body { font-family: 'Cairo', sans-serif; }
 .kanban-col-tasks::-webkit-scrollbar-thumb  { background: var(--gold-20); border-radius: 4px; }
 .kanban-col-tasks::-webkit-scrollbar-thumb:hover { background: var(--gold-35); }
 
-/* Fix kb-sc (leads kanban) direction */
-.kb-sc {
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 12px;
-}
-.kb-sc > div {
-  direction: rtl;
-}
+.kb-sc { overflow-x: auto; overflow-y: hidden; padding-bottom: 12px; }
+.kb-sc > div { direction: rtl; }
 
-/* Fix leads-tbl scrollbar */
 .leads-tbl::-webkit-scrollbar        { height: 5px; }
 .leads-tbl::-webkit-scrollbar-track  { background: var(--bg-base); }
 .leads-tbl::-webkit-scrollbar-thumb  { background: var(--bg-elevated); border-radius: 3px; }
 .leads-tbl::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS — CORE
+═══════════════════════════════════════════════════════════ */
+
+/* ── Tablet (max 1024px) ────────────────────────────────── */
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 200px; }
+}
+
+/* ── Mobile (max 768px) ─────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* === الـ Sidebar يختفي ويصبح Drawer === */
+  .db-sidebar {
+    /* الـ sidebar يتحرك لليمين خارج الشاشة */
+    transform: translateX(100%);
+    width: var(--sidebar-w) !important;
+    z-index: 300;
+    /* تأكيد الـ transition */
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* لما يكون مفتوح */
+  .db-sidebar--open {
+    transform: translateX(0);
+    box-shadow: -8px 0 40px rgba(0,0,0,.6);
+  }
+
+  /* الـ overlay يظهر فقط على الموبايل */
+  .db-sidebar-overlay {
+    display: block;
+  }
+
+  /* === الـ Header يمتد على الشاشة كاملة === */
+  .db-header {
+    right: 0 !important;
+    left: 0 !important;
+    padding: 0 12px 0 16px;
+  }
+
+  /* إظهار زرار الـ Hamburger */
+  .db-header__menu-btn {
+    display: flex;
+  }
+
+  /* === الـ Main Content يملأ الشاشة كاملة === */
+  .db-main {
+    margin-right: 0 !important;
+    width: 100% !important;
+    /* مسافة في الأسفل للـ bottom nav */
+    padding-bottom: var(--mobile-nav-h);
+  }
+
+  /* === إظهار الـ Bottom Nav === */
+  .db-mobile-nav {
+    display: block;
+  }
+
+  /* padding للصفحات */
+  .db-page { padding: 14px 12px; }
+
+  /* الـ Header title أصغر */
+  .db-header__title      { font-size: 14px; }
+  .db-header__breadcrumb { display: none; }
+}
+
+/* ── Small Mobile (max 480px) ───────────────────────────── */
+@media (max-width: 480px) {
+  .db-page { padding: 12px 10px; }
+
+  .db-header { padding: 0 10px 0 12px; }
+  .db-header__title { font-size: 13px; }
+
+  /* الـ actions تخفي بعض العناصر */
+  .db-header__actions .db-btn--ghost:not(.db-header__keep) {
+    display: none;
+  }
+}
+
+/* ── XS Mobile (max 360px) ──────────────────────────────── */
+@media (max-width: 360px) {
+  .db-page    { padding: 10px 8px; }
+  .db-stats   { grid-template-columns: 1fr; }
+  .db-mobile-nav__item,
+  .db-mobile-nav__more { min-width: 44px; font-size: 9px; }
+}
+
+/* ── Safe area على iPhone (notch + home bar) ────────────── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .db-mobile-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+  }
+  @media (max-width: 768px) {
+    .db-main {
+      padding-bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+    }
+  }
+}
+@media (max-width: 1024px) {
+  .bottom-layout-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* ── Pagination & Table Footer ────────────────────────── */
+.db-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-card); /* أو لون الخلفية اللي عندك */
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.db-pagination {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.db-pagination button {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.db-pagination button:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.05);
+}
+
+.db-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+/* حالة الـ Status Badge اللي في الجدول بالمرة */
+.db-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.db-status.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.db-status.inactive {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+/* ── Modal Overlay ────────────────────────────────────── */
+.db-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  /* خلفية معتمة قليلاً مع تأثير الزجاج الضبابي */
+  background: rgba(8, 13, 22, 0.7); 
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  
+  /* لضمان التوسيط التام في منتصف الشاشة */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* ليكون فوق السايد بار والهيدر */
+  z-index: 9999; 
+  padding: 20px;
+}
+
+/* ── Modal Card ───────────────────────────────────────── */
+/* تأكد أن الكارت داخل المودال لا يهرب لأسفل */
+.db-modal-overlay .db-card {
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* تحسين شكل المودال عند الظهور */
+.db-animate-in {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  
+}
+/* ── Main Content Scrollbar ──────────────────────────────── */
+.db-main::-webkit-scrollbar        { width: 6px; }
+.db-main::-webkit-scrollbar-track  { background: var(--bg-base); }
+.db-main::-webkit-scrollbar-thumb  { background: var(--gold-20); border-radius: 10px; }
+.db-main::-webkit-scrollbar-thumb:hover { background: var(--gold-35); }
+
+/* Firefox */
+.db-main { scrollbar-width: thin; scrollbar-color: var(--gold-20) var(--bg-base); }

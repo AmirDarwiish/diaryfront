@@ -2,73 +2,94 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  
+  <meta name="theme-color" content="#080d16" />
 
-  <title>زيا | تطوير مواقع وتطبيقات احترافية</title>
-  <meta name="description" content="زيا – شركة متخصصة في تطوير المواقع والتطبيقات وتصميم الهوية البصرية. نحول أفكارك إلى منتجات رقمية متميزة." />
-  <meta name="keywords" content="تطوير مواقع, تطوير تطبيقات, تصميم هوية بصرية, برمجة, زيا, zeiia, شركة برمجة في مصر" />
-  <meta name="author" content="Zeiia" />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://zeiia.com/" />
+  <title>Zeiia ERP | نظام إدارة الموارد</title>
 
-  <link rel="icon" href="%PUBLIC_URL%/logo.webp" />
+  <meta name="description" content="نظام Zeiia المتكامل لإدارة و متابعة الإنتاج، المخزون، المبيعات والتوزيع بكل سهولة." />
+  <meta name="author" content="Zeiia Software" />
+  <meta name="robots" content="noindex, nofollow" />
 
-  <!-- Fonts -->
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" media="print" onload="this.media='all'">
-  <noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap">
-  </noscript>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 
-  <link rel="alternate" hreflang="ar" href="https://zeiia.com/" />
-  <link rel="alternate" hreflang="en" href="https://zeiia.com/" />
-  <link rel="alternate" hreflang="x-default" href="https://zeiia.com/" />
-
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://zeiia.com/" />
-  <meta property="og:title" content="زيا | تطوير مواقع وتطبيقات احترافية" />
-  <meta property="og:description" content="نحول أفكارك إلى منتجات رقمية متميزة — مواقع، تطبيقات، هوية بصرية." />
-  <meta property="og:image" content="https://zeiia.com/logo.webp" />
-  <meta property="og:locale" content="ar_AR" />
-  <meta property="og:site_name" content="زيا - Zeiia" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="زيا | تطوير مواقع وتطبيقات احترافية" />
-  <meta name="twitter:description" content="نحول أفكارك إلى منتجات رقمية متميزة." />
-  <meta name="twitter:image" content="https://zeiia.com/logo.webp" />
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "زيا",
-    "alternateName": "Zeiia",
-    "url": "https://zeiia.com",
-    "logo": "https://zeiia.com/logo.webp",
-    "description": "شركة متخصصة في تطوير المواقع والتطبيقات وتصميم الهوية البصرية",
-    "foundingLocation": {
-      "@type": "Place",
-      "name": "مصر"
-    },
-    "sameAs": [
-      "https://www.facebook.com/profile.php?id=61587278585452",
-      "https://www.linkedin.com/company/zeiia",
-      "https://www.tiktok.com/@zeiia98"
-    ],
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer service",
-      "availableLanguage": ["Arabic", "English"]
-    },
-    "areaServed": ["EG", "SA", "AE", "KW", "QA", "BH", "OM", "JO", "LB"]
-  }
-  </script>
+  <style>
+    :root {
+      --bg-deep: #080d16;
+      --gold: #C9A96E;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-deep);
+      font-family: 'Cairo', sans-serif;
+      overflow: hidden; /* يمنع السكرول أثناء التحميل */
+    }
+    .zeiia-preloader {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-deep);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+    }
+    .spinner-box {
+      width: 50px;
+      height: 50px;
+      position: relative;
+    }
+    .spinner {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      border: 3px solid rgba(201, 169, 110, 0.1);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .brand-logo {
+      margin-top: 20px;
+      color: var(--gold);
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards 0.3s;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(-5px); }
+    }
+  </style>
 </head>
+
 <body>
-  <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div id="root"></div>
-</body>
+  <noscript>يجب تفعيل JavaScript لتشغيل نظام Zeiia ERP.</noscript>
+
+  <div id="root">
+    <div class="zeiia-preloader">
+      <div class="spinner-box">
+        <div class="spinner"></div>
+      </div>
+      <div class="brand-logo">ZEIIA ERP</div>
+    </div>
+  </div>
+
+  </body>
 </html>
