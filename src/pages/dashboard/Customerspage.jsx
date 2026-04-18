@@ -328,6 +328,7 @@ function FormModal({ editData, onClose, onSuccess }) {
     name: editData?.name || '',
     phone: editData?.phone || '',
     address: editData?.address || '',
+      openingBalance: 0, 
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -378,6 +379,22 @@ function FormModal({ editData, onClose, onSuccess }) {
             <label className="db-label">العنوان</label>
             <input className="db-input" placeholder="المدينة، الشارع…" value={form.address} onChange={set('address')} />
           </div>
+          {!isEdit && (
+  <div>
+    <label className="db-label">الرصيد الافتتاحي (ج.م)</label>
+    <input
+      type="number"
+      className="db-input"
+      placeholder="0.00"
+      min="0"
+      step="0.01"
+      value={form.openingBalance}
+      onChange={e => setForm(f => ({ ...f, openingBalance: Number(e.target.value) }))}
+    />
+  </div>
+)}
+
+<div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}></div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
             <button className="db-btn db-btn--ghost" onClick={onClose} disabled={loading}>إلغاء</button>
             <button className="db-btn db-btn--gold" onClick={submit} disabled={loading}
