@@ -439,7 +439,7 @@ const [password, setPassword] = useState('123123123')
             </button>
 
             {/* Footer */}
-            <div className="login-footer">ZEIIA ERP · نظام إدارة الموادر</div>
+            <div className="login-footer">ZEIIA ERP · نظام إدارة الموارد</div>
           </div>
         </div>
       </div>
