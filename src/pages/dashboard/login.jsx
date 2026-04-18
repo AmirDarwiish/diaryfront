@@ -357,7 +357,7 @@ const [password, setPassword] = useState('123123123')
                 onError={e => { e.currentTarget.style.display = 'none' }}
               />
               <div className="logo-divider" />
-              <div className="logo-subtitle">CRM System</div>
+              <div className="logo-subtitle">ERP System</div>
             </div>
 
             {/* Title */}
