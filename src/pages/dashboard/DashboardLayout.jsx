@@ -64,6 +64,7 @@ const NAV = [
     section: 'المخزن والمستودع',
     items: [
       { path: '/dashboard/products', label: 'المنتجات والمخزون', Icon: IcoInventory },
+      { path: '/dashboard/Units', label: 'الوحدات', Icon: IcoInventory },      
     ],
   },
   {
